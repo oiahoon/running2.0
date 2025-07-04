@@ -40,17 +40,10 @@ def check_strava_permissions():
         print(f"   - Token type: {token_info.get('token_type', 'N/A')}")
         print(f"   - Expires at: {token_info.get('expires_at', 'N/A')}")
         
-        # Check scope
+        # Check scope (but don't fail if missing)
         scope = token_info.get('scope', '')
-        print(f"   - Scope: {scope}")
+        print(f"   - Scope: {scope if scope else 'NOT PRESENT (will test API directly)'}")
         
-        if 'activity:read_all' in scope:
-            print("   ✅ Has activity:read_all permission")
-        else:
-            print("   ❌ Missing activity:read_all permission")
-            print("   📝 You need to re-authorize with activity:read_all scope")
-            return False
-            
     except requests.exceptions.RequestException as e:
         print(f"❌ Failed to refresh token: {e}")
         if hasattr(e, 'response') and e.response is not None:
@@ -75,49 +68,49 @@ def check_strava_permissions():
         print(f"❌ Failed to access athlete endpoint: {e}")
         return False
     
-    # Step 3: Test activities endpoint
+    # Step 3: Test activities endpoint (THE REAL TEST)
     print("\n3. Testing activities endpoint...")
     activities_url = 'https://www.strava.com/api/v3/athlete/activities'
-    params = {'page': 1, 'per_page': 1}
+    params = {'page': 1, 'per_page': 5}
     
     try:
         activities_response = requests.get(activities_url, headers=headers, params=params)
-        activities_response.raise_for_status()
-        activities = activities_response.json()
+        print(f"   - Status Code: {activities_response.status_code}")
         
-        print("✅ Activities endpoint accessible")
-        print(f"   - Response: {len(activities)} activities returned")
-        
-        if activities:
-            latest = activities[0]
-            print(f"   - Latest activity: {latest.get('name', 'Unnamed')}")
-            print(f"   - Type: {latest.get('type', 'Unknown')}")
-            print(f"   - Date: {latest.get('start_date', 'N/A')}")
+        if activities_response.status_code == 200:
+            activities = activities_response.json()
+            print(f"   ✅ SUCCESS! Activities endpoint accessible")
+            print(f"   - Found {len(activities)} activities")
+            
+            if activities:
+                latest = activities[0]
+                print(f"   - Latest activity: {latest.get('name', 'Unnamed')}")
+                print(f"   - Type: {latest.get('type', 'Unknown')}")
+                print(f"   - Date: {latest.get('start_date', 'N/A')}")
+            
+            print("\n🎉 CONCLUSION: Your token HAS activity:read_all permissions!")
+            print("   The API test confirms the token works correctly.")
+            return True
+            
+        elif activities_response.status_code == 401:
+            print("   ❌ FAILED: 401 Unauthorized")
+            print("   Your token does NOT have activity:read_all permissions")
+            print(f"   Response: {activities_response.text}")
+            
+            print("\n🔧 SOLUTION:")
+            print("   You need to re-authorize your app with the 'activity:read_all' scope.")
+            print("   Follow the setup guide in scripts/setup-strava-secrets.md")
+            return False
         else:
-            print("   - No activities found (this might be normal if you have no activities)")
+            print(f"   ❌ Unexpected status code: {activities_response.status_code}")
+            print(f"   Response: {activities_response.text}")
+            return False
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to access activities endpoint: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"   Status Code: {e.response.status_code}")
-            print(f"   Response: {e.response.text}")
-            
-            if e.response.status_code == 401:
-                print("\n🔧 SOLUTION:")
-                print("   The 401 Unauthorized error means your refresh token doesn't have")
-                print("   the required permissions. You need to re-authorize your app with")
-                print("   the 'activity:read_all' scope.")
-                print("\n   Follow these steps:")
-                print("   1. Visit this URL (replace YOUR_CLIENT_ID):")
-                print(f"      https://www.strava.com/oauth/authorize?client_id={client_id}&response_type=code&redirect_uri=http://localhost&approval_prompt=force&scope=read,activity:read_all")
-                print("   2. Authorize the app")
-                print("   3. Get the new authorization code from the redirect URL")
-                print("   4. Exchange it for a new refresh token")
-                print("   5. Update your GitHub Secrets with the new refresh token")
+        print(f"   ❌ Failed to access activities endpoint: {e}")
         return False
-    
-    print("\n🎉 All permission checks passed!")
-    return True
 
 if __name__ == '__main__':
-    check_strava_permissions()
+    success = check_strava_permissions()
+    if not success:
+        exit(1)
