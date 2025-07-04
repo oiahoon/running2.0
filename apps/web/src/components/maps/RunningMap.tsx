@@ -64,6 +64,97 @@ function decodePolyline(encoded: string): [number, number][] {
   }
 }
 
+// Utility function to create safe Mapbox URLs that won't exceed limits
+function createSafeMapboxUrl(
+  activities: Activity[], 
+  bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number },
+  width: number,
+  height: number,
+  mapType: 'overview' | 'single',
+  token: string
+): string {
+  const centerLat = (bounds.minLat + bounds.maxLat) / 2
+  const centerLng = (bounds.minLng + bounds.maxLng) / 2
+  
+  // Calculate zoom
+  const latDiff = bounds.maxLat - bounds.minLat
+  const lngDiff = bounds.maxLng - bounds.minLng
+  const maxDiff = Math.max(latDiff, lngDiff)
+  
+  let zoom = 10
+  if (maxDiff < 0.01) zoom = 14
+  else if (maxDiff < 0.05) zoom = 12
+  else if (maxDiff < 0.1) zoom = 11
+  else if (maxDiff < 0.5) zoom = 9
+  else if (maxDiff < 1) zoom = 8
+  else zoom = 7
+
+  const baseUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/`
+  const suffix = `/${centerLng},${centerLat},${zoom},0/${width}x${height}@2x?access_token=${token}`
+  
+  // Strategy 1: Try with simplified polylines (single activity or limited activities)
+  if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
+    const activity = activities[0]
+    const polyline = `path-2+ff0000-0.8(${encodeURIComponent(activity.summary_polyline)})`
+    const marker = `pin-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
+    const overlays = `${polyline},${marker}`
+    const url = `${baseUrl}${overlays}${suffix}`
+    
+    if (url.length < 2000) return url
+  }
+  
+  // Strategy 2: Try with just markers for multiple activities
+  const markers = activities
+    .filter(a => a.start_latitude && a.start_longitude)
+    .slice(0, mapType === 'single' ? 1 : 8) // Limit markers
+    .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
+    .join(',')
+  
+  const markersUrl = `${baseUrl}${markers}${suffix}`
+  if (markersUrl.length < 2000) return markersUrl
+  
+  // Strategy 3: Fallback to just center point
+  const fallbackUrl = `${baseUrl}pin-l+ff0000(${centerLng},${centerLat})${suffix}`
+  return fallbackUrl
+}
+function decodePolyline(encoded: string): [number, number][] {
+  if (!encoded) return []
+  
+  try {
+    const poly = []
+    let index = 0
+    let lat = 0
+    let lng = 0
+
+    while (index < encoded.length) {
+      let b, shift = 0, result = 0
+      do {
+        b = encoded.charCodeAt(index++) - 63
+        result |= (b & 0x1f) << shift
+        shift += 5
+      } while (b >= 0x20)
+      const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+      lat += dlat
+
+      shift = 0
+      result = 0
+      do {
+        b = encoded.charCodeAt(index++) - 63
+        result |= (b & 0x1f) << shift
+        shift += 5
+      } while (b >= 0x20)
+      const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
+      lng += dlng
+
+      poly.push([lat / 1e5, lng / 1e5])
+    }
+    return poly
+  } catch (error) {
+    console.warn('Failed to decode polyline:', error)
+    return []
+  }
+}
+
 // Calculate bounds for activities
 function calculateBounds(activities: Activity[]): { 
   minLat: number, maxLat: number, minLng: number, maxLng: number 
@@ -259,7 +350,7 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
     )
   }
 
-  // Generate static map URL with routes
+  // Generate static map URL with routes - optimized to avoid 494 errors
   const centerLat = (bounds.minLat + bounds.maxLat) / 2
   const centerLng = (bounds.minLng + bounds.maxLng) / 2
   
@@ -276,38 +367,39 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
   else if (maxDiff < 1) zoom = 8
   else zoom = 7
 
-  // Create polyline overlays for routes
-  const polylines = displayActivities
-    .filter(a => a.summary_polyline)
-    .slice(0, 20) // Limit to prevent URL length issues
-    .map((activity, index) => {
-      const color = mapType === 'single' ? 'ff0000' : `${['ff0000', '00ff00', '0000ff', 'ffff00', 'ff00ff', '00ffff'][index % 6]}`
-      return `path-3+${color}-0.8(${encodeURIComponent(activity.summary_polyline!)})`
-    })
-    .join(',')
-
-  // Add start/end markers
-  const markers = displayActivities
-    .filter(a => a.start_latitude && a.start_longitude)
-    .slice(0, 10)
-    .map(a => `pin-s-circle+ff0000(${a.start_longitude},${a.start_latitude})`)
-    .join(',')
-
-  const overlays = [polylines, markers].filter(Boolean).join(',')
-  const mapWidth = Math.min(800, height * 1.5)
-  
-  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${overlays}/${centerLng},${centerLat},${zoom},0/${mapWidth}x${height}@2x?access_token=${hasMapboxToken}`
+  // Generate safe static map URL
+  const mapWidth = Math.min(600, height * 1.5)
+  const staticMapUrl = createSafeMapboxUrl(
+    displayActivities,
+    bounds,
+    mapWidth,
+    height,
+    mapType,
+    hasMapboxToken
+  )
 
   return (
     <div 
       className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
       style={{ height }}
     >
+      {/* Debug info for development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 left-2 z-10 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
+          URL Length: {staticMapUrl.length}
+          <br />
+          Activities: {displayActivities.length}
+          <br />
+          Zoom: {Math.round(((bounds.maxLat + bounds.minLat) / 2) * 100) / 100}
+        </div>
+      )}
+      
       <img 
         src={staticMapUrl}
         alt="Activity routes map"
         className="w-full h-full object-cover"
         onError={(e) => {
+          console.error('Map loading failed:', staticMapUrl)
           e.currentTarget.style.display = 'none'
           const fallback = e.currentTarget.nextElementSibling as HTMLElement
           if (fallback) fallback.classList.remove('hidden')
@@ -319,9 +411,24 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             Map Loading Failed
           </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            Check your Mapbox token configuration
+          <p className="text-gray-500 dark:text-gray-400 mb-2">
+            Unable to load map with current routes
           </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Try selecting fewer activities or check your Mapbox token
+          </p>
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-2 text-left">
+              <summary className="cursor-pointer text-xs">Debug Info</summary>
+              <pre className="text-xs mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-32">
+                URL: {staticMapUrl.substring(0, 200)}...
+                <br />
+                Length: {staticMapUrl.length}
+                <br />
+                Activities: {displayActivities.length}
+              </pre>
+            </details>
+          )}
         </div>
       </div>
     </div>
