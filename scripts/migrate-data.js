@@ -6,8 +6,15 @@
 const path = require('path');
 const fs = require('fs');
 
+// Add the apps/web/src path to require resolution
+const appPath = path.join(__dirname, '../apps/web');
+require('module').globalPaths.push(path.join(appPath, 'node_modules'));
+
+// Set up TypeScript compilation for Node.js
+require('ts-node/register');
+
 // Import database functions
-const { migrateFromOriginalDatabase } = require('../apps/web/src/lib/database/connection');
+const { migrateFromOriginalDatabase } = require('../apps/web/src/lib/database/connection.ts');
 
 async function main() {
   const args = process.argv.slice(2);

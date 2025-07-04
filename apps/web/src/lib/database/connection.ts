@@ -5,7 +5,7 @@ import fs from 'fs';
 
 // Database configuration
 const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
-const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
+const SCHEMA_PATH = path.join(process.cwd(), 'src', 'lib', 'database', 'schema.sql');
 
 // Ensure data directory exists
 const dataDir = path.dirname(DB_PATH);
