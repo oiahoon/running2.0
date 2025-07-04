@@ -2,6 +2,7 @@
 
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
+import RunningMap from '@/components/maps/RunningMap'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -194,20 +195,40 @@ function RecentActivities() {
 }
 
 function MapPlaceholder() {
+  const { data: activities } = useRecentActivities(10)
+  
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Route Map
+          Route Map Preview
         </h3>
-        <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">🗺️</div>
-            <p className="text-gray-500 dark:text-gray-400">Interactive map coming soon</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Your running routes will be displayed here
-            </p>
+        {activities && activities.length > 0 ? (
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+            <RunningMap
+              activities={activities.slice(0, 5)}
+              height={256}
+              mapStyle="streets"
+            />
           </div>
+        ) : (
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-2">🗺️</div>
+              <p className="text-gray-500 dark:text-gray-400">Map preview</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                Your recent routes will be displayed here
+              </p>
+            </div>
+          </div>
+        )}
+        <div className="mt-4">
+          <a
+            href="/map"
+            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            View Full Map
+          </a>
         </div>
       </div>
     </div>
