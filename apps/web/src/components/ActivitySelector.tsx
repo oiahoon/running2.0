@@ -1,9 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+
+// Custom hook for debounced value
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
 
 interface Activity {
   id: number
@@ -29,18 +46,34 @@ export default function ActivitySelector({
   const [isOpen, setIsOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [allActivities, setAllActivities] = useState<Activity[]>([])
   const pageSize = 20
+
+  // Debounce search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Fetch activities with GPS data only
   const { data, isLoading } = useActivities({
-    search: searchTerm || undefined
+    search: debouncedSearchTerm || undefined
   }, currentPage, pageSize)
 
-  const activities = (data?.activities || []).filter((activity: Activity) => 
-    shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
-  )
+  // Handle new data - accumulate activities for pagination
+  useEffect(() => {
+    if (data?.activities) {
+      const filteredActivities = data.activities.filter((activity: Activity) => 
+        shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
+      )
+      
+      if (currentPage === 1) {
+        setAllActivities(filteredActivities)
+      } else {
+        setAllActivities(prev => [...prev, ...filteredActivities])
+      }
+    }
+  }, [data, currentPage])
 
-  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize)
+  const totalCount = data?.totalCount || 0
+  const totalPages = Math.ceil(totalCount / pageSize)
   const hasMore = currentPage < totalPages
 
   const handleSelect = (activity: Activity) => {
@@ -62,7 +95,8 @@ export default function ActivitySelector({
   // Reset page when search changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm])
+    setAllActivities([])
+  }, [debouncedSearchTerm])
 
   return (
     <div className={`relative ${className}`}>
@@ -121,9 +155,9 @@ export default function ActivitySelector({
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                 Loading activities...
               </div>
-            ) : activities.length > 0 ? (
+            ) : allActivities.length > 0 ? (
               <>
-                {activities.map((activity: Activity) => {
+                {allActivities.map((activity: Activity) => {
                   const config = getActivityConfig(activity.type)
                   const isSelected = selectedActivity?.id === activity.id
                   
@@ -149,20 +183,26 @@ export default function ActivitySelector({
                   )
                 })}
                 
-                {/* Load More Button */}
-                {hasMore && (
-                  <button
-                    onClick={loadMore}
-                    disabled={isLoading}
-                    className="w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Loading...' : `Load More (Page ${currentPage + 1})`}
-                  </button>
-                )}
+                {/* Pagination Info and Load More */}
+                <div className="border-t border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <span>Showing {allActivities.length} of {totalCount}</span>
+                    <span>Page {currentPage} of {totalPages}</span>
+                  </div>
+                  {hasMore && (
+                    <button
+                      onClick={loadMore}
+                      disabled={isLoading}
+                      className="w-full px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-colors"
+                    >
+                      {isLoading ? 'Loading...' : 'Load More Activities'}
+                    </button>
+                  )}
+                </div>
               </>
             ) : (
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                No activities found
+                {debouncedSearchTerm ? `No activities found for "${debouncedSearchTerm}"` : 'No activities found'}
               </div>
             )}
           </div>

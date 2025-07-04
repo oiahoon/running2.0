@@ -94,32 +94,39 @@ function createSafeMapboxUrl(
   const baseUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/`
   const suffix = `/${centerLng},${centerLat},${zoom},0/${width}x${height}@2x?access_token=${token}`
   
-  // Strategy 1: Try with simplified polylines (single activity or limited activities)
+  // Strategy 1: Single activity with full route
   if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
-    const polyline = `path-3+ff0000-0.9(${encodeURIComponent(activity.summary_polyline || '')})`
-    const marker = `pin-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
-    const overlays = `${polyline},${marker}`
+    const polyline = `path-4+ff0000-1.0(${encodeURIComponent(activity.summary_polyline)})`
+    const startMarker = `pin-s-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
+    const endMarker = activity.end_longitude && activity.end_latitude 
+      ? `pin-s-f+00ff00(${activity.end_longitude},${activity.end_latitude})`
+      : ''
+    
+    const overlays = [polyline, startMarker, endMarker].filter(Boolean).join(',')
     const url = `${baseUrl}${overlays}${suffix}`
     
     if (url.length < 2000) return url
   }
   
-  // Strategy 2: Try with multiple routes for overview
+  // Strategy 2: Overview with multiple routes (simplified)
   if (mapType === 'overview' && activities.length > 1) {
-    const routes = activities
-      .filter(a => a.summary_polyline)
-      .slice(0, 3) // Limit to 3 routes to prevent URL overflow
-      .map((activity, index) => {
-        const colors = ['ff0000', '00ff00', '0000ff']
-        const color = colors[index % colors.length]
-        return `path-2+${color}-0.7(${encodeURIComponent(activity.summary_polyline || '')})`
-      })
+    const routeActivities = activities.filter(a => a.summary_polyline).slice(0, 2) // Limit to 2 routes
+    const colors = ['ff0000', '00ff00', '0000ff', 'ffff00', 'ff00ff']
     
+    const routes = routeActivities.map((activity, index) => {
+      const color = colors[index % colors.length]
+      return `path-3+${color}-0.8(${encodeURIComponent(activity.summary_polyline || '')})`
+    })
+    
+    // Add start markers for all activities
     const markers = activities
       .filter(a => a.start_latitude && a.start_longitude)
-      .slice(0, 5)
-      .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
+      .slice(0, 8) // Limit markers
+      .map((a, index) => {
+        const color = colors[index % colors.length]
+        return `pin-s+${color}(${a.start_longitude},${a.start_latitude})`
+      })
     
     const overlays = [...routes, ...markers].join(',')
     const url = `${baseUrl}${overlays}${suffix}`
@@ -127,17 +134,17 @@ function createSafeMapboxUrl(
     if (url.length < 2000) return url
   }
   
-  // Strategy 2: Try with just markers for multiple activities
+  // Strategy 3: Just markers for multiple activities
   const markers = activities
     .filter(a => a.start_latitude && a.start_longitude)
-    .slice(0, mapType === 'single' ? 1 : 8) // Limit markers
+    .slice(0, mapType === 'single' ? 1 : 10) // Limit markers
     .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
     .join(',')
   
   const markersUrl = `${baseUrl}${markers}${suffix}`
   if (markersUrl.length < 2000) return markersUrl
   
-  // Strategy 3: Fallback to just center point
+  // Strategy 4: Fallback to just center point
   const fallbackUrl = `${baseUrl}pin-l+ff0000(${centerLng},${centerLat})${suffix}`
   return fallbackUrl
 }

@@ -6,6 +6,23 @@ import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import RunningMap from '@/components/maps/RunningMap'
 
+// Custom hook for debounced value
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 interface ActivityFilters {
   type?: ActivityType[]
   startDate?: Date
@@ -138,7 +155,19 @@ export default function ActivitiesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
   const pageSize = 10
+
+  // Debounce search input
+  const debouncedSearch = useDebounce(searchInput, 300)
+
+  // Update filters when debounced search changes
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      search: debouncedSearch || undefined
+    }))
+  }, [debouncedSearch])
 
   const { data, isLoading, error } = useActivities(filters, currentPage, pageSize)
 
@@ -281,11 +310,8 @@ export default function ActivitiesPage() {
             <input
               type="text"
               placeholder="Search activities..."
-              value={filters.search || ''}
-              onChange={(e) => setFilters({
-                ...filters,
-                search: e.target.value || undefined
-              })}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
             />
           </div>
@@ -325,7 +351,10 @@ export default function ActivitiesPage() {
         {/* Clear Filters */}
         <div className="mt-4 flex justify-end">
           <button
-            onClick={() => setFilters({})}
+            onClick={() => {
+              setFilters({})
+              setSearchInput('')
+            }}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             Clear Filters
