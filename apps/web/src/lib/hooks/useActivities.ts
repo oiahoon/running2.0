@@ -98,7 +98,7 @@ export function useRecentActivities(limit = 5) {
       }
       
       const data = await response.json();
-      return data.activities;
+      return data.activities || [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
