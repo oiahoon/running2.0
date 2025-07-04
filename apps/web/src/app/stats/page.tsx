@@ -7,6 +7,8 @@ import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import ActivityTypeChart from '@/components/charts/ActivityTypeChart'
 import CalendarHeatmap from '@/components/charts/CalendarHeatmap'
 import PersonalRecords from '@/components/PersonalRecords'
+import WeeklyProgressChart from '@/components/charts/WeeklyProgressChart'
+import PaceAnalysisChart from '@/components/charts/PaceAnalysisChart'
 
 function YearSelector({ selectedYear, onYearChange }: { 
   selectedYear: number
@@ -299,6 +301,47 @@ export default function StatsPage() {
           records={yearStats?.personalRecords || {}} 
           isLoading={isLoading}
         />
+
+        {/* Weekly Progress */}
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              📈 Weekly Progress
+            </h3>
+            {yearStats?.weeklyStats && yearStats.weeklyStats.length > 0 ? (
+              <WeeklyProgressChart data={yearStats.weeklyStats} />
+            ) : (
+              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📊</div>
+                  <p className="text-gray-500 dark:text-gray-400">Loading weekly progress...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pace Analysis */}
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              ⚡ Pace Analysis
+            </h3>
+            {yearStats?.paceAnalysis && yearStats.paceAnalysis.length > 0 ? (
+              <PaceAnalysisChart data={yearStats.paceAnalysis} />
+            ) : (
+              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">⚡</div>
+                  <p className="text-gray-500 dark:text-gray-400">No pace data available</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                    Pace analysis shows after running activities
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Calendar Heatmap */}
         <CalendarHeatmapSection selectedYear={selectedYear} yearStats={yearStats} />

@@ -2,38 +2,28 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-interface PaceData {
-  date: string
-  pace: number
+interface WeeklyData {
+  week: string
+  activities: number
   distance: number
-  name: string
+  time: number
 }
 
-interface PaceAnalysisChartProps {
-  data: PaceData[]
+interface WeeklyProgressChartProps {
+  data: WeeklyData[]
   height?: number
 }
 
-export default function PaceAnalysisChart({ data, height = 300 }: PaceAnalysisChartProps) {
+export default function WeeklyProgressChart({ data, height = 300 }: WeeklyProgressChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-2">⚡</div>
-          <p className="text-gray-500 dark:text-gray-400">No pace data available</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-            Pace analysis will show after running activities
-          </p>
+          <div className="text-4xl mb-2">📊</div>
+          <p className="text-gray-500 dark:text-gray-400">No weekly data available</p>
         </div>
       </div>
     )
-  }
-
-  // Format pace for display (convert decimal minutes to mm:ss)
-  const formatPace = (pace: number) => {
-    const minutes = Math.floor(pace)
-    const seconds = Math.round((pace - minutes) * 60)
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
   return (
@@ -42,16 +32,13 @@ export default function PaceAnalysisChart({ data, height = 300 }: PaceAnalysisCh
         <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
           <XAxis 
-            dataKey="date" 
+            dataKey="week" 
             className="text-gray-600 dark:text-gray-400"
             tick={{ fontSize: 12 }}
-            tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           />
           <YAxis 
             className="text-gray-600 dark:text-gray-400"
             tick={{ fontSize: 12 }}
-            tickFormatter={formatPace}
-            domain={['dataMin - 0.5', 'dataMax + 0.5']}
           />
           <Tooltip 
             contentStyle={{
@@ -61,17 +48,27 @@ export default function PaceAnalysisChart({ data, height = 300 }: PaceAnalysisCh
               color: 'white'
             }}
             formatter={(value: number, name: string) => [
-              name === 'pace' ? `${formatPace(value)}/km` : `${value.toFixed(1)}km`,
-              name === 'pace' ? 'Pace' : 'Distance'
+              name === 'distance' ? `${value.toFixed(1)}km` : 
+              name === 'time' ? `${Math.round(value / 60)}min` : value,
+              name === 'distance' ? 'Distance' :
+              name === 'time' ? 'Time' : 'Activities'
             ]}
-            labelFormatter={(label) => new Date(label).toLocaleDateString()}
+            labelFormatter={(label) => `Week ${label}`}
           />
           <Line 
             type="monotone" 
-            dataKey="pace" 
-            stroke="#ef4444" 
+            dataKey="distance" 
+            stroke="#3b82f6" 
             strokeWidth={2}
-            dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
+            dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="activities" 
+            stroke="#10b981" 
+            strokeWidth={2}
+            dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6 }}
           />
         </LineChart>

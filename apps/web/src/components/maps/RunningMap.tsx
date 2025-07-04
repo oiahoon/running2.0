@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/config/activities'
 
 interface Activity {
   id: number
@@ -444,22 +445,27 @@ export default function RunningMap({
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
   const [mapType, setMapType] = useState<'overview' | 'single'>(defaultView)
 
-  // Filter activities with location data
-  const activitiesWithLocation = activities.filter(a => 
-    a.start_latitude && a.start_longitude
+  // Filter activities that should show on map (Run, Walk, Hike, Ride)
+  const mapEnabledActivities = activities.filter(activity => 
+    shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
+  )
+
+  // Filter activities that should show tracks
+  const trackEnabledActivities = mapEnabledActivities.filter(activity =>
+    shouldShowTrack(activity.type) && activity.summary_polyline
   )
 
   // Auto-select first activity when switching to single mode
   useEffect(() => {
-    if (mapType === 'single' && !selectedActivity && activitiesWithLocation.length > 0) {
-      setSelectedActivity(activitiesWithLocation[0])
+    if (mapType === 'single' && !selectedActivity && mapEnabledActivities.length > 0) {
+      setSelectedActivity(mapEnabledActivities[0])
     }
-  }, [mapType, selectedActivity, activitiesWithLocation])
+  }, [mapType, selectedActivity, mapEnabledActivities])
 
   return (
     <div className="space-y-4">
       {/* Controls */}
-      {showControls && activitiesWithLocation.length > 0 && (
+      {showControls && mapEnabledActivities.length > 0 && (
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center space-x-4">
             <select
@@ -475,24 +481,27 @@ export default function RunningMap({
               <select
                 value={selectedActivity?.id || ''}
                 onChange={(e) => {
-                  const activity = activitiesWithLocation.find(a => a.id === parseInt(e.target.value))
+                  const activity = mapEnabledActivities.find(a => a.id === parseInt(e.target.value))
                   setSelectedActivity(activity || null)
                 }}
                 className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white min-w-48"
               >
                 <option value="">Select Activity</option>
-                {activitiesWithLocation.slice(0, 50).map(activity => (
-                  <option key={activity.id} value={activity.id}>
-                    {activity.name} ({(activity.distance / 1000).toFixed(1)}km)
-                  </option>
-                ))}
+                {mapEnabledActivities.slice(0, 50).map(activity => {
+                  const config = getActivityConfig(activity.type)
+                  return (
+                    <option key={activity.id} value={activity.id}>
+                      {config.icon} {activity.name} ({(activity.distance / 1000).toFixed(1)}km)
+                    </option>
+                  )
+                })}
               </select>
             )}
           </div>
           
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {mapType === 'overview' 
-              ? `${activitiesWithLocation.length} routes displayed`
+              ? `${mapEnabledActivities.length} routes displayed`
               : selectedActivity 
                 ? `Route: ${selectedActivity.name}`
                 : 'No route selected'
@@ -503,7 +512,7 @@ export default function RunningMap({
 
       {/* Map */}
       <MapboxMap 
-        activities={activitiesWithLocation}
+        activities={mapEnabledActivities}
         height={height}
         mapType={mapType}
         selectedActivity={selectedActivity}
