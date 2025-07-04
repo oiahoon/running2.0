@@ -2,18 +2,31 @@
 
 import { useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
-import { formatDistance, formatDuration, formatPace } from '@/lib/database/models/Activity'
+import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import RunningMap from '@/components/maps/RunningMap'
 
 interface ActivityFilters {
-  type?: string[]
+  type?: ActivityType[]
   startDate?: Date
   endDate?: Date
   search?: string
 }
 
-function ActivityCard({ activity }: { activity: any }) {
+interface Activity {
+  id: number
+  name: string
+  type: ActivityType
+  distance: number
+  moving_time: number
+  total_elevation_gain: number
+  start_date: string
+  start_latitude?: number
+  start_longitude?: number
+  location_city?: string
+}
+
+function ActivityCard({ activity }: { activity: Activity }) {
   const config = getActivityConfig(activity.type)
   const hasLocation = activity.start_latitude && activity.start_longitude
   const showMap = shouldShowOnMap(activity.type) && hasLocation
@@ -141,7 +154,7 @@ export default function ActivitiesPage() {
   const totalCount = data?.totalCount || 0
 
   // Get available activity types for filter
-  const availableTypes = [...new Set(activities.map(a => a.type))].sort()
+  const availableTypes = [...new Set(activities.map((a: Activity) => a.type))].sort()
 
   if (isLoading) {
     return (
@@ -212,12 +225,12 @@ export default function ActivitiesPage() {
               value={filters.type?.[0] || ''}
               onChange={(e) => setFilters({
                 ...filters,
-                type: e.target.value ? [e.target.value] : undefined
+                type: e.target.value ? [e.target.value as ActivityType] : undefined
               })}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
             >
               <option value="">All Types</option>
-              {availableTypes.map(type => {
+              {availableTypes.map((type: ActivityType) => {
                 const config = getActivityConfig(type)
                 return (
                   <option key={type} value={type}>
@@ -291,7 +304,7 @@ export default function ActivitiesPage() {
       {/* Activities List */}
       <div className="space-y-4">
         {activities.length > 0 ? (
-          activities.map((activity) => (
+          activities.map((activity: Activity) => (
             <ActivityCard key={activity.id} activity={activity} />
           ))
         ) : (

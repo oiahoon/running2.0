@@ -3,10 +3,21 @@
 import { useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import RunningMap from '@/components/maps/RunningMap'
-import { formatDistance, formatDuration, getActivityIcon } from '@/lib/database/models/Activity'
+import { formatDistance, formatDuration, getActivityIcon, ActivityType } from '@/lib/database/models/Activity'
+
+interface Activity {
+  id: number
+  name: string
+  type: ActivityType
+  distance: number
+  moving_time: number
+  start_date: string
+  start_latitude?: number
+  start_longitude?: number
+}
 
 export default function MapPage() {
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Run', 'Walk', 'Ride', 'Swim', 'Hike', 'WeightTraining'])
+  const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>(['Run', 'Walk', 'Ride', 'Swim', 'Hike', 'WeightTraining'])
   const [dateRange, setDateRange] = useState<{ start?: Date; end?: Date }>({})
 
   // Fetch activities with location data
@@ -16,8 +27,8 @@ export default function MapPage() {
     endDate: dateRange.end
   }, 1, 500) // Get more activities for map
 
-  const activities = data?.activities || []
-  const activitiesWithLocation = activities.filter(a => 
+  const activities: Activity[] = data?.activities || []
+  const activitiesWithLocation = activities.filter((a: Activity) => 
     a.start_latitude && a.start_longitude
   )
 
@@ -64,7 +75,7 @@ export default function MapPage() {
     )
   }
 
-  const availableTypes = [...new Set(activities.map(a => a.type))].sort()
+  const availableTypes = [...new Set(activities.map((a: Activity) => a.type))].sort()
 
   return (
     <div className="space-y-8">
@@ -85,7 +96,7 @@ export default function MapPage() {
               Activity Types
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto">
-              {availableTypes.map(type => (
+              {availableTypes.map((type: ActivityType) => (
                 <label key={type} className="flex items-center">
                   <input
                     type="checkbox"
@@ -176,7 +187,7 @@ export default function MapPage() {
 
         <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-5">
           <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {formatDistance(activities.reduce((sum, a) => sum + (a.distance || 0), 0))}
+            {formatDistance(activities.reduce((sum: number, a: Activity) => sum + (a.distance || 0), 0))}
           </div>
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Total Distance
@@ -185,7 +196,7 @@ export default function MapPage() {
 
         <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-5">
           <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {formatDuration(activities.reduce((sum, a) => sum + (a.moving_time || 0), 0))}
+            {formatDuration(activities.reduce((sum: number, a: Activity) => sum + (a.moving_time || 0), 0))}
           </div>
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Total Time
@@ -213,7 +224,7 @@ export default function MapPage() {
               Activities with GPS Data ({activitiesWithLocation.length})
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activitiesWithLocation.slice(0, 12).map((activity) => (
+              {activitiesWithLocation.slice(0, 12).map((activity: Activity) => (
                 <div key={activity.id} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{getActivityIcon(activity.type)}</span>

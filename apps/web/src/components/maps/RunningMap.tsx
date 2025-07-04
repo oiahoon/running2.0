@@ -56,7 +56,7 @@ function decodePolyline(encoded: string): [number, number][] {
       const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1))
       lng += dlng
 
-      poly.push([lat / 1e5, lng / 1e5])
+      poly.push([lat / 1e5, lng / 1e5] as [number, number])
     }
     return poly
   } catch (error) {
@@ -96,7 +96,7 @@ function createSafeMapboxUrl(
   // Strategy 1: Try with simplified polylines (single activity or limited activities)
   if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
-    const polyline = `path-2+ff0000-0.8(${encodeURIComponent(activity.summary_polyline)})`
+    const polyline = `path-2+ff0000-0.8(${encodeURIComponent(activity.summary_polyline || '')})`
     const marker = `pin-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
     const overlays = `${polyline},${marker}`
     const url = `${baseUrl}${overlays}${suffix}`
@@ -339,7 +339,7 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
     mapWidth,
     height,
     mapType,
-    hasMapboxToken
+    hasMapboxToken || ''
   )
 
   return (
