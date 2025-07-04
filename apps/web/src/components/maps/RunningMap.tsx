@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/config/activities'
+import ActivitySelector from '@/components/ActivitySelector'
 
 interface Activity {
   id: number
@@ -96,9 +97,31 @@ function createSafeMapboxUrl(
   // Strategy 1: Try with simplified polylines (single activity or limited activities)
   if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
-    const polyline = `path-2+ff0000-0.8(${encodeURIComponent(activity.summary_polyline || '')})`
+    const polyline = `path-3+ff0000-0.9(${encodeURIComponent(activity.summary_polyline || '')})`
     const marker = `pin-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
     const overlays = `${polyline},${marker}`
+    const url = `${baseUrl}${overlays}${suffix}`
+    
+    if (url.length < 2000) return url
+  }
+  
+  // Strategy 2: Try with multiple routes for overview
+  if (mapType === 'overview' && activities.length > 1) {
+    const routes = activities
+      .filter(a => a.summary_polyline)
+      .slice(0, 3) // Limit to 3 routes to prevent URL overflow
+      .map((activity, index) => {
+        const colors = ['ff0000', '00ff00', '0000ff']
+        const color = colors[index % colors.length]
+        return `path-2+${color}-0.7(${encodeURIComponent(activity.summary_polyline || '')})`
+      })
+    
+    const markers = activities
+      .filter(a => a.start_latitude && a.start_longitude)
+      .slice(0, 5)
+      .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
+    
+    const overlays = [...routes, ...markers].join(',')
     const url = `${baseUrl}${overlays}${suffix}`
     
     if (url.length < 2000) return url
@@ -441,24 +464,11 @@ export default function RunningMap({
             </select>
             
             {mapType === 'single' && (
-              <select
-                value={selectedActivity?.id || ''}
-                onChange={(e) => {
-                  const activity = mapEnabledActivities.find(a => a.id === parseInt(e.target.value))
-                  setSelectedActivity(activity || null)
-                }}
-                className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white min-w-48"
-              >
-                <option value="">Select Activity</option>
-                {mapEnabledActivities.slice(0, 50).map(activity => {
-                  const config = getActivityConfig(activity.type)
-                  return (
-                    <option key={activity.id} value={activity.id}>
-                      {config.icon} {activity.name} ({(activity.distance / 1000).toFixed(1)}km)
-                    </option>
-                  )
-                })}
-              </select>
+              <ActivitySelector
+                selectedActivity={selectedActivity}
+                onActivitySelect={setSelectedActivity}
+                className="min-w-64"
+              />
             )}
           </div>
           

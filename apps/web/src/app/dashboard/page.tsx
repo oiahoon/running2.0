@@ -50,7 +50,8 @@ function StatsCard({ title, value, subtitle, icon, trend }: {
 }
 
 function StatsGrid() {
-  const { data: stats, isLoading, error } = useActivityStats()
+  const currentYear = new Date().getFullYear()
+  const { data: stats, isLoading, error } = useActivityStats(currentYear)
 
   if (isLoading) {
     return (
@@ -200,33 +201,6 @@ function MapPlaceholder() {
   )
 }
 
-function ChartPlaceholder() {
-  const { data: stats } = useActivityStats()
-
-  return (
-    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Monthly Progress
-        </h3>
-        {stats?.monthlyStats && stats.monthlyStats.length > 0 ? (
-          <DistanceTrendChart data={stats.monthlyStats} />
-        ) : (
-          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-2">📈</div>
-              <p className="text-gray-500 dark:text-gray-400">Monthly progress chart</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Data will appear after syncing activities
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export default function DashboardPage() {
   const currentYear = new Date().getFullYear()
   const { data: stats } = useActivityStats()
@@ -252,9 +226,6 @@ export default function DashboardPage() {
         {/* Map Placeholder */}
         <MapPlaceholder />
       </div>
-
-      {/* Chart Placeholder */}
-      <ChartPlaceholder />
 
       {/* GitHub Style Heatmap - Enhanced */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
