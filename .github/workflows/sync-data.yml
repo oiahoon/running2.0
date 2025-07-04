@@ -1,0 +1,145 @@
+name: Sync Strava Data
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      force_full_sync:
+        description: 'Force full sync (fetch all activities)'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+  STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+  STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Python dependencies
+      run: |
+        pip install requests python-dotenv
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'apps/web/package-lock.json'
+        
+    - name: Install Node.js dependencies
+      run: |
+        cd apps/web
+        npm ci
+        
+    - name: Create data directories
+      run: |
+        mkdir -p apps/web/data
+        mkdir -p apps/web/public
+        
+    - name: Run Strava sync
+      run: |
+        cd scripts
+        python sync_strava.py
+      env:
+        FORCE_FULL_SYNC: ${{ github.event.inputs.force_full_sync }}
+        
+    - name: Migrate data to SQLite
+      run: |
+        cd scripts
+        node migrate-strava-json.js
+        
+    - name: Prepare database for Vercel
+      run: |
+        cd apps/web
+        npm run prepare-db
+        
+    - name: Generate sync report
+      run: |
+        cd apps/web/data
+        echo "## Sync Report - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > sync-report.md
+        echo "" >> sync-report.md
+        
+        if [ -f "strava_activities.json" ]; then
+          BASIC_COUNT=$(jq length strava_activities.json)
+          echo "- Basic activities: $BASIC_COUNT" >> sync-report.md
+        fi
+        
+        if [ -f "strava_detailed.json" ]; then
+          DETAILED_COUNT=$(jq length strava_detailed.json)
+          echo "- Detailed activities: $DETAILED_COUNT" >> sync-report.md
+        fi
+        
+        if [ -f "running_page_2.db" ]; then
+          DB_COUNT=$(sqlite3 running_page_2.db "SELECT COUNT(*) FROM activities;")
+          echo "- Database records: $DB_COUNT" >> sync-report.md
+        fi
+        
+        echo "" >> sync-report.md
+        echo "Last sync: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> sync-report.md
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add all data files
+        git add apps/web/data/
+        git add apps/web/public/
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          exit 0
+        fi
+        
+        # Show what's being committed
+        echo "Changes to commit:"
+        git diff --staged --name-only
+        
+        # Commit with detailed message
+        COMMIT_MSG="🔄 Auto-sync Strava data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        
+        if [ -f "apps/web/data/sync-report.md" ]; then
+          echo "" >> commit_body.txt
+          cat apps/web/data/sync-report.md >> commit_body.txt
+          git commit -F commit_body.txt -m "$COMMIT_MSG"
+        else
+          git commit -m "$COMMIT_MSG"
+        fi
+        
+        git push
+        
+    - name: Summary
+      run: |
+        echo "✅ Strava data sync completed successfully"
+        if [ -f "apps/web/data/sync-report.md" ]; then
+          echo "📊 Sync Report:"
+          cat apps/web/data/sync-report.md
+        fi
+        
+        # Add to GitHub Actions summary
+        echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Completed" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "apps/web/data/sync-report.md" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat apps/web/data/sync-report.md >> $GITHUB_STEP_SUMMARY
+        fi
