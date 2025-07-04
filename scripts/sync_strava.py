@@ -8,7 +8,7 @@ import os
 import json
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 class StravaSync:
@@ -120,7 +120,7 @@ class StravaSync:
         
         # Fetch detailed data for recent activities (last 30 days)
         recent_activities = []
-        cutoff_date = datetime.now() - timedelta(days=30)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=30)
         
         for activity in all_activities:
             activity_date = datetime.fromisoformat(activity['start_date'].replace('Z', '+00:00'))
