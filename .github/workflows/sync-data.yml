@@ -12,6 +12,9 @@ on:
         default: 'false'
         type: boolean
 
+permissions:
+  contents: write
+
 env:
   STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
   STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
