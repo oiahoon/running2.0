@@ -10,8 +10,19 @@ const isVercel = process.env.VERCEL === '1';
 // Database path configuration
 let DB_PATH: string;
 if (isVercel) {
-  // On Vercel, use /tmp directory for SQLite (note: data will be lost on each deployment)
+  // On Vercel, copy database from public to /tmp and use it
   DB_PATH = '/tmp/running_page_2.db';
+  
+  // Copy database from public directory if it doesn't exist
+  const sourcePath = path.join(process.cwd(), 'public', 'running_page_2.db');
+  if (fs.existsSync(sourcePath) && !fs.existsSync(DB_PATH)) {
+    try {
+      fs.copyFileSync(sourcePath, DB_PATH);
+      console.log('Database copied to Vercel tmp directory');
+    } catch (error) {
+      console.warn('Failed to copy database:', error);
+    }
+  }
 } else if (isProduction) {
   // Other production environments
   DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');

@@ -153,7 +153,7 @@ export default function GitHubHeatmap({
   const activeDays = data.filter(d => d.count > 0).length
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-auto">
       {/* Header Stats */}
       <div className="mb-4 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
         <span><strong>{totalActivities}</strong> activities in {year}</span>
@@ -163,16 +163,15 @@ export default function GitHubHeatmap({
         )}
       </div>
 
-      <div className="inline-block">
+      <div className="inline-block min-w-full">
         {/* Month labels */}
         {showMonthLabels && (
-          <div className="flex mb-2" style={{ marginLeft: showWeekLabels ? 20 : 0 }}>
+          <div className="flex mb-2 relative" style={{ marginLeft: showWeekLabels ? 20 : 0 }}>
             {monthPositions.map((pos) => (
               <div
                 key={pos.month}
-                className="text-xs text-gray-600 dark:text-gray-400"
+                className="text-xs text-gray-600 dark:text-gray-400 absolute"
                 style={{ 
-                  position: 'absolute',
                   left: pos.x,
                   fontSize: '11px'
                 }}
@@ -186,7 +185,7 @@ export default function GitHubHeatmap({
         <div className="flex" style={{ marginTop: showMonthLabels ? 16 : 0 }}>
           {/* Day labels */}
           {showWeekLabels && (
-            <div className="flex flex-col mr-2">
+            <div className="flex flex-col mr-2 flex-shrink-0">
               {dayLabels.map((day, index) => (
                 <div
                   key={day}
