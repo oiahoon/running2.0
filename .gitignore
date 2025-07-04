@@ -87,13 +87,19 @@ jspm_packages/
 tmp/
 temp/
 
-# Database
+# Database files (but allow specific ones for deployment)
 *.db
 *.sqlite
 *.sqlite3
+# Allow database files in web app for deployment
+!apps/web/data/*.db
+!apps/web/public/*.db
 
 # Data files
 data/
+# Allow JSON data files for sync
+!apps/web/data/*.json
+!apps/web/data/*.md
 GPX_OUT/
 TCX_OUT/
 FIT_OUT/
