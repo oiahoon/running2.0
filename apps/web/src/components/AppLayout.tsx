@@ -8,6 +8,7 @@ import {
   ChartBarIcon, 
   MapIcon, 
   ListBulletIcon,
+  ArrowPathIcon,
   Bars3Icon,
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Activities', href: '/activities', icon: ListBulletIcon },
   { name: 'Statistics', href: '/stats', icon: ChartBarIcon },
   { name: 'Map', href: '/map', icon: MapIcon },
+  { name: 'Sync', href: '/sync', icon: ArrowPathIcon },
 ]
 
 function classNames(...classes: string[]) {

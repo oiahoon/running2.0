@@ -4,6 +4,7 @@ import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities
 import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
 import RunningMap from '@/components/maps/RunningMap'
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
+import GitHubHeatmap from '@/components/charts/GitHubHeatmap'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -269,7 +270,37 @@ function ChartPlaceholder() {
   )
 }
 
+// Mock function to generate daily data for heatmap
+function generateMockDailyData(year: number) {
+  const data = []
+  const startDate = new Date(year, 0, 1)
+  const endDate = new Date(year, 11, 31)
+  
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    // Generate random activity data (replace with real data)
+    const hasActivity = Math.random() > 0.7 // 30% chance of activity
+    const count = hasActivity ? Math.floor(Math.random() * 3) + 1 : 0
+    const distance = count > 0 ? Math.random() * 15000 + 2000 : 0 // 2-17km
+    const duration = count > 0 ? Math.random() * 3600 + 1800 : 0 // 30-90 minutes
+    
+    data.push({
+      date: d.toISOString().split('T')[0],
+      activities: count,
+      distance: Math.round(distance),
+      duration: Math.round(duration)
+    })
+  }
+  
+  return data
+}
+
 export default function DashboardPage() {
+  const currentYear = new Date().getFullYear()
+  
+  // Mock year stats for heatmap - in real app this would come from API
+  const yearStats = {
+    dailyData: generateMockDailyData(currentYear)
+  }
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -294,6 +325,37 @@ export default function DashboardPage() {
 
       {/* Chart Placeholder */}
       <ChartPlaceholder />
+
+      {/* GitHub Style Heatmap */}
+      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            🔥 Activity Heatmap - {currentYear}
+          </h3>
+          {yearStats?.dailyData && yearStats.dailyData.length > 0 ? (
+            <GitHubHeatmap 
+              data={yearStats.dailyData.map((day: any) => ({
+                date: day.date,
+                count: day.activities,
+                distance: day.distance,
+                duration: day.duration
+              }))}
+              year={currentYear}
+              showTooltip={true}
+            />
+          ) : (
+            <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-4xl mb-2">📅</div>
+                <p className="text-gray-500 dark:text-gray-400">Loading activity heatmap...</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                  GitHub-style activity calendar will be displayed here
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
