@@ -12,6 +12,13 @@ function YearSelector({ selectedYear, onYearChange }: {
   selectedYear: number
   onYearChange: (year: number) => void 
 }) {
+  // Generate years from 2020 to current year
+  const currentYear = new Date().getFullYear()
+  const years = []
+  for (let year = currentYear; year >= 2020; year--) {
+    years.push(year)
+  }
+
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
@@ -25,9 +32,11 @@ function YearSelector({ selectedYear, onYearChange }: {
               onChange={(e) => onYearChange(Number(e.target.value))}
               className="block w-32 pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-800 dark:text-white"
             >
-              <option value={2024}>2024</option>
-              <option value={2023}>2023</option>
-              <option value={2022}>2022</option>
+              {years.map(year => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
             </select>
             <button className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
               Export
@@ -234,7 +243,8 @@ function ActivityTypesSection({ yearStats }: { yearStats: any }) {
 }
 
 export default function StatsPage() {
-  const [selectedYear, setSelectedYear] = useState(2024)
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(currentYear)
   const { data: yearStats, isLoading } = useActivityStats(selectedYear)
 
   if (isLoading) {

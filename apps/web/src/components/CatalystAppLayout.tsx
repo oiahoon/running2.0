@@ -195,23 +195,23 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
           <SidebarBody>
             <SidebarSection>
               <SidebarItem href="/dashboard" current={pathname === '/dashboard'}>
-                <HomeIcon />
+                <HomeIcon className="w-5 h-5" />
                 <SidebarLabel>Dashboard</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/activities" current={pathname === '/activities'}>
-                <ListBulletIcon />
+                <ListBulletIcon className="w-5 h-5" />
                 <SidebarLabel>Activities</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/stats" current={pathname === '/stats'}>
-                <ChartBarIcon />
+                <ChartBarIcon className="w-5 h-5" />
                 <SidebarLabel>Statistics</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/map" current={pathname === '/map'}>
-                <MapIcon />
+                <MapIcon className="w-5 h-5" />
                 <SidebarLabel>Map</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/sync" current={pathname === '/sync'}>
-                <ArrowPathIcon />
+                <ArrowPathIcon className="w-5 h-5" />
                 <SidebarLabel>Sync</SidebarLabel>
               </SidebarItem>
             </SidebarSection>

@@ -5,6 +5,7 @@ import { formatDistance, formatDuration, getActivityIcon } from '@/lib/database/
 import RunningMap from '@/components/maps/RunningMap'
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import GitHubHeatmap from '@/components/charts/GitHubHeatmap'
+import YearAwareHeatmap from '@/components/charts/YearAwareHeatmap'
 
 function StatsCard({ title, value, subtitle, icon, trend }: {
   title: string
@@ -258,31 +259,12 @@ export default function DashboardPage() {
       {/* GitHub Style Heatmap - Enhanced */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="px-4 py-5 sm:p-6">
-          {stats?.dailyStats && stats.dailyStats.length > 0 ? (
-            <GitHubHeatmap 
-              data={stats.dailyStats.map((day: any) => ({
-                date: day.date,
-                count: day.activities,
-                distance: day.distance,
-                duration: day.duration
-              }))}
-              initialYear={currentYear}
-              showYearNavigation={true}
-              height={350}
-              cellSize={16}
-              showTooltip={true}
-            />
-          ) : (
-            <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-4xl mb-2">📅</div>
-                <p className="text-gray-500 dark:text-gray-400">Loading activity heatmap...</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                  GitHub-style activity calendar will be displayed here
-                </p>
-              </div>
-            </div>
-          )}
+          <YearAwareHeatmap 
+            initialYear={currentYear}
+            showYearNavigation={true}
+            height={350}
+            cellSize={16}
+          />
         </div>
       </div>
     </div>

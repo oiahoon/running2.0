@@ -20,6 +20,7 @@ interface GitHubHeatmapProps {
   showTooltip?: boolean
   showYearNavigation?: boolean
   onYearChange?: (year: number) => void
+  yearData?: { [year: number]: HeatmapData[] } // Add support for multi-year data
 }
 
 export default function GitHubHeatmap({ 
@@ -31,7 +32,8 @@ export default function GitHubHeatmap({
   showWeekLabels = true,
   showTooltip = true,
   showYearNavigation = true,
-  onYearChange
+  onYearChange,
+  yearData
 }: GitHubHeatmapProps) {
   const [selectedYear, setSelectedYear] = useState(initialYear)
   const [hoveredCell, setHoveredCell] = useState<{ date: string; count: number; x: number; y: number } | null>(null)
@@ -41,9 +43,22 @@ export default function GitHubHeatmap({
     onYearChange?.(newYear)
   }
 
+  // Use year-specific data if available, otherwise filter from main data
+  const currentYearData = useMemo(() => {
+    if (yearData && yearData[selectedYear]) {
+      return yearData[selectedYear]
+    }
+    
+    // Filter data for selected year
+    return data.filter(d => {
+      const date = new Date(d.date)
+      return date.getFullYear() === selectedYear
+    })
+  }, [data, selectedYear, yearData])
+
   const calendarData = useMemo(() => {
     // Create a map for quick lookup
-    const dataMap = new Map(data.map(d => [d.date, d]))
+    const dataMap = new Map(currentYearData.map(d => [d.date, d]))
     
     // Generate all dates for the year
     const startDate = new Date(selectedYear, 0, 1)
@@ -78,7 +93,7 @@ export default function GitHubHeatmap({
     }
     
     return dates
-  }, [data, selectedYear])
+  }, [currentYearData, selectedYear])
 
   const maxCount = useMemo(() => {
     return Math.max(...calendarData.map(d => d.count), 1)

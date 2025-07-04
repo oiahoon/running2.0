@@ -118,28 +118,41 @@ function calculateBounds(activities: Activity[]): {
   }
 }
 
-// Format location with smart truncation
-function formatLocation(activity: Activity): string {
+// Format location with smart truncation and better display
+function formatLocation(activity: Activity): { short: string; full: string } {
   const parts = [
     activity.location_city,
     activity.location_state,
     activity.location_country
   ].filter(Boolean)
   
-  if (parts.length === 0) return ''
+  if (parts.length === 0) return { short: '', full: '' }
   
   const fullLocation = parts.join(', ')
   
-  // If too long, show only city and country, or just country
-  if (fullLocation.length > 30) {
-    if (activity.location_city && activity.location_country) {
-      const shortLocation = `${activity.location_city}, ${activity.location_country}`
-      if (shortLocation.length <= 30) return shortLocation
-    }
-    return activity.location_country || parts[0] || ''
+  // Create short version
+  let shortLocation = ''
+  if (activity.location_city && activity.location_country) {
+    shortLocation = `${activity.location_city}, ${activity.location_country}`
+  } else if (activity.location_city) {
+    shortLocation = activity.location_city
+  } else if (activity.location_country) {
+    shortLocation = activity.location_country
+  } else {
+    shortLocation = parts[0]
   }
   
-  return fullLocation
+  // If short version is still too long, truncate city name
+  if (shortLocation.length > 25 && activity.location_city) {
+    const truncatedCity = activity.location_city.length > 12 
+      ? activity.location_city.substring(0, 12) + '...'
+      : activity.location_city
+    shortLocation = activity.location_country 
+      ? `${truncatedCity}, ${activity.location_country}`
+      : truncatedCity
+  }
+  
+  return { short: shortLocation, full: fullLocation }
 }
 
 function MapboxMap({ activities, height, mapType, selectedActivity }: {
@@ -183,32 +196,35 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
             </div>
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {displayActivities.slice(0, 10).map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {activity.name}
-                    </p>
-                    <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{activity.type}</span>
-                      <span>•</span>
-                      <span>{(activity.distance / 1000).toFixed(1)}km</span>
-                      {formatLocation(activity) && (
-                        <>
-                          <span>•</span>
-                          <span className="truncate max-w-32" title={formatLocation(activity)}>
-                            {formatLocation(activity)}
+              {displayActivities.slice(0, 10).map((activity) => {
+                const location = formatLocation(activity)
+                return (
+                  <div key={activity.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border hover:shadow-sm transition-shadow">
+                    <div className="flex-1 min-w-0 pr-3">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {activity.name}
+                      </p>
+                      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {activity.type}
+                        </span>
+                        <span>{(activity.distance / 1000).toFixed(1)}km</span>
+                      </div>
+                      {location.short && (
+                        <div className="flex items-center mt-1">
+                          <span className="text-xs text-gray-400 dark:text-gray-500 truncate" title={location.full}>
+                            📍 {location.short}
                           </span>
-                        </>
+                        </div>
                       )}
                     </div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 text-right flex-shrink-0">
+                      <div className="font-mono">{activity.start_latitude?.toFixed(3)}</div>
+                      <div className="font-mono">{activity.start_longitude?.toFixed(3)}</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500 text-right ml-2">
-                    <div>{activity.start_latitude?.toFixed(3)}</div>
-                    <div>{activity.start_longitude?.toFixed(3)}</div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
             
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -280,7 +296,7 @@ function MapboxMap({ activities, height, mapType, selectedActivity }: {
   const overlays = [polylines, markers].filter(Boolean).join(',')
   const mapWidth = Math.min(800, height * 1.5)
   
-  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/navigation-night-v1/static/${overlays}/${centerLng},${centerLat},${zoom},0/${mapWidth}x${height}@2x?access_token=${hasMapboxToken}`
+  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${overlays}/${centerLng},${centerLat},${zoom},0/${mapWidth}x${height}@2x?access_token=${hasMapboxToken}`
 
   return (
     <div 
@@ -395,15 +411,17 @@ export default function RunningMap({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500 dark:text-gray-400">Type:</span> 
-              <span className="ml-2 font-medium">{selectedActivity.type}</span>
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                {selectedActivity.type}
+              </span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">Distance:</span> 
               <span className="ml-2 font-medium">{(selectedActivity.distance / 1000).toFixed(2)}km</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Start:</span> 
-              <span className="ml-2 font-medium text-xs">
+              <span className="text-gray-500 dark:text-gray-400">Coordinates:</span> 
+              <span className="ml-2 font-mono text-xs">
                 {selectedActivity.start_latitude?.toFixed(4)}, {selectedActivity.start_longitude?.toFixed(4)}
               </span>
             </div>
@@ -411,14 +429,17 @@ export default function RunningMap({
               <span className="text-gray-500 dark:text-gray-400">Date:</span> 
               <span className="ml-2 font-medium">{new Date(selectedActivity.start_date).toLocaleDateString()}</span>
             </div>
-            {formatLocation(selectedActivity) && (
-              <div className="col-span-2">
-                <span className="text-gray-500 dark:text-gray-400">Location:</span> 
-                <span className="ml-2 font-medium" title={formatLocation(selectedActivity)}>
-                  {formatLocation(selectedActivity)}
-                </span>
-              </div>
-            )}
+            {(() => {
+              const location = formatLocation(selectedActivity)
+              return location.short ? (
+                <div className="col-span-2">
+                  <span className="text-gray-500 dark:text-gray-400">Location:</span> 
+                  <span className="ml-2 font-medium" title={location.full}>
+                    📍 {location.short}
+                  </span>
+                </div>
+              ) : null
+            })()}
           </div>
         </div>
       )}
