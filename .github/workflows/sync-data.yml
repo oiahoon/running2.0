@@ -117,9 +117,10 @@ jobs:
         COMMIT_MSG="🔄 Auto-sync Strava data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         
         if [ -f "apps/web/data/sync-report.md" ]; then
+          echo "$COMMIT_MSG" > commit_body.txt
           echo "" >> commit_body.txt
           cat apps/web/data/sync-report.md >> commit_body.txt
-          git commit -F commit_body.txt -m "$COMMIT_MSG"
+          git commit -F commit_body.txt
         else
           git commit -m "$COMMIT_MSG"
         fi
