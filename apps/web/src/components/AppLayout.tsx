@@ -16,6 +16,7 @@ import {
   MoonIcon
 } from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
+import { PageContainer } from './PageContainer'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -219,9 +220,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Page Content */}
         <main className="flex-1">
           <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <PageContainer maxWidth="full">
               {children}
-            </div>
+            </PageContainer>
           </div>
         </main>
       </div>

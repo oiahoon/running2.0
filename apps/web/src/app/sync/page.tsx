@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon, LinkIcon } from '@heroicons/react/24/outline'
 
 interface SyncLog {
   id: number
@@ -13,10 +14,29 @@ interface SyncLog {
   error_message?: string
 }
 
-export default function SyncPage() {
+function SyncPageContent() {
+  const searchParams = useSearchParams()
   const [isManualSyncing, setIsManualSyncing] = useState(false)
   const [syncResult, setSyncResult] = useState<any>(null)
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([])
+  const [connectionStatus, setConnectionStatus] = useState<string>('')
+
+  // Check for connection status from URL params
+  useEffect(() => {
+    const connected = searchParams.get('connected')
+    const error = searchParams.get('error')
+    const athlete = searchParams.get('athlete')
+
+    if (connected === 'strava') {
+      setConnectionStatus(`✅ Successfully connected to Strava${athlete ? ` as ${athlete}` : ''}!`)
+    } else if (error) {
+      setConnectionStatus(`❌ Connection failed: ${error}`)
+    }
+  }, [searchParams])
+
+  const handleStravaConnect = () => {
+    window.location.href = '/api/auth/strava'
+  }
 
   const handleManualSync = async () => {
     setIsManualSyncing(true)
@@ -55,9 +75,9 @@ export default function SyncPage() {
   }
 
   // Fetch logs on component mount
-  useState(() => {
+  useEffect(() => {
     fetchSyncLogs()
-  })
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -68,6 +88,23 @@ export default function SyncPage() {
           Manage your running data synchronization from connected services.
         </p>
       </div>
+
+      {/* Connection Status */}
+      {connectionStatus && (
+        <div className={`rounded-md p-4 ${
+          connectionStatus.includes('✅') 
+            ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800' 
+            : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
+        }`}>
+          <p className={`text-sm ${
+            connectionStatus.includes('✅') 
+              ? 'text-green-800 dark:text-green-200' 
+              : 'text-red-800 dark:text-red-200'
+          }`}>
+            {connectionStatus}
+          </p>
+        </div>
+      )}
 
       {/* Sync Status Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,11 +127,19 @@ export default function SyncPage() {
               </div>
             </div>
             
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
+              <button
+                onClick={handleStravaConnect}
+                className="inline-flex items-center px-3 py-2 border border-orange-300 text-sm leading-4 font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-700 dark:hover:bg-orange-900/30"
+              >
+                <LinkIcon className="h-4 w-4 mr-2" />
+                Connect Strava
+              </button>
+              
               <button
                 onClick={handleManualSync}
                 disabled={isManualSyncing}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
               >
                 <ArrowPathIcon className={`h-4 w-4 mr-2 ${isManualSyncing ? 'animate-spin' : ''}`} />
                 {isManualSyncing ? 'Syncing...' : 'Manual Sync'}
@@ -271,19 +316,43 @@ export default function SyncPage() {
         <div className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
           <p><strong>To enable Strava sync:</strong></p>
           <ol className="list-decimal list-inside space-y-1 ml-4">
-            <li>Create a Strava API application at <a href="https://developers.strava.com" target="_blank" rel="noopener noreferrer" className="underline">developers.strava.com</a></li>
-            <li>Add your Strava credentials to Vercel environment variables</li>
-            <li>Authorize your Strava account via the OAuth flow</li>
+            <li>Click "Connect Strava" button above</li>
+            <li>Authorize the application on Strava</li>
+            <li>You'll be redirected back with confirmation</li>
+            <li>Use "Manual Sync" to test the connection</li>
             <li>Data will sync automatically every day at 6 AM UTC</li>
           </ol>
           <p className="mt-4">
-            <strong>Environment Variables needed:</strong><br />
+            <strong>Required Vercel Environment Variables:</strong><br />
             <code className="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded text-xs">
-              STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN
+              STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, NEXT_PUBLIC_APP_URL
             </code>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SyncPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Data Sync</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+            Loading sync configuration...
+          </p>
+        </div>
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-12 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-500 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SyncPageContent />
+    </Suspense>
   )
 }

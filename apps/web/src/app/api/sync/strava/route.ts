@@ -41,6 +41,28 @@ interface StravaTokenResponse {
   expires_at: number
 }
 
+async function getStoredTokens() {
+  const db = getDatabase()
+  
+  const settings = db.prepare(`
+    SELECT access_token, refresh_token, token_expires_at
+    FROM data_source_settings 
+    WHERE source = 'strava' AND is_active = 1
+    ORDER BY updated_at DESC
+    LIMIT 1
+  `).get() as any
+
+  if (!settings) {
+    throw new Error('No Strava connection found. Please connect your Strava account first.')
+  }
+
+  return {
+    accessToken: settings.access_token,
+    refreshToken: settings.refresh_token,
+    expiresAt: new Date(settings.token_expires_at).getTime() / 1000
+  }
+}
+
 async function refreshStravaToken(refreshToken: string): Promise<StravaTokenResponse> {
   const response = await fetch('https://www.strava.com/oauth/token', {
     method: 'POST',
@@ -60,6 +82,26 @@ async function refreshStravaToken(refreshToken: string): Promise<StravaTokenResp
   }
 
   return response.json()
+}
+
+async function updateStoredTokens(tokenData: StravaTokenResponse) {
+  const db = getDatabase()
+  
+  const updateTokens = db.prepare(`
+    UPDATE data_source_settings 
+    SET access_token = ?, refresh_token = ?, token_expires_at = ?, updated_at = ?
+    WHERE source = 'strava' AND is_active = 1
+  `)
+
+  const expiresAt = new Date(tokenData.expires_at * 1000).toISOString()
+  const now = new Date().toISOString()
+
+  updateTokens.run(
+    tokenData.access_token,
+    tokenData.refresh_token,
+    expiresAt,
+    now
+  )
 }
 
 async function fetchStravaActivities(accessToken: string, page = 1, perPage = 200): Promise<StravaActivity[]> {
@@ -168,16 +210,20 @@ export async function GET(request: NextRequest) {
       throw new Error('Missing Strava API credentials')
     }
 
-    // For now, we'll use a stored refresh token
-    // In a real implementation, you'd get this from user authentication
-    const storedRefreshToken = process.env.STRAVA_REFRESH_TOKEN
-    if (!storedRefreshToken) {
-      throw new Error('No Strava refresh token available')
+    // Get stored tokens
+    console.log('Getting stored Strava tokens...')
+    const storedTokens = await getStoredTokens()
+    
+    // Check if token needs refresh
+    let accessToken = storedTokens.accessToken
+    const now = Math.floor(Date.now() / 1000)
+    
+    if (storedTokens.expiresAt <= now + 300) { // Refresh if expires in 5 minutes
+      console.log('Refreshing Strava token...')
+      const tokenData = await refreshStravaToken(storedTokens.refreshToken)
+      await updateStoredTokens(tokenData)
+      accessToken = tokenData.access_token
     }
-
-    // Refresh the access token
-    console.log('Refreshing Strava token...')
-    const tokenData = await refreshStravaToken(storedRefreshToken)
     
     // Fetch activities
     console.log('Fetching Strava activities...')
@@ -186,7 +232,7 @@ export async function GET(request: NextRequest) {
     let hasMore = true
     
     while (hasMore && page <= 10) { // Limit to 10 pages (2000 activities) for safety
-      const activities = await fetchStravaActivities(tokenData.access_token, page)
+      const activities = await fetchStravaActivities(accessToken, page)
       
       if (activities.length === 0) {
         hasMore = false
