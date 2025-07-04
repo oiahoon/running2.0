@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
-import { AppLayout } from '@/components/AppLayout'
+import { CatalystAppLayout } from '@/components/CatalystAppLayout'
 
 import '@/app/globals.css'
 
@@ -33,9 +33,9 @@ export default function RootLayout({
       className={clsx('h-full antialiased', inter.variable)}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full bg-gray-50 dark:bg-gray-900">
+      <body className="flex min-h-full bg-white dark:bg-zinc-900">
         <Providers>
-          <AppLayout>{children}</AppLayout>
+          <CatalystAppLayout>{children}</CatalystAppLayout>
         </Providers>
       </body>
     </html>
