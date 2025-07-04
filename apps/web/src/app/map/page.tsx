@@ -62,23 +62,23 @@ export default function MapPage() {
   const activities = data?.activities || []
   
   // Filter activities by selected types
-  const filteredActivities = activities.filter(activity => 
+  const filteredActivities = activities.filter((activity: any) => 
     selectedTypes.includes(activity.type)
   )
 
   // Get unique activity types from data
-  const availableTypes = [...new Set(activities.map(activity => activity.type))]
+  const availableTypes = [...new Set(activities.map((activity: any) => activity.type))] as string[]
 
   // Calculate map statistics
   const mapStats = {
-    totalRoutes: filteredActivities.filter(a => a.summary_polyline).length,
+    totalRoutes: filteredActivities.filter((a: any) => a.summary_polyline).length,
     totalActivities: filteredActivities.length,
     uniqueLocations: new Set(
       filteredActivities
-        .filter(a => a.location_country)
-        .map(a => a.location_country)
+        .filter((a: any) => a.location_country)
+        .map((a: any) => a.location_country)
     ).size,
-    totalDistance: filteredActivities.reduce((sum, a) => sum + (a.distance || 0), 0),
+    totalDistance: filteredActivities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0),
   }
 
   return (
