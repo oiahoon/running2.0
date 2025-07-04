@@ -1,10 +1,9 @@
 import { type Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import localFont from 'next/font/local'
 import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
-import { Layout } from '@/components/Layout'
+import { AppLayout } from '@/components/AppLayout'
 
 import '@/app/globals.css'
 
@@ -14,20 +13,13 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-// Use local version of Lexend so that we can use OpenType features
-const lexend = localFont({
-  src: '../fonts/lexend.woff2',
-  display: 'swap',
-  variable: '--font-lexend',
-})
-
 export const metadata: Metadata = {
   title: {
-    template: '%s - Docs',
-    default: 'CacheAdvance - Never miss the cache again.',
+    template: '%s - Running Page 2.0',
+    default: 'Running Page 2.0 - Personal Running Data Visualization',
   },
   description:
-    'Cache every single thing your app could ever do ahead of time, so your code never even has to run at all.',
+    'A modern running data visualization platform with comprehensive analytics, interactive maps, and beautiful charts.',
 }
 
 export default function RootLayout({
@@ -38,12 +30,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={clsx('h-full antialiased', inter.variable, lexend.variable)}
+      className={clsx('h-full antialiased', inter.variable)}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full bg-white dark:bg-slate-900">
+      <body className="flex min-h-full bg-gray-50 dark:bg-gray-900">
         <Providers>
-          <Layout>{children}</Layout>
+          <AppLayout>{children}</AppLayout>
         </Providers>
       </body>
     </html>
