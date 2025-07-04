@@ -1,7 +1,7 @@
-## Sync Report - 2025-07-04 12:07:23 UTC
+## Sync Report - 2025-07-04 18:06:13 UTC
 
 - Basic activities: 739
-- Detailed activities: 8
+- Detailed activities: 7
 - Database records: 739
 
-Last sync: 2025-07-04 12:07:23 UTC
+Last sync: 2025-07-04 18:06:13 UTC
