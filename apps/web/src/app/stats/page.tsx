@@ -6,6 +6,7 @@ import { formatDistance, formatDuration, formatPace } from '@/lib/database/model
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import ActivityTypeChart from '@/components/charts/ActivityTypeChart'
 import CalendarHeatmap from '@/components/charts/CalendarHeatmap'
+import PersonalRecords from '@/components/PersonalRecords'
 
 function YearSelector({ selectedYear, onYearChange }: { 
   selectedYear: number
@@ -282,6 +283,12 @@ export default function StatsPage() {
 
         {/* Activity Types */}
         <ActivityTypesSection yearStats={yearStats} />
+
+        {/* Personal Records */}
+        <PersonalRecords 
+          records={yearStats?.personalRecords || {}} 
+          isLoading={isLoading}
+        />
 
         {/* Calendar Heatmap */}
         <CalendarHeatmapSection selectedYear={selectedYear} yearStats={yearStats} />
