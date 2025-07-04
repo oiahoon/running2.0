@@ -1,91 +1,142 @@
-// Statistics API routes for Running Page 2.0
-import { NextRequest, NextResponse } from 'next/server';
-import { activityRepository } from '@/lib/database/repositories/ActivityRepository';
-import { ActivityFilters } from '@/lib/database/models/Activity';
+import { NextRequest, NextResponse } from 'next/server'
+import { getDatabase } from '@/lib/database/connection'
 
-// GET /api/stats - Get activity statistics
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const db = getDatabase()
+    const currentYear = new Date().getFullYear()
     
-    // Parse query parameters
-    const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : undefined;
-    const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : undefined;
-    const type = searchParams.get('type')?.split(',');
+    // Basic stats
+    const basicStats = db.prepare(`
+      SELECT 
+        COUNT(*) as total_activities,
+        SUM(distance) as total_distance,
+        SUM(moving_time) as total_time,
+        SUM(total_elevation_gain) as total_elevation,
+        AVG(distance) as avg_distance,
+        AVG(moving_time) as avg_time,
+        MAX(distance) as longest_distance,
+        MIN(start_date) as first_activity,
+        MAX(start_date) as last_activity
+      FROM activities
+    `).get() as any
+
+    // Activity type distribution
+    const typeDistribution = db.prepare(`
+      SELECT 
+        type,
+        COUNT(*) as count,
+        SUM(distance) as total_distance,
+        SUM(moving_time) as total_time
+      FROM activities 
+      GROUP BY type 
+      ORDER BY count DESC
+    `).all()
+
+    // Monthly stats for current year
+    const monthlyStats = db.prepare(`
+      SELECT 
+        strftime('%Y-%m', start_date) as month,
+        COUNT(*) as activities,
+        SUM(distance) as distance,
+        SUM(moving_time) as time,
+        AVG(distance) as avg_distance
+      FROM activities 
+      WHERE strftime('%Y', start_date) = ?
+      GROUP BY strftime('%Y-%m', start_date)
+      ORDER BY month
+    `).all(currentYear.toString())
+
+    // Daily stats for heatmap (current year)
+    const dailyStats = db.prepare(`
+      SELECT 
+        DATE(start_date) as date,
+        COUNT(*) as activities,
+        SUM(distance) as distance,
+        SUM(moving_time) as duration
+      FROM activities 
+      WHERE strftime('%Y', start_date) = ?
+      GROUP BY DATE(start_date)
+      ORDER BY date
+    `).all(currentYear.toString())
+
+    // Recent activities (last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     
-    // Build filters
-    const filters: ActivityFilters = {};
-    
-    if (year) {
-      filters.startDate = new Date(year, month ? month - 1 : 0, 1);
-      filters.endDate = month 
-        ? new Date(year, month, 0, 23, 59, 59) // Last day of month
-        : new Date(year, 11, 31, 23, 59, 59); // Last day of year
+    const recentActivities = db.prepare(`
+      SELECT 
+        id, name, type, distance, moving_time, start_date, start_date_local
+      FROM activities 
+      WHERE start_date >= ?
+      ORDER BY start_date DESC 
+      LIMIT 10
+    `).all(thirtyDaysAgo.toISOString())
+
+    // Weekly stats (last 12 weeks)
+    const weeklyStats = db.prepare(`
+      SELECT 
+        strftime('%Y-W%W', start_date) as week,
+        COUNT(*) as activities,
+        SUM(distance) as distance,
+        SUM(moving_time) as time
+      FROM activities 
+      WHERE start_date >= date('now', '-12 weeks')
+      GROUP BY strftime('%Y-W%W', start_date)
+      ORDER BY week
+    `).all()
+
+    // Personal records
+    const personalRecords = {
+      longestRun: db.prepare(`
+        SELECT name, distance, start_date 
+        FROM activities 
+        WHERE type IN ('Run', 'Running') 
+        ORDER BY distance DESC 
+        LIMIT 1
+      `).get(),
+      fastestPace: db.prepare(`
+        SELECT name, distance, moving_time, start_date,
+               (moving_time / (distance / 1000)) as pace_per_km
+        FROM activities 
+        WHERE type IN ('Run', 'Running') AND distance > 1000
+        ORDER BY pace_per_km ASC 
+        LIMIT 1
+      `).get(),
+      mostElevation: db.prepare(`
+        SELECT name, total_elevation_gain, distance, start_date
+        FROM activities 
+        WHERE total_elevation_gain > 0
+        ORDER BY total_elevation_gain DESC 
+        LIMIT 1
+      `).get()
     }
-    
-    if (type?.length) {
-      filters.type = type as any;
-    }
-    
-    // Get summary statistics
-    const summary = await activityRepository.getActivitySummary(filters);
-    
-    // Get comparison data (previous period)
-    let comparison = null;
-    if (year) {
-      const prevFilters: ActivityFilters = {
-        ...filters,
-        startDate: month 
-          ? new Date(year, month - 2, 1) // Previous month
-          : new Date(year - 1, 0, 1), // Previous year
-        endDate: month
-          ? new Date(year, month - 1, 0, 23, 59, 59) // Last day of previous month
-          : new Date(year - 1, 11, 31, 23, 59, 59), // Last day of previous year
-      };
-      
-      const prevSummary = await activityRepository.getActivitySummary(prevFilters);
-      
-      comparison = {
-        previousPeriod: prevSummary,
-        percentageChange: {
-          distance: prevSummary.totalDistance > 0 
-            ? ((summary.totalDistance - prevSummary.totalDistance) / prevSummary.totalDistance) * 100 
-            : 0,
-          time: prevSummary.totalTime > 0 
-            ? ((summary.totalTime - prevSummary.totalTime) / prevSummary.totalTime) * 100 
-            : 0,
-          activities: prevSummary.totalActivities > 0 
-            ? ((summary.totalActivities - prevSummary.totalActivities) / prevSummary.totalActivities) * 100 
-            : 0,
-        },
-      };
-    }
-    
-    // Get monthly data for charts
-    const monthlyData = await activityRepository.getMonthlyData(year);
-    
-    // Get activity types distribution
-    const activityTypes = await activityRepository.getActivityTypesDistribution();
-    
+
     return NextResponse.json({
-      period: {
-        start: filters.startDate?.toISOString(),
-        end: filters.endDate?.toISOString(),
-        label: year 
-          ? (month ? `${year}-${month.toString().padStart(2, '0')}` : year.toString())
-          : 'All Time',
+      basicStats: {
+        totalActivities: basicStats.total_activities || 0,
+        totalDistance: basicStats.total_distance || 0,
+        totalTime: basicStats.total_time || 0,
+        totalElevation: basicStats.total_elevation || 0,
+        avgDistance: basicStats.avg_distance || 0,
+        avgTime: basicStats.avg_time || 0,
+        longestDistance: basicStats.longest_distance || 0,
+        firstActivity: basicStats.first_activity,
+        lastActivity: basicStats.last_activity,
       },
-      summary,
-      comparison,
-      monthlyData,
-      activityTypes,
-    });
-    
+      typeDistribution,
+      monthlyStats,
+      dailyStats,
+      recentActivities,
+      weeklyStats,
+      personalRecords,
+      year: currentYear,
+    })
   } catch (error) {
-    console.error('Stats API error:', error);
+    console.error('Stats API error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch statistics' },
       { status: 500 }
-    );
+    )
   }
 }

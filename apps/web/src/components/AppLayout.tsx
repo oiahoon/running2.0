@@ -170,7 +170,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main Content */}
-      <div className="lg:pl-64 flex flex-col flex-1">
+      <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top Navigation */}
         <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 shadow border-b border-gray-200 dark:border-gray-700">
           <button
@@ -182,7 +182,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
           
           <div className="flex-1 px-4 flex justify-between items-center">
-            <div className="flex-1 flex">
+            <div className="flex-1 flex max-w-lg">
               <div className="w-full flex md:ml-0">
                 <label htmlFor="search-field" className="sr-only">
                   Search
@@ -218,11 +218,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Page Content */}
-        <main className="flex-1">
+        <main className="flex-1 bg-gray-50 dark:bg-gray-900">
           <div className="py-6">
-            <PageContainer maxWidth="full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               {children}
-            </PageContainer>
+            </div>
           </div>
         </main>
       </div>

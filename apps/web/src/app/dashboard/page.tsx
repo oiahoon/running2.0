@@ -1,118 +1,123 @@
 'use client'
 
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
-import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
+import { formatDistance, formatDuration, getActivityIcon } from '@/lib/database/models/Activity'
 import RunningMap from '@/components/maps/RunningMap'
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import GitHubHeatmap from '@/components/charts/GitHubHeatmap'
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+function StatsCard({ title, value, subtitle, icon, trend }: {
+  title: string
+  value: string | number
+  subtitle?: string
+  icon: string
+  trend?: { value: number; isPositive: boolean }
+}) {
+  return (
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-5 sm:p-6">
+        <div className="flex items-center">
+          <div className="flex-shrink-0">
+            <div className="text-2xl">{icon}</div>
+          </div>
+          <div className="ml-4 flex-1">
+            <div className="flex items-baseline">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                {value}
+              </div>
+              {trend && (
+                <div className={`ml-2 flex items-baseline text-sm font-semibold ${
+                  trend.isPositive ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <span>{trend.isPositive ? '+' : ''}{trend.value}%</span>
+                </div>
+              )}
+            </div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+              {title}
+            </div>
+            {subtitle && (
+              <div className="text-xs text-gray-400 dark:text-gray-500">
+                {subtitle}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function StatsGrid() {
-  const currentYear = new Date().getFullYear()
-  const currentMonth = new Date().getMonth() + 1
-  
-  const { data: yearStats, isLoading: yearLoading } = useActivityStats(currentYear)
-  const { data: monthStats, isLoading: monthLoading } = useActivityStats(currentYear, currentMonth)
-  const { data: allTimeStats, isLoading: allTimeLoading } = useActivityStats()
+  const { data: stats, isLoading, error } = useActivityStats()
 
-  if (yearLoading || monthLoading || allTimeLoading) {
+  if (isLoading) {
     return (
-      <div>
-        <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-          Running Statistics
-        </h3>
-        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="overflow-hidden rounded-lg bg-white dark:bg-gray-900 px-4 py-5 shadow sm:p-6 border border-gray-200 dark:border-gray-700 animate-pulse"
-            >
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     )
   }
 
-  const stats = [
-    {
-      name: 'Total Distance',
-      value: formatDistance(allTimeStats?.summary?.totalDistance * 1000),
-      change: yearStats?.comparison?.percentageChange?.distance 
-        ? `${yearStats.comparison.percentageChange.distance > 0 ? '+' : ''}${yearStats.comparison.percentageChange.distance.toFixed(1)}%`
-        : null,
-      changeType: (yearStats?.comparison?.percentageChange?.distance || 0) >= 0 ? 'increase' : 'decrease',
-    },
-    {
-      name: 'This Year',
-      value: formatDistance(yearStats?.summary?.totalDistance * 1000),
-      change: yearStats?.comparison?.percentageChange?.distance 
-        ? `${yearStats.comparison.percentageChange.distance > 0 ? '+' : ''}${yearStats.comparison.percentageChange.distance.toFixed(1)}%`
-        : null,
-      changeType: (yearStats?.comparison?.percentageChange?.distance || 0) >= 0 ? 'increase' : 'decrease',
-    },
-    {
-      name: 'This Month',
-      value: formatDistance(monthStats?.summary?.totalDistance * 1000),
-      change: monthStats?.comparison?.percentageChange?.distance 
-        ? `${monthStats.comparison.percentageChange.distance > 0 ? '+' : ''}${monthStats.comparison.percentageChange.distance.toFixed(1)}%`
-        : null,
-      changeType: (monthStats?.comparison?.percentageChange?.distance || 0) >= 0 ? 'increase' : 'decrease',
-    },
-    {
-      name: 'Activities',
-      value: allTimeStats?.summary?.totalActivities?.toString() || '0',
-      change: yearStats?.comparison?.percentageChange?.activities 
-        ? `${yearStats.comparison.percentageChange.activities > 0 ? '+' : ''}${yearStats.comparison.percentageChange.activities.toFixed(1)}%`
-        : null,
-      changeType: (yearStats?.comparison?.percentageChange?.activities || 0) >= 0 ? 'increase' : 'decrease',
-    },
-  ]
+  if (error || !stats) {
+    return (
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsCard title="Total Activities" value="0" icon="🏃‍♂️" />
+        <StatsCard title="Total Distance" value="0 km" icon="📏" />
+        <StatsCard title="Total Time" value="0h 0m" icon="⏱️" />
+        <StatsCard title="Avg Distance" value="0 km" icon="📊" />
+      </div>
+    )
+  }
+
+  const basicStats = stats.basicStats || {}
 
   return (
-    <div>
-      <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-        Running Statistics
-      </h3>
-      <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((item) => (
-          <div
-            key={item.name}
-            className="overflow-hidden rounded-lg bg-white dark:bg-gray-900 px-4 py-5 shadow sm:p-6 border border-gray-200 dark:border-gray-700"
-          >
-            <dt className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">
-              {item.name}
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
-              {item.value}
-            </dd>
-            {item.change && (
-              <dd className="mt-1 flex items-baseline text-sm font-semibold">
-                <span
-                  className={classNames(
-                    item.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                  )}
-                >
-                  {item.change}
-                </span>
-                <span className="ml-2 text-gray-500 dark:text-gray-400">vs last period</span>
-              </dd>
-            )}
-          </div>
-        ))}
-      </dl>
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <StatsCard 
+        title="Total Activities" 
+        value={basicStats.totalActivities || 0}
+        icon="🏃‍♂️"
+        subtitle={`Since ${basicStats.firstActivity ? new Date(basicStats.firstActivity).getFullYear() : 'N/A'}`}
+      />
+      <StatsCard 
+        title="Total Distance" 
+        value={formatDistance(basicStats.totalDistance || 0)}
+        icon="📏"
+        subtitle="All time"
+      />
+      <StatsCard 
+        title="Total Time" 
+        value={formatDuration(basicStats.totalTime || 0)}
+        icon="⏱️"
+        subtitle="Moving time"
+      />
+      <StatsCard 
+        title="Avg Distance" 
+        value={formatDistance(basicStats.avgDistance || 0)}
+        icon="📊"
+        subtitle="Per activity"
+      />
     </div>
   )
 }
 
 function RecentActivities() {
-  const { data: activities, isLoading, error } = useRecentActivities(5)
+  const { data: activities, isLoading } = useRecentActivities(5)
 
   if (isLoading) {
     return (
@@ -121,30 +126,19 @@ function RecentActivities() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Recent Activities
           </h3>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center space-x-4 animate-pulse">
-                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Recent Activities
-          </h3>
-          <p className="text-red-500">Failed to load activities</p>
         </div>
       </div>
     )
@@ -156,111 +150,73 @@ function RecentActivities() {
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Recent Activities
         </h3>
-        <div className="flow-root">
-          <ul className="-my-5 divide-y divide-gray-200 dark:divide-gray-700">
-            {activities?.map((activity: any) => (
-              <li key={activity.id} className="py-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {getActivityIcon(activity.type)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {activity.name || 'Untitled Activity'}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {formatDistance(activity.distance)} • {formatDuration(activity.moving_time)} • {new Date(activity.start_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <button className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                      View
-                    </button>
+        {activities && activities.length > 0 ? (
+          <div className="space-y-3">
+            {activities.map((activity: any) => (
+              <div key={activity.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex-shrink-0">
+                  <span className="text-2xl">{getActivityIcon(activity.type)}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {activity.name || `${activity.type} Activity`}
+                  </p>
+                  <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                    <span>{formatDistance(activity.distance)}</span>
+                    <span>{formatDuration(activity.moving_time)}</span>
+                    <span>{new Date(activity.start_date).toLocaleDateString()}</span>
                   </div>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
-        </div>
-        <div className="mt-6">
-          <button className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-            View all activities
-          </button>
-        </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-2">🏃‍♂️</div>
+            <p className="text-gray-500 dark:text-gray-400">No recent activities</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+              Connect your Strava account to see activities
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 function MapPlaceholder() {
-  const { data: activities } = useRecentActivities(10)
-  
+  const { data: activities } = useRecentActivities(50) // Get more activities for map
+
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Route Map Preview
+          Activity Map
         </h3>
-        {activities && activities.length > 0 ? (
-          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-            <RunningMap
-              activities={activities.slice(0, 5)}
-              height={256}
-              mapStyle="streets"
-            />
-          </div>
-        ) : (
-          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-2">🗺️</div>
-              <p className="text-gray-500 dark:text-gray-400">Map preview</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Your recent routes will be displayed here
-              </p>
-            </div>
-          </div>
-        )}
-        <div className="mt-4">
-          <a
-            href="/map"
-            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            View Full Map
-          </a>
-        </div>
+        <RunningMap activities={activities || []} height={300} />
       </div>
     </div>
   )
 }
 
 function ChartPlaceholder() {
-  const currentYear = new Date().getFullYear()
-  const { data: yearStats } = useActivityStats(currentYear)
-  
+  const { data: stats } = useActivityStats()
+
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Performance Trends
+          Monthly Progress
         </h3>
-        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 ? (
-          <DistanceTrendChart 
-            data={yearStats.monthlyData}
-            height={300}
-            showArea={true}
-            color="#3b82f6"
-          />
+        {stats?.monthlyStats && stats.monthlyStats.length > 0 ? (
+          <DistanceTrendChart data={stats.monthlyStats} />
         ) : (
           <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
             <div className="text-center">
-              <div className="text-4xl mb-2">📊</div>
-              <p className="text-gray-500 dark:text-gray-400">Loading chart data...</p>
+              <div className="text-4xl mb-2">📈</div>
+              <p className="text-gray-500 dark:text-gray-400">Monthly progress chart</p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Monthly distance trends will be displayed here
+                Data will appear after syncing activities
               </p>
             </div>
           </div>
@@ -270,37 +226,10 @@ function ChartPlaceholder() {
   )
 }
 
-// Mock function to generate daily data for heatmap
-function generateMockDailyData(year: number) {
-  const data = []
-  const startDate = new Date(year, 0, 1)
-  const endDate = new Date(year, 11, 31)
-  
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    // Generate random activity data (replace with real data)
-    const hasActivity = Math.random() > 0.7 // 30% chance of activity
-    const count = hasActivity ? Math.floor(Math.random() * 3) + 1 : 0
-    const distance = count > 0 ? Math.random() * 15000 + 2000 : 0 // 2-17km
-    const duration = count > 0 ? Math.random() * 3600 + 1800 : 0 // 30-90 minutes
-    
-    data.push({
-      date: d.toISOString().split('T')[0],
-      activities: count,
-      distance: Math.round(distance),
-      duration: Math.round(duration)
-    })
-  }
-  
-  return data
-}
-
 export default function DashboardPage() {
   const currentYear = new Date().getFullYear()
+  const { data: stats } = useActivityStats()
   
-  // Mock year stats for heatmap - in real app this would come from API
-  const yearStats = {
-    dailyData: generateMockDailyData(currentYear)
-  }
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -332,9 +261,9 @@ export default function DashboardPage() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             🔥 Activity Heatmap - {currentYear}
           </h3>
-          {yearStats?.dailyData && yearStats.dailyData.length > 0 ? (
+          {stats?.dailyStats && stats.dailyStats.length > 0 ? (
             <GitHubHeatmap 
-              data={yearStats.dailyData.map((day: any) => ({
+              data={stats.dailyStats.map((day: any) => ({
                 date: day.date,
                 count: day.activities,
                 distance: day.distance,
