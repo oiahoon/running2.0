@@ -151,100 +151,25 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
 export default function ActivitiesPage() {
   const [filters, setFilters] = useState<ActivityFilters>({})
-  const [allActivities, setAllActivities] = useState<Activity[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [searchInput, setSearchInput] = useState('')
-  const pageSize = 10
+  const pageSize = 20
 
   // Debounce search input
   const debouncedSearch = useDebounce(searchInput, 300)
 
   // Update filters when debounced search changes
-  useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      search: debouncedSearch || undefined
-    }))
-  }, [debouncedSearch])
+  const effectiveFilters = {
+    ...filters,
+    search: debouncedSearch || undefined
+  }
 
-  const { data, isLoading, error } = useActivities(filters, currentPage, pageSize)
+  const { data, isLoading, error } = useActivities(effectiveFilters, 1, pageSize)
 
-  // Handle new data
-  useEffect(() => {
-    if (data?.activities) {
-      if (currentPage === 1) {
-        setAllActivities(data.activities)
-      } else {
-        setAllActivities(prev => [...prev, ...data.activities])
-      }
-      setHasMore(data.activities.length === pageSize)
-      setIsLoadingMore(false)
-    }
-  }, [data, currentPage])
-
-  // Reset when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-    setAllActivities([])
-    setHasMore(true)
-  }, [filters])
-
-  // Infinite scroll handler
-  const loadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore && !isLoading) {
-      setIsLoadingMore(true)
-      setCurrentPage(prev => prev + 1)
-    }
-  }, [isLoadingMore, hasMore, isLoading])
-
-  // Scroll event listener
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop 
-          >= document.documentElement.offsetHeight - 1000) {
-        loadMore()
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [loadMore])
+  const activities: Activity[] = data?.activities || []
+  const totalCount = data?.totalCount || 0
 
   // Get available activity types for filter
-  const availableTypes = [...new Set(allActivities.map((a: Activity) => a.type))].sort()
-
-  if (isLoading && currentPage === 1) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Activities</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Loading your activities...
-          </p>
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
-              <div className="flex flex-col lg:flex-row">
-                <div className="flex-1 p-6">
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-                <div className="w-full lg:w-96 h-64 lg:h-48 bg-gray-200 dark:bg-gray-700"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
+  const availableTypes = [...new Set(activities.map((a: Activity) => a.type))].sort()
 
   if (error) {
     return (
@@ -257,7 +182,7 @@ export default function ActivitiesPage() {
         </div>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <p className="text-red-800 dark:text-red-200">
-            Error loading activities. Please try refreshing the page.
+            Error loading activities: {error.message}
           </p>
         </div>
       </div>
@@ -270,7 +195,7 @@ export default function ActivitiesPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Activities</h1>
         <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Browse and explore your {data?.totalCount?.toLocaleString() || 0} activities.
+          Browse and explore your {totalCount.toLocaleString()} activities.
         </p>
       </div>
 
@@ -364,8 +289,28 @@ export default function ActivitiesPage() {
 
       {/* Activities List */}
       <div className="space-y-6">
-        {allActivities.length > 0 ? (
-          allActivities.map((activity: Activity) => (
+        {isLoading ? (
+          // Loading skeleton
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+                <div className="flex flex-col lg:flex-row">
+                  <div className="flex-1 p-6">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="w-full lg:w-96 h-64 lg:h-48 bg-gray-200 dark:bg-gray-700"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activities.length > 0 ? (
+          activities.map((activity: Activity) => (
             <ActivityCard key={activity.id} activity={activity} />
           ))
         ) : (
@@ -375,7 +320,7 @@ export default function ActivitiesPage() {
               No Activities Found
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              {Object.keys(filters).length > 0 
+              {Object.keys(effectiveFilters).some(key => effectiveFilters[key as keyof ActivityFilters])
                 ? 'Try adjusting your filters to see more activities.'
                 : 'Start tracking your activities to see them here.'
               }
@@ -384,18 +329,11 @@ export default function ActivitiesPage() {
         )}
       </div>
 
-      {/* Loading More Indicator */}
-      {isLoadingMore && (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      )}
-
-      {/* End of Results */}
-      {!hasMore && allActivities.length > 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400">
-            You've reached the end of your activities!
+      {/* Simple Pagination */}
+      {!isLoading && activities.length > 0 && (
+        <div className="flex justify-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Showing {activities.length} of {totalCount} activities
           </p>
         </div>
       )}

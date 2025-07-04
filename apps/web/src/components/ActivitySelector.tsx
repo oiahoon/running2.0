@@ -44,37 +44,23 @@ export default function ActivitySelector({
   className = '' 
 }: ActivitySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const [allActivities, setAllActivities] = useState<Activity[]>([])
-  const pageSize = 20
+  const pageSize = 50 // Increase page size for better UX
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Fetch activities with GPS data only
-  const { data, isLoading } = useActivities({
+  const { data, isLoading, error } = useActivities({
     search: debouncedSearchTerm || undefined
-  }, currentPage, pageSize)
+  }, 1, pageSize)
 
-  // Handle new data - accumulate activities for pagination
-  useEffect(() => {
-    if (data?.activities) {
-      const filteredActivities = data.activities.filter((activity: Activity) => 
-        shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
-      )
-      
-      if (currentPage === 1) {
-        setAllActivities(filteredActivities)
-      } else {
-        setAllActivities(prev => [...prev, ...filteredActivities])
-      }
-    }
-  }, [data, currentPage])
+  // Filter activities that should show on map
+  const activities = (data?.activities || []).filter((activity: Activity) => 
+    shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
+  )
 
   const totalCount = data?.totalCount || 0
-  const totalPages = Math.ceil(totalCount / pageSize)
-  const hasMore = currentPage < totalPages
 
   const handleSelect = (activity: Activity) => {
     onActivitySelect(activity)
@@ -86,17 +72,9 @@ export default function ActivitySelector({
     setIsOpen(false)
   }
 
-  const loadMore = () => {
-    if (hasMore && !isLoading) {
-      setCurrentPage(prev => prev + 1)
-    }
+  if (error) {
+    console.error('ActivitySelector error:', error)
   }
-
-  // Reset page when search changes
-  useEffect(() => {
-    setCurrentPage(1)
-    setAllActivities([])
-  }, [debouncedSearchTerm])
 
   return (
     <div className={`relative ${className}`}>
@@ -151,13 +129,13 @@ export default function ActivitySelector({
 
           {/* Activities List */}
           <div className="max-h-60 overflow-y-auto">
-            {isLoading && currentPage === 1 ? (
+            {isLoading ? (
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                 Loading activities...
               </div>
-            ) : allActivities.length > 0 ? (
+            ) : activities.length > 0 ? (
               <>
-                {allActivities.map((activity: Activity) => {
+                {activities.map((activity: Activity) => {
                   const config = getActivityConfig(activity.type)
                   const isSelected = selectedActivity?.id === activity.id
                   
@@ -183,21 +161,12 @@ export default function ActivitySelector({
                   )
                 })}
                 
-                {/* Pagination Info and Load More */}
+                {/* Show count info */}
                 <div className="border-t border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800">
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    <span>Showing {allActivities.length} of {totalCount}</span>
-                    <span>Page {currentPage} of {totalPages}</span>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Showing {activities.length} of {totalCount} activities
+                    {debouncedSearchTerm && ` matching "${debouncedSearchTerm}"`}
                   </div>
-                  {hasMore && (
-                    <button
-                      onClick={loadMore}
-                      disabled={isLoading}
-                      className="w-full px-3 py-1 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-colors"
-                    >
-                      {isLoading ? 'Loading...' : 'Load More Activities'}
-                    </button>
-                  )}
                 </div>
               </>
             ) : (
