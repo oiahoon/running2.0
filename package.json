@@ -1,0 +1,32 @@
+{
+  "name": "running-page-2.0-monorepo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A modern running data visualization platform - monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "start": "npm run start --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/web",
+    "type-check": "npm run type-check --workspace=apps/web",
+    "clean": "rm -rf apps/web/.next apps/web/out node_modules apps/web/node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.8",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:oiahoon/running2.0.git"
+  },
+  "author": "Joey Huang",
+  "license": "MIT"
+}
