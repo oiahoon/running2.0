@@ -1,112 +1,141 @@
 ---
-title: Getting started
+title: Running Page 2.0
 ---
 
-Learn how to get CacheAdvance set up in your project in under thirty minutes or it's free. {% .lead %}
+A modern, beautiful running data visualization platform that brings your fitness journey to life. Track, analyze, and visualize your running activities with powerful insights and stunning maps. {% .lead %}
 
 {% quick-links %}
 
-{% quick-link title="Installation" icon="installation" href="/" description="Step-by-step guides to setting up your system and installing the library." /%}
+{% quick-link title="Dashboard" icon="installation" href="/dashboard" description="View your running statistics, recent activities, and performance trends at a glance." /%}
 
-{% quick-link title="Architecture guide" icon="presets" href="/" description="Learn how the internals work and contribute." /%}
+{% quick-link title="Activities" icon="presets" href="/activities" description="Browse and analyze all your running activities with detailed metrics and route maps." /%}
 
-{% quick-link title="Plugins" icon="plugins" href="/" description="Extend the library with third-party plugins or write your own." /%}
+{% quick-link title="Statistics" icon="plugins" href="/stats" description="Dive deep into your running data with comprehensive charts and performance analytics." /%}
 
-{% quick-link title="API reference" icon="theming" href="/" description="Learn to easily customize and modify your app's visual design to fit your brand." /%}
+{% quick-link title="Route Map" icon="theming" href="/map" description="Explore your running routes on interactive maps with heatmaps and 3D visualizations." /%}
 
 {% /quick-links %}
 
-Possimus saepe veritatis sint nobis et quam eos. Architecto consequatur odit perferendis fuga eveniet possimus rerum cumque. Ea deleniti voluptatum deserunt voluptatibus ut non iste.
+Running Page 2.0 transforms your fitness data into beautiful, actionable insights. Whether you're training for a marathon or just staying active, our platform helps you understand your progress and stay motivated.
 
 ---
 
-## Quick start
+## Supported Data Sources
 
-Sit commodi iste iure molestias qui amet voluptatem sed quaerat. Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque velit tenetur.
+Connect your favorite fitness apps and devices to automatically sync your running data.
 
-### Installing dependencies
+### Popular Platforms
 
-Sit commodi iste iure molestias qui amet voluptatem sed quaerat. Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque velit tenetur quaerat exercitationem. Consequatur et cum atque mollitia qui quia necessitatibus.
+Running Page 2.0 supports 15+ data sources including all major fitness platforms:
+
+- **Strava** - The social network for athletes
+- **Garmin Connect** - For Garmin device users (Global & China)
+- **Nike Run Club** - Nike's running community app
+- **Apple Health** - iOS health data integration
+
+### File Formats
+
+Import your data directly from files:
 
 ```shell
-npm install @tailwindlabs/cache-advance
+# Supported file formats
+GPX files    # GPS Exchange Format
+TCX files    # Training Center XML
+FIT files    # Flexible and Interoperable Data Transfer
 ```
 
-Possimus saepe veritatis sint nobis et quam eos. Architecto consequatur odit perferendis fuga eveniet possimus rerum cumque. Ea deleniti voluptatum deserunt voluptatibus ut non iste. Provident nam asperiores vel laboriosam omnis ducimus enim nesciunt quaerat. Minus tempora cupiditate est quod.
+Upload your workout files and let Running Page 2.0 automatically process and visualize your activities.
 
-{% callout type="warning" title="Oh no! Something bad happened!" %}
-This is what a disclaimer message looks like. You might want to include inline `code` in it. Or maybe you’ll want to include a [link](/) in it. I don’t think we should get too carried away with other scenarios like lists or tables — that would be silly.
+{% callout type="warning" title="Privacy First" %}
+Your data stays secure. Running Page 2.0 processes your fitness data locally and gives you full control over what information is shared and displayed.
 {% /callout %}
 
-### Configuring the library
+### GitHub Actions Integration
 
-Sit commodi iste iure molestias qui amet voluptatem sed quaerat. Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque velit tenetur quaerat exercitationem. Consequatur et cum atque mollitia qui quia necessitatibus.
+Automatically sync your data with powerful automation:
 
-```js
-// cache-advance.config.js
-export default {
-  strategy: 'predictive',
-  engine: {
-    cpus: 12,
-    backups: ['./storage/cache.wtf'],
-  },
-}
+```yaml
+# .github/workflows/sync-data.yml
+name: Sync Running Data
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Strava Data
+        run: python scripts/strava_sync.py
 ```
 
-Possimus saepe veritatis sint nobis et quam eos. Architecto consequatur odit perferendis fuga eveniet possimus rerum cumque. Ea deleniti voluptatum deserunt voluptatibus ut non iste. Provident nam asperiores vel laboriosam omnis ducimus enim nesciunt quaerat. Minus tempora cupiditate est quod.
+Set up automated data synchronization that runs in the background, keeping your running page always up-to-date.
 
-{% callout title="You should know!" %}
-This is what a disclaimer message looks like. You might want to include inline `code` in it. Or maybe you’ll want to include a [link](/) in it. I don’t think we should get too carried away with other scenarios like lists or tables — that would be silly.
+{% callout title="Open Source" %}
+Running Page 2.0 is built on open-source technologies and welcomes contributions from the running community. Join us in making fitness data visualization better for everyone.
 {% /callout %}
 
 ---
 
-## Basic usage
+## Key Features
 
-Praesentium laudantium magni. Consequatur reiciendis aliquid nihil iusto ut in et. Quisquam ut et aliquid occaecati. Culpa veniam aut et voluptates amet perspiciatis. Qui exercitationem in qui. Vel qui dignissimos sit quae distinctio.
+Discover what makes Running Page 2.0 the ultimate running data platform.
 
-### Your first cache
+### Beautiful Visualizations
 
-Minima vel non iste debitis. Consequatur repudiandae et quod accusamus sit molestias consequatur aperiam. Et sequi ipsa eum voluptatibus ipsam. Et quisquam ut.
+Transform your running data into stunning visual stories:
 
-Qui quae esse aspernatur fugit possimus. Quam sed molestiae temporibus. Eum perferendis dignissimos provident ea et. Et repudiandae quasi accusamus consequatur dolore nobis. Quia reiciendis necessitatibus a blanditiis iste quia. Ut quis et amet praesentium sapiente.
+- **Interactive Maps** - See your routes on beautiful, customizable maps
+- **Performance Charts** - Track your progress with detailed analytics
+- **Calendar Heatmaps** - Visualize your activity patterns over time
+- **3D Route Views** - Experience your runs in three dimensions
 
-Atque eos laudantium. Optio odit aspernatur consequuntur corporis soluta quidem sunt aut doloribus. Laudantium assumenda commodi.
+### Smart Analytics
 
-### Clearing the cache
+Get insights that help you improve:
 
-Vel aut velit sit dolor aut suscipit at veritatis voluptas. Laudantium tempore praesentium. Qui ut voluptatem.
+- **Pace Analysis** - Understand your running rhythm and consistency
+- **Heart Rate Zones** - Optimize your training intensity
+- **Personal Records** - Celebrate your achievements and milestones
+- **Training Load** - Monitor your fitness progression
 
-Ea est autem fugiat velit esse a alias earum. Dolore non amet soluta eos libero est. Consequatur qui aliquam qui odit eligendi ut impedit illo dignissimos.
+### Modern Technology
 
-Ut dolore qui aut nam. Natus temporibus nisi voluptatum labore est ex error vel officia. Vero repellendus ut. Suscipit voluptate et placeat. Eius quo corporis ab et consequatur quisquam. Nihil officia facere dolorem occaecati alias deleniti deleniti in.
+Built with the latest web technologies for the best experience:
 
-### Adding middleware
-
-Officia nobis tempora maiores id iusto magni reprehenderit velit. Quae dolores inventore molestiae perspiciatis aut. Quis sequi officia quasi rem officiis officiis. Nesciunt ut cupiditate. Sunt aliquid explicabo enim ipsa eum recusandae. Vitae sunt eligendi et non beatae minima aut.
-
-Harum perferendis aut qui quibusdam tempore laboriosam voluptatum qui sed. Amet error amet totam exercitationem aut corporis accusantium dolorum. Perspiciatis aut animi et. Sed unde error ut aut rerum.
-
-Ut quo libero aperiam mollitia est repudiandae quaerat corrupti explicabo. Voluptas accusantium sed et doloribus voluptatem fugiat a mollitia. Numquam est magnam dolorem asperiores fugiat. Soluta et fuga amet alias temporibus quasi velit. Laudantium voluptatum perspiciatis doloribus quasi facere. Eveniet deleniti veniam et quia veritatis minus veniam perspiciatis.
+- **Next.js 14** - Lightning-fast performance and SEO
+- **TypeScript** - Type-safe development and better reliability
+- **Tailwind CSS** - Beautiful, responsive design
+- **Mapbox** - Professional-grade mapping and visualization
 
 ---
 
-## Getting help
+## Getting Started
 
-Consequuntur et aut quisquam et qui consequatur eligendi. Necessitatibus dolorem sit. Excepturi cumque quibusdam soluta ullam rerum voluptatibus. Porro illo sequi consequatur nisi numquam nisi autem. Ut necessitatibus aut. Veniam ipsa voluptatem sed.
+Ready to visualize your running journey? Here's how to get started:
 
-### Submit an issue
+### Quick Setup
 
-Inventore et aut minus ut voluptatem nihil commodi doloribus consequatur. Facilis perferendis nihil sit aut aspernatur iure ut dolores et. Aspernatur odit dignissimos. Aut qui est sint sint.
+1. **Connect Your Data Source** - Link your Strava, Garmin, or other fitness accounts
+2. **Sync Your Activities** - Import your historical running data
+3. **Explore Your Dashboard** - Discover insights about your running patterns
+4. **Share Your Journey** - Show off your progress with beautiful visualizations
 
-Facere aliquam qui. Dolorem officia ipsam adipisci qui molestiae. Error voluptatem reprehenderit ex.
+### Advanced Features
 
-Consequatur enim quia maiores aperiam et ipsum dicta. Quam ut sit facere sit quae. Eligendi veritatis aut ut veritatis iste ut adipisci illo.
+For power users who want more control:
 
-### Join the community
+- **Custom Data Processing** - Fine-tune how your data is analyzed
+- **Privacy Controls** - Decide exactly what information to display
+- **Export Options** - Download your data in various formats
+- **API Access** - Integrate with other tools and services
 
-Praesentium facilis iste aliquid quo quia a excepturi. Fuga reprehenderit illo sequi voluptatem voluptatem omnis. Id quia consequatur rerum consectetur eligendi et omnis. Voluptates iusto labore possimus provident praesentium id vel harum quisquam. Voluptatem provident corrupti.
+### Community
 
-Eum et ut. Qui facilis est ipsa. Non facere quia sequi commodi autem. Dicta autem sit sequi omnis impedit. Eligendi amet dolorum magnam repudiandae in a.
+Join thousands of runners who use Running Page 2.0:
 
-Molestiae iusto ut exercitationem dolorem unde iusto tempora atque nihil. Voluptatem velit facere laboriosam nobis ea. Consequatur rerum velit ipsum ipsam. Et qui saepe consequatur minima laborum tempore voluptatum et. Quia eveniet eaque sequi consequatur nihil eos.
+- **Share Routes** - Discover new running paths from the community
+- **Compare Progress** - See how your performance stacks up
+- **Get Motivated** - Find inspiration from other runners' journeys
+- **Contribute** - Help improve the platform for everyone
+
+Start your journey with Running Page 2.0 today and see your running data like never before!
