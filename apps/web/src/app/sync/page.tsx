@@ -1,82 +1,235 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon, LinkIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react'
+import { CheckCircleIcon, ExclamationCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-interface SyncLog {
-  id: number
+interface SyncRecord {
+  id: string
   source: string
-  status: string
-  activities_processed: number
-  started_at: string
-  completed_at: string
-  error_message?: string
+  status: 'success' | 'failed' | 'running'
+  timestamp: string
+  activitiesProcessed: number
+  activitiesCreated: number
+  activitiesUpdated: number
+  duration: number
+  errorMessage?: string
 }
 
-function SyncPageContent() {
-  const searchParams = useSearchParams()
-  const [isManualSyncing, setIsManualSyncing] = useState(false)
-  const [syncResult, setSyncResult] = useState<any>(null)
-  const [syncLogs, setSyncLogs] = useState<SyncLog[]>([])
-  const [connectionStatus, setConnectionStatus] = useState<string>('')
+interface DataSource {
+  name: string
+  status: 'connected' | 'disconnected' | 'error'
+  lastSync?: string
+  totalActivities: number
+  userInfo?: {
+    name: string
+    avatar?: string
+    profile?: string
+  }
+}
 
-  // Check for connection status from URL params
-  useEffect(() => {
-    const connected = searchParams.get('connected')
-    const error = searchParams.get('error')
-    const athlete = searchParams.get('athlete')
+// Mock data - in real implementation, this would come from API
+const mockSyncRecords: SyncRecord[] = [
+  {
+    id: '1',
+    source: 'Strava',
+    status: 'success',
+    timestamp: '2025-07-04T12:07:23Z',
+    activitiesProcessed: 15,
+    activitiesCreated: 3,
+    activitiesUpdated: 0,
+    duration: 45
+  },
+  {
+    id: '2',
+    source: 'Strava',
+    status: 'success',
+    timestamp: '2025-07-04T06:07:23Z',
+    activitiesProcessed: 12,
+    activitiesCreated: 1,
+    activitiesUpdated: 2,
+    duration: 32
+  },
+  {
+    id: '3',
+    source: 'Strava',
+    status: 'success',
+    timestamp: '2025-07-04T00:07:23Z',
+    activitiesProcessed: 8,
+    activitiesCreated: 0,
+    activitiesUpdated: 1,
+    duration: 28
+  },
+  {
+    id: '4',
+    source: 'Strava',
+    status: 'failed',
+    timestamp: '2025-07-03T18:07:23Z',
+    activitiesProcessed: 0,
+    activitiesCreated: 0,
+    activitiesUpdated: 0,
+    duration: 5,
+    errorMessage: 'Rate limit exceeded. Will retry automatically.'
+  }
+]
 
-    if (connected === 'strava') {
-      setConnectionStatus(`✅ Successfully connected to Strava${athlete ? ` as ${athlete}` : ''}!`)
-    } else if (error) {
-      setConnectionStatus(`❌ Connection failed: ${error}`)
+const mockDataSources: DataSource[] = [
+  {
+    name: 'Strava',
+    status: 'connected',
+    lastSync: '2025-07-04T12:07:23Z',
+    totalActivities: 739,
+    userInfo: {
+      name: 'Huang Yuyao',
+      avatar: 'https://github.com/huangyuyao.png?size=100',
+      profile: 'https://www.strava.com/athletes/your-id'
     }
-  }, [searchParams])
+  }
+]
 
-  const handleStravaConnect = () => {
-    window.location.href = '/api/auth/strava'
+function StatusIcon({ status }: { status: string }) {
+  switch (status) {
+    case 'success':
+      return <CheckCircleIcon className="w-5 h-5 text-green-500" />
+    case 'failed':
+      return <ExclamationCircleIcon className="w-5 h-5 text-red-500" />
+    case 'running':
+      return <ArrowPathIcon className="w-5 h-5 text-blue-500 animate-spin" />
+    default:
+      return <ClockIcon className="w-5 h-5 text-gray-400" />
+  }
+}
+
+function DataSourceCard({ source }: { source: DataSource }) {
+  const statusColors = {
+    connected: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    disconnected: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700',
+    error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
   }
 
-  const handleManualSync = async () => {
-    setIsManualSyncing(true)
-    setSyncResult(null)
+  const statusText = {
+    connected: 'Connected',
+    disconnected: 'Disconnected',
+    error: 'Connection Error'
+  }
 
-    try {
-      const response = await fetch('/api/sync/strava', {
-        method: 'POST',
-      })
+  return (
+    <div className={`p-6 rounded-lg border ${statusColors[source.status]}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+            S
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {source.name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {statusText[source.status]}
+            </p>
+          </div>
+        </div>
+        
+        {source.userInfo && (
+          <div className="flex items-center space-x-3">
+            <img 
+              src={source.userInfo.avatar} 
+              alt={source.userInfo.name}
+              className="w-10 h-10 rounded-full"
+            />
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {source.userInfo.name}
+              </p>
+              {source.userInfo.profile && (
+                <a 
+                  href={source.userInfo.profile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  View Profile
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Activities</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {source.totalActivities.toLocaleString()}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Last Sync</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            {source.lastSync 
+              ? new Date(source.lastSync).toLocaleString()
+              : 'Never'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SyncRecordRow({ record }: { record: SyncRecord }) {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+      <div className="flex items-center space-x-4">
+        <StatusIcon status={record.status} />
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="font-medium text-gray-900 dark:text-white">
+              {record.source}
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {new Date(record.timestamp).toLocaleString()}
+            </span>
+          </div>
+          {record.errorMessage ? (
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+              {record.errorMessage}
+            </p>
+          ) : (
+            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <span>Processed: {record.activitiesProcessed}</span>
+              <span>New: {record.activitiesCreated}</span>
+              <span>Updated: {record.activitiesUpdated}</span>
+              <span>Duration: {record.duration}s</span>
+            </div>
+          )}
+        </div>
+      </div>
       
-      const result = await response.json()
-      setSyncResult(result)
-      
-      // Refresh sync logs after sync
-      await fetchSyncLogs()
-    } catch (error) {
-      setSyncResult({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
-    } finally {
-      setIsManualSyncing(false)
-    }
-  }
+      <div className="text-right">
+        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          record.status === 'success' 
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+            : record.status === 'failed'
+            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+        }`}>
+          {record.status === 'success' ? 'Success' : 
+           record.status === 'failed' ? 'Failed' : 'Running'}
+        </div>
+      </div>
+    </div>
+  )
+}
 
-  const fetchSyncLogs = async () => {
-    try {
-      const response = await fetch('/api/sync/logs')
-      if (response.ok) {
-        const logs = await response.json()
-        setSyncLogs(logs)
-      }
-    } catch (error) {
-      console.error('Failed to fetch sync logs:', error)
-    }
-  }
+export default function SyncPage() {
+  const [syncRecords, setSyncRecords] = useState<SyncRecord[]>(mockSyncRecords)
+  const [dataSources, setDataSources] = useState<DataSource[]>(mockDataSources)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch logs on component mount
+  // In real implementation, fetch data from API
   useEffect(() => {
-    fetchSyncLogs()
+    // fetchSyncRecords()
+    // fetchDataSources()
   }, [])
 
   return (
@@ -85,274 +238,92 @@ function SyncPageContent() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Data Sync</h1>
         <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Manage your running data synchronization from connected services.
+          Monitor your data synchronization from various fitness platforms.
         </p>
       </div>
 
-      {/* Connection Status */}
-      {connectionStatus && (
-        <div className={`rounded-md p-4 ${
-          connectionStatus.includes('✅') 
-            ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800' 
-            : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
-        }`}>
-          <p className={`text-sm ${
-            connectionStatus.includes('✅') 
-              ? 'text-green-800 dark:text-green-200' 
-              : 'text-red-800 dark:text-red-200'
-          }`}>
-            {connectionStatus}
-          </p>
+      {/* Data Sources */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Connected Data Sources
+        </h2>
+        <div className="grid grid-cols-1 gap-4">
+          {dataSources.map((source, index) => (
+            <DataSourceCard key={index} source={source} />
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* Sync Status Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Strava Sync */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
-                </div>
-              </div>
-              <div className="ml-4 flex-1">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Strava
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Automatic sync every day at 6 AM
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4 space-y-2">
-              <button
-                onClick={handleStravaConnect}
-                className="inline-flex items-center px-3 py-2 border border-orange-300 text-sm leading-4 font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-700 dark:hover:bg-orange-900/30"
-              >
-                <LinkIcon className="h-4 w-4 mr-2" />
-                Connect Strava
-              </button>
-              
-              <button
-                onClick={handleManualSync}
-                disabled={isManualSyncing}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
-              >
-                <ArrowPathIcon className={`h-4 w-4 mr-2 ${isManualSyncing ? 'animate-spin' : ''}`} />
-                {isManualSyncing ? 'Syncing...' : 'Manual Sync'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Garmin Sync (Placeholder) */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 opacity-50">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">G</span>
-                </div>
-              </div>
-              <div className="ml-4 flex-1">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Garmin
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Coming soon
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <button
-                disabled
-                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed"
-              >
-                Configure
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Nike Sync (Placeholder) */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 opacity-50">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">N</span>
-                </div>
-              </div>
-              <div className="ml-4 flex-1">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Nike Run Club
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Coming soon
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <button
-                disabled
-                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed"
-              >
-                Configure
-              </button>
-            </div>
+      {/* Sync Schedule Info */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <ClockIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              Automatic Sync Schedule
+            </h3>
+            <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+              Data is automatically synchronized every 6 hours via GitHub Actions. 
+              The next sync is scheduled for approximately {new Date(Date.now() + 6 * 60 * 60 * 1000).toLocaleTimeString()}.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Sync Result */}
-      {syncResult && (
-        <div className={`rounded-md p-4 ${
-          syncResult.success 
-            ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800' 
-            : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
-        }`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              {syncResult.success ? (
-                <CheckCircleIcon className="h-5 w-5 text-green-400" />
-              ) : (
-                <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
-              )}
-            </div>
-            <div className="ml-3">
-              <h3 className={`text-sm font-medium ${
-                syncResult.success ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'
-              }`}>
-                {syncResult.success ? 'Sync Successful' : 'Sync Failed'}
-              </h3>
-              <div className={`mt-2 text-sm ${
-                syncResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
-              }`}>
-                {syncResult.success ? (
-                  <p>{syncResult.message}</p>
-                ) : (
-                  <p>Error: {syncResult.error}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sync Logs */}
-      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      {/* Recent Sync History */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Recent Sync History
-          </h3>
-          
-          {syncLogs.length > 0 ? (
-            <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Source
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Activities
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {syncLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {log.source}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          log.status === 'success' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {log.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {log.activities_processed}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(log.started_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          </h2>
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            <ArrowPathIcon className="w-4 h-4 mr-2" />
+            Refresh
+          </button>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          {syncRecords.length > 0 ? (
+            <div>
+              {syncRecords.map((record) => (
+                <SyncRecordRow key={record.id} record={record} />
+              ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-2">📊</div>
-              <p className="text-gray-500 dark:text-gray-400">No sync history available</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Sync logs will appear here after your first data sync
+            <div className="p-8 text-center">
+              <ClockIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No Sync Records
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Sync records will appear here once data synchronization begins.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Configuration Instructions */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-blue-900 dark:text-blue-200 mb-2">
-          🔧 Setup Instructions
+      {/* GitHub Actions Info */}
+      <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+          🔄 Powered by GitHub Actions
         </h3>
-        <div className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
-          <p><strong>To enable Strava sync:</strong></p>
-          <ol className="list-decimal list-inside space-y-1 ml-4">
-            <li>Click "Connect Strava" button above</li>
-            <li>Authorize the application on Strava</li>
-            <li>You'll be redirected back with confirmation</li>
-            <li>Use "Manual Sync" to test the connection</li>
-            <li>Data will sync automatically every day at 6 AM UTC</li>
-          </ol>
-          <p className="mt-4">
-            <strong>Required Vercel Environment Variables:</strong><br />
-            <code className="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded text-xs">
-              STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, NEXT_PUBLIC_APP_URL
-            </code>
-          </p>
-        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          Data synchronization is handled automatically by GitHub Actions workflows. 
+          You can monitor the sync process and view detailed logs in your GitHub repository.
+        </p>
+        <a
+          href="https://github.com/oiahoon/running2.0/actions"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          View GitHub Actions →
+        </a>
       </div>
     </div>
-  )
-}
-
-export default function SyncPage() {
-  return (
-    <Suspense fallback={
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Data Sync</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Loading sync configuration...
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 py-12 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">Loading...</p>
-          </div>
-        </div>
-      </div>
-    }>
-      <SyncPageContent />
-    </Suspense>
   )
 }

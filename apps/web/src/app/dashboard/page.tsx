@@ -255,12 +255,9 @@ export default function DashboardPage() {
       {/* Chart Placeholder */}
       <ChartPlaceholder />
 
-      {/* GitHub Style Heatmap */}
+      {/* GitHub Style Heatmap - Enhanced */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            🔥 Activity Heatmap - {currentYear}
-          </h3>
           {stats?.dailyStats && stats.dailyStats.length > 0 ? (
             <GitHubHeatmap 
               data={stats.dailyStats.map((day: any) => ({
@@ -269,11 +266,14 @@ export default function DashboardPage() {
                 distance: day.distance,
                 duration: day.duration
               }))}
-              year={currentYear}
+              initialYear={currentYear}
+              showYearNavigation={true}
+              height={350}
+              cellSize={16}
               showTooltip={true}
             />
           ) : (
-            <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
               <div className="text-center">
                 <div className="text-4xl mb-2">📅</div>
                 <p className="text-gray-500 dark:text-gray-400">Loading activity heatmap...</p>

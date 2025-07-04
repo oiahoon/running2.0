@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
 interface HeatmapData {
   date: string
@@ -11,30 +12,42 @@ interface HeatmapData {
 
 interface GitHubHeatmapProps {
   data: HeatmapData[]
-  year?: number
+  initialYear?: number
   height?: number
   cellSize?: number
   showMonthLabels?: boolean
   showWeekLabels?: boolean
   showTooltip?: boolean
+  showYearNavigation?: boolean
+  onYearChange?: (year: number) => void
 }
 
 export default function GitHubHeatmap({ 
   data, 
-  year = new Date().getFullYear(),
-  height = 200,
-  cellSize = 11,
+  initialYear = new Date().getFullYear(),
+  height = 300,
+  cellSize = 14,
   showMonthLabels = true,
   showWeekLabels = true,
-  showTooltip = true
+  showTooltip = true,
+  showYearNavigation = true,
+  onYearChange
 }: GitHubHeatmapProps) {
+  const [selectedYear, setSelectedYear] = useState(initialYear)
+  const [hoveredCell, setHoveredCell] = useState<{ date: string; count: number; x: number; y: number } | null>(null)
+
+  const handleYearChange = (newYear: number) => {
+    setSelectedYear(newYear)
+    onYearChange?.(newYear)
+  }
+
   const calendarData = useMemo(() => {
     // Create a map for quick lookup
     const dataMap = new Map(data.map(d => [d.date, d]))
     
     // Generate all dates for the year
-    const startDate = new Date(year, 0, 1)
-    const endDate = new Date(year, 11, 31)
+    const startDate = new Date(selectedYear, 0, 1)
+    const endDate = new Date(selectedYear, 11, 31)
     const dates = []
     
     // Start from the first Sunday of the year or before
@@ -48,219 +61,215 @@ export default function GitHubHeatmap({
     for (let d = new Date(firstSunday); d <= lastSaturday; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0]
       const dayData = dataMap.get(dateStr)
-      const isCurrentYear = d.getFullYear() === year
+      const isCurrentYear = d.getFullYear() === selectedYear
       
       dates.push({
         date: dateStr,
+        dayOfYear: Math.floor((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)),
         dayOfWeek: d.getDay(),
+        week: Math.floor((d.getTime() - firstSunday.getTime()) / (1000 * 60 * 60 * 24 * 7)),
         month: d.getMonth(),
         day: d.getDate(),
-        count: isCurrentYear ? (dayData?.count || 0) : 0,
-        distance: isCurrentYear ? (dayData?.distance || 0) : 0,
-        duration: isCurrentYear ? (dayData?.duration || 0) : 0,
-        isCurrentYear,
+        count: dayData?.count || 0,
+        distance: dayData?.distance || 0,
+        duration: dayData?.duration || 0,
+        isCurrentYear
       })
     }
     
     return dates
-  }, [data, year])
+  }, [data, selectedYear])
 
-  // Calculate intensity levels (0-4) like GitHub
-  const maxCount = Math.max(...data.map(d => d.count), 1)
+  const maxCount = useMemo(() => {
+    return Math.max(...calendarData.map(d => d.count), 1)
+  }, [calendarData])
+
   const getIntensity = (count: number) => {
     if (count === 0) return 0
     if (count === 1) return 1
-    if (count <= Math.ceil(maxCount * 0.25)) return 1
-    if (count <= Math.ceil(maxCount * 0.5)) return 2
-    if (count <= Math.ceil(maxCount * 0.75)) return 3
+    if (count <= maxCount * 0.25) return 1
+    if (count <= maxCount * 0.5) return 2
+    if (count <= maxCount * 0.75) return 3
     return 4
   }
 
-  const getColor = (intensity: number) => {
-    const colors = [
-      '#ebedf0', // 0 - no activity (light gray)
-      '#9be9a8', // 1 - low activity (light green)
-      '#40c463', // 2 - medium-low activity (medium green)
-      '#30a14e', // 3 - medium-high activity (dark green)
-      '#216e39', // 4 - high activity (darkest green)
-    ]
-    return colors[intensity]
-  }
-
-  const weeks = useMemo(() => {
-    const weeksArray = []
-    let currentWeek = []
-    
-    calendarData.forEach((day, index) => {
-      currentWeek.push(day)
-      
-      if (currentWeek.length === 7) {
-        weeksArray.push([...currentWeek])
-        currentWeek = []
-      }
-    })
-    
-    if (currentWeek.length > 0) {
-      weeksArray.push(currentWeek)
+  const getColor = (intensity: number, isCurrentYear: boolean) => {
+    if (!isCurrentYear) {
+      return 'fill-gray-100 dark:fill-gray-800'
     }
     
-    return weeksArray
-  }, [calendarData])
-
-  const monthLabels = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ]
-
-  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-  // Calculate month positions
-  const monthPositions = useMemo(() => {
-    const positions = []
-    let currentMonth = -1
-    
-    weeks.forEach((week, weekIndex) => {
-      const firstDayOfWeek = week.find(day => day?.isCurrentYear)
-      if (firstDayOfWeek && firstDayOfWeek.month !== currentMonth) {
-        currentMonth = firstDayOfWeek.month
-        positions.push({
-          month: currentMonth,
-          x: weekIndex * (cellSize + 2),
-          label: monthLabels[currentMonth]
-        })
-      }
-    })
-    
-    return positions
-  }, [weeks, cellSize, monthLabels])
-
-  if (!data || data.length === 0) {
-    return (
-      <div 
-        className="flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-        style={{ height }}
-      >
-        <div className="text-center">
-          <div className="text-4xl mb-2">📅</div>
-          <p className="text-gray-500 dark:text-gray-400">No activity data for {year}</p>
-        </div>
-      </div>
-    )
+    const colors = [
+      'fill-gray-100 dark:fill-gray-800', // 0 activities
+      'fill-green-200 dark:fill-green-900', // 1 activity
+      'fill-green-300 dark:fill-green-700', // low
+      'fill-green-500 dark:fill-green-500', // medium
+      'fill-green-700 dark:fill-green-300', // high
+    ]
+    return colors[intensity] || colors[0]
   }
 
-  const totalActivities = data.reduce((sum, d) => sum + d.count, 0)
-  const totalDistance = data.reduce((sum, d) => sum + (d.distance || 0), 0)
-  const activeDays = data.filter(d => d.count > 0).length
+  const weeks = Math.ceil(calendarData.length / 7)
+  const svgWidth = weeks * (cellSize + 2) + 50
+  const svgHeight = 7 * (cellSize + 2) + 50
+
+  const monthLabels = useMemo(() => {
+    const labels = []
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+    for (let month = 0; month < 12; month++) {
+      const firstDayOfMonth = calendarData.find(d => d.month === month && d.isCurrentYear)
+      if (firstDayOfMonth) {
+        labels.push({
+          month: months[month],
+          x: firstDayOfMonth.week * (cellSize + 2) + 25
+        })
+      }
+    }
+    
+    return labels
+  }, [calendarData, cellSize])
+
+  const weekLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+  const totalActivities = calendarData.filter(d => d.isCurrentYear).reduce((sum, d) => sum + d.count, 0)
+  const totalDistance = calendarData.filter(d => d.isCurrentYear).reduce((sum, d) => sum + (d.distance || 0), 0)
 
   return (
-    <div className="w-full overflow-x-auto">
-      {/* Header Stats */}
-      <div className="mb-4 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-        <span><strong>{totalActivities}</strong> activities in {year}</span>
-        <span><strong>{activeDays}</strong> active days</span>
-        {totalDistance > 0 && (
-          <span><strong>{(totalDistance / 1000).toFixed(1)}</strong> km total</span>
+    <div className="space-y-4">
+      {/* Header with Year Navigation */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            🔥 Activity Heatmap
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {totalActivities} activities • {(totalDistance / 1000).toFixed(0)}km in {selectedYear}
+          </p>
+        </div>
+        
+        {showYearNavigation && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleYearChange(selectedYear - 1)}
+              className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+              title="Previous year"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            
+            <span className="text-lg font-semibold text-gray-900 dark:text-white min-w-16 text-center">
+              {selectedYear}
+            </span>
+            
+            <button
+              onClick={() => handleYearChange(selectedYear + 1)}
+              disabled={selectedYear >= new Date().getFullYear()}
+              className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Next year"
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="inline-block min-w-full">
-        {/* Month labels */}
-        {showMonthLabels && (
-          <div className="flex mb-2 relative" style={{ marginLeft: showWeekLabels ? 20 : 0 }}>
-            {monthPositions.map((pos) => (
-              <div
-                key={pos.month}
-                className="text-xs text-gray-600 dark:text-gray-400 absolute"
-                style={{ 
-                  left: pos.x,
-                  fontSize: '11px'
+      {/* Heatmap */}
+      <div className="relative bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <svg width={svgWidth} height={svgHeight} className="font-mono text-xs">
+          {/* Month labels */}
+          {showMonthLabels && monthLabels.map((label, index) => (
+            <text
+              key={index}
+              x={label.x}
+              y={15}
+              className="fill-gray-600 dark:fill-gray-400 text-xs"
+              textAnchor="middle"
+            >
+              {label.month}
+            </text>
+          ))}
+          
+          {/* Week day labels */}
+          {showWeekLabels && weekLabels.map((label, index) => (
+            <text
+              key={index}
+              x={15}
+              y={30 + index * (cellSize + 2) + cellSize / 2}
+              className="fill-gray-600 dark:fill-gray-400 text-xs"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {label}
+            </text>
+          ))}
+          
+          {/* Calendar cells */}
+          {calendarData.map((day, index) => {
+            const x = 25 + day.week * (cellSize + 2)
+            const y = 25 + day.dayOfWeek * (cellSize + 2)
+            const intensity = getIntensity(day.count)
+            
+            return (
+              <rect
+                key={day.date}
+                x={x}
+                y={y}
+                width={cellSize}
+                height={cellSize}
+                rx={2}
+                className={`${getColor(intensity, day.isCurrentYear)} stroke-gray-200 dark:stroke-gray-700 hover:stroke-gray-400 dark:hover:stroke-gray-500 cursor-pointer transition-colors`}
+                strokeWidth={0.5}
+                onMouseEnter={(e) => {
+                  if (showTooltip && day.isCurrentYear) {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setHoveredCell({
+                      date: day.date,
+                      count: day.count,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top
+                    })
+                  }
                 }}
-              >
-                {pos.label}
+                onMouseLeave={() => setHoveredCell(null)}
+              />
+            )
+          })}
+        </svg>
+        
+        {/* Tooltip */}
+        {hoveredCell && showTooltip && (
+          <div
+            className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-md px-2 py-1 pointer-events-none shadow-lg"
+            style={{
+              left: hoveredCell.x,
+              top: hoveredCell.y - 40,
+              transform: 'translateX(-50%)'
+            }}
+          >
+            <div className="text-center">
+              <div className="font-medium">
+                {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
               </div>
-            ))}
+              <div className="text-gray-300">
+                {new Date(hoveredCell.date).toLocaleDateString()}
+              </div>
+            </div>
           </div>
         )}
+      </div>
 
-        <div className="flex" style={{ marginTop: showMonthLabels ? 16 : 0 }}>
-          {/* Day labels */}
-          {showWeekLabels && (
-            <div className="flex flex-col mr-2 flex-shrink-0">
-              {dayLabels.map((day, index) => (
-                <div
-                  key={day}
-                  className="text-xs text-gray-600 dark:text-gray-400 flex items-center justify-end"
-                  style={{ 
-                    height: cellSize + 2,
-                    width: 18,
-                    fontSize: '9px'
-                  }}
-                >
-                  {index % 2 === 1 ? day : ''}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Calendar grid */}
-          <div className="flex gap-0.5">
-            {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-0.5">
-                {week.map((day, dayIndex) => {
-                  if (!day) return <div key={dayIndex} style={{ width: cellSize, height: cellSize }} />
-                  
-                  const intensity = day.isCurrentYear ? getIntensity(day.count) : 0
-                  const color = getColor(intensity)
-                  
-                  return (
-                    <div
-                      key={`${weekIndex}-${dayIndex}`}
-                      className="rounded-sm cursor-pointer hover:ring-1 hover:ring-gray-400 transition-all group relative"
-                      style={{
-                        width: cellSize,
-                        height: cellSize,
-                        backgroundColor: color,
-                      }}
-                    >
-                      {/* Tooltip */}
-                      {showTooltip && (
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          <div className="text-center">
-                            <div className="font-medium">{day.date}</div>
-                            <div>{day.count} activities</div>
-                            {day.distance > 0 && (
-                              <div>{(day.distance / 1000).toFixed(1)} km</div>
-                            )}
-                          </div>
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
+      {/* Legend */}
+      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+        <span>Less</span>
+        <div className="flex items-center space-x-1">
+          {[0, 1, 2, 3, 4].map((intensity) => (
+            <div
+              key={intensity}
+              className={`w-3 h-3 rounded-sm ${getColor(intensity, true)}`}
+            />
+          ))}
         </div>
-
-        {/* Legend */}
-        <div className="flex items-center justify-between mt-3 text-xs text-gray-600 dark:text-gray-400">
-          <span>Less</span>
-          <div className="flex items-center gap-1 mx-2">
-            {[0, 1, 2, 3, 4].map((level) => (
-              <div
-                key={level}
-                className="rounded-sm"
-                style={{
-                  width: cellSize,
-                  height: cellSize,
-                  backgroundColor: getColor(level),
-                }}
-              />
-            ))}
-          </div>
-          <span>More</span>
-        </div>
+        <span>More</span>
       </div>
     </div>
   )
