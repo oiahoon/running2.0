@@ -27,8 +27,9 @@ if (isVercel) {
   // Other production environments
   DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
 } else {
-  // Development environment
-  DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
+  // Development environment - use absolute path to ensure it works
+  const devDbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
+  DB_PATH = path.resolve(devDbPath);
 }
 
 const SCHEMA_PATH = path.join(process.cwd(), 'src', 'lib', 'database', 'schema.sql');

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import { useUserInfo } from '@/lib/hooks/useUserInfo'
 import {
   SidebarLayout,
   Sidebar,
@@ -140,6 +141,7 @@ function SearchField() {
 
 export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const userInfo = useUserInfo()
 
   return (
     <SidebarLayout
@@ -153,11 +155,11 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
             <Dropdown>
               <DropdownButton as={NavbarItem}>
-                <Avatar src="/profile-photo.jpg" />
+                <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} />
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
                 <DropdownItem href="/profile">
-                  <Avatar src="/profile-photo.jpg" />
+                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} />
                   <DropdownLabel>My account</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
@@ -219,13 +221,13 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             <Dropdown>
               <DropdownButton as={SidebarItem}>
                 <span className="flex min-w-0 items-center gap-3">
-                  <Avatar src="/profile-photo.jpg" className="size-10" />
+                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} className="size-10" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
-                      Runner
+                      {userInfo.name}
                     </span>
                     <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-                      runner@example.com
+                      @{userInfo.username}
                     </span>
                   </span>
                 </span>

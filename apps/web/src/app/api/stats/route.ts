@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     `).get() as any
 
     // Activity type distribution
-    const typeDistribution = db.prepare(`
+    const typeDistributionRaw = db.prepare(`
       SELECT 
         type,
         COUNT(*) as count,
@@ -32,6 +32,15 @@ export async function GET(request: NextRequest) {
       GROUP BY type 
       ORDER BY count DESC
     `).all()
+
+    const totalActivities = typeDistributionRaw.reduce((sum: number, item: any) => sum + item.count, 0)
+    const typeDistribution = typeDistributionRaw.map((item: any) => ({
+      type: item.type,
+      count: item.count,
+      total_distance: Math.round((item.total_distance || 0) / 1000 * 100) / 100, // Convert to km
+      total_time: item.total_time || 0,
+      percentage: totalActivities > 0 ? Math.round((item.count / totalActivities) * 100 * 100) / 100 : 0
+    }))
 
     // Monthly stats for current year
     const monthlyStats = db.prepare(`
@@ -45,7 +54,14 @@ export async function GET(request: NextRequest) {
       WHERE strftime('%Y', start_date) = ?
       GROUP BY strftime('%Y-%m', start_date)
       ORDER BY month
-    `).all(currentYear.toString())
+    `).all(currentYear.toString()).map((row: any) => ({
+      month: row.month,
+      activities: row.activities,
+      distance: Math.round((row.distance || 0) / 1000 * 100) / 100, // Convert to km with 2 decimals
+      time: row.time || 0,
+      avgDistance: Math.round((row.avg_distance || 0) / 1000 * 100) / 100, // Convert to km
+      avgPace: row.distance > 0 ? Math.round((row.time / (row.distance / 1000)) / 60 * 100) / 100 : 0 // minutes per km
+    }))
 
     // Daily stats for heatmap (current year)
     const dailyStats = db.prepare(`
