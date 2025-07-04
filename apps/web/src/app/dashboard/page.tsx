@@ -3,6 +3,7 @@
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
 import RunningMap from '@/components/maps/RunningMap'
+import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -236,7 +237,8 @@ function MapPlaceholder() {
 }
 
 function ChartPlaceholder() {
-  const { data: yearStats } = useActivityStats(new Date().getFullYear())
+  const currentYear = new Date().getFullYear()
+  const { data: yearStats } = useActivityStats(currentYear)
   
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
@@ -244,20 +246,24 @@ function ChartPlaceholder() {
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Performance Trends
         </h3>
-        <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">📊</div>
-            <p className="text-gray-500 dark:text-gray-400">Charts coming soon</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Distance, pace, and heart rate trends will be displayed here
-            </p>
-            {yearStats?.monthlyData && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                {yearStats.monthlyData.length} months of data available
+        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 ? (
+          <DistanceTrendChart 
+            data={yearStats.monthlyData}
+            height={300}
+            showArea={true}
+            color="#3b82f6"
+          />
+        ) : (
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-2">📊</div>
+              <p className="text-gray-500 dark:text-gray-400">Loading chart data...</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                Monthly distance trends will be displayed here
               </p>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

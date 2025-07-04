@@ -1,54 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-
-// Mock data for development
-const mockYearlyStats = {
-  2024: {
-    totalDistance: 1234.5,
-    totalTime: 7425, // minutes
-    totalActivities: 156,
-    averagePace: 332, // seconds per km
-    longestRun: 21.1,
-    fastestPace: 285,
-  },
-  2023: {
-    totalDistance: 1156.2,
-    totalTime: 6890,
-    totalActivities: 142,
-    averagePace: 345,
-    longestRun: 18.5,
-    fastestPace: 295,
-  }
-}
-
-const mockMonthlyData = [
-  { month: 'Jan', distance: 95.2, activities: 12, avgPace: 330 },
-  { month: 'Feb', distance: 108.5, activities: 14, avgPace: 325 },
-  { month: 'Mar', distance: 125.8, activities: 16, avgPace: 320 },
-  { month: 'Apr', distance: 142.3, activities: 18, avgPace: 315 },
-  { month: 'May', distance: 156.7, activities: 20, avgPace: 310 },
-  { month: 'Jun', distance: 134.2, activities: 17, avgPace: 318 },
-]
-
-const mockAchievements = [
-  { title: 'Marathon Finisher', description: 'Completed your first marathon', icon: '🏆', date: '2024-05-15' },
-  { title: '100km Month', description: 'Ran over 100km in a single month', icon: '💯', date: '2024-03-31' },
-  { title: 'Consistency King', description: '30 days running streak', icon: '🔥', date: '2024-02-28' },
-  { title: 'Early Bird', description: '50 morning runs completed', icon: '🌅', date: '2024-01-20' },
-]
-
-function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${hours}h ${mins}m`
-}
-
-function formatPace(secondsPerKm: number): string {
-  const minutes = Math.floor(secondsPerKm / 60)
-  const seconds = secondsPerKm % 60
-  return `${minutes}:${seconds.toString().padStart(2, '0')}/km`
-}
+import { useActivityStats } from '@/lib/hooks/useActivities'
+import { formatDistance, formatDuration, formatPace } from '@/lib/database/models/Activity'
+import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
+import ActivityTypeChart from '@/components/charts/ActivityTypeChart'
+import CalendarHeatmap from '@/components/charts/CalendarHeatmap'
 
 function YearSelector({ selectedYear, onYearChange }: { 
   selectedYear: number
@@ -81,14 +38,29 @@ function YearSelector({ selectedYear, onYearChange }: {
   )
 }
 
-function YearlyStatsGrid({ stats }: { stats: typeof mockYearlyStats[2024] }) {
+function YearlyStatsGrid({ stats }: { stats: any }) {
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+            <div className="p-5">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   const statItems = [
-    { name: 'Total Distance', value: `${stats.totalDistance.toFixed(1)} km`, icon: '📏' },
-    { name: 'Total Time', value: formatTime(stats.totalTime), icon: '⏱️' },
+    { name: 'Total Distance', value: formatDistance(stats.totalDistance), icon: '📏' },
+    { name: 'Total Time', value: formatDuration(stats.totalTime), icon: '⏱️' },
     { name: 'Activities', value: stats.totalActivities.toString(), icon: '🏃' },
-    { name: 'Average Pace', value: formatPace(stats.averagePace), icon: '⚡' },
-    { name: 'Longest Run', value: `${stats.longestRun} km`, icon: '🎯' },
-    { name: 'Fastest Pace', value: formatPace(stats.fastestPace), icon: '🚀' },
+    { name: 'Average Pace', value: formatPace(stats.averageDistance > 0 ? stats.totalTime / (stats.totalDistance / 1000) : 0), icon: '⚡' },
+    { name: 'Longest Run', value: formatDistance(stats.longestRun), icon: '🎯' },
+    { name: 'Average Distance', value: formatDistance(stats.averageDistance), icon: '📊' },
   ]
 
   return (
@@ -121,120 +93,140 @@ function YearlyStatsGrid({ stats }: { stats: typeof mockYearlyStats[2024] }) {
   )
 }
 
-function MonthlyChart() {
+function MonthlyChart({ yearStats }: { yearStats: any }) {
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Monthly Progress
         </h3>
-        <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">📊</div>
-            <p className="text-gray-500 dark:text-gray-400">Interactive charts coming soon</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Monthly distance and pace trends will be displayed here
-            </p>
-          </div>
-        </div>
-        
-        {/* Simple data table for now */}
-        <div className="mt-6">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Month
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Distance
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Activities
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Avg Pace
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                {mockMonthlyData.map((month) => (
-                  <tr key={month.month}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {month.month}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {month.distance} km
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {month.activities}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {formatPace(month.avgPace)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CalendarHeatmap() {
-  return (
-    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Activity Calendar
-        </h3>
-        <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-2">📅</div>
-            <p className="text-gray-500 dark:text-gray-400">Calendar heatmap coming soon</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              GitHub-style activity calendar will be displayed here
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Achievements() {
-  return (
-    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Achievements
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {mockAchievements.map((achievement, index) => (
-            <div
-              key={index}
-              className="flex items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
-            >
-              <div className="flex-shrink-0">
-                <div className="text-2xl">{achievement.icon}</div>
-              </div>
-              <div className="ml-4">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {achievement.title}
-                </h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {achievement.description}
-                </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  {achievement.date}
-                </p>
-              </div>
+        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 ? (
+          <DistanceTrendChart 
+            data={yearStats.monthlyData}
+            height={300}
+            showArea={false}
+            color="#3b82f6"
+          />
+        ) : (
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-2">📊</div>
+              <p className="text-gray-500 dark:text-gray-400">Loading monthly data...</p>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+        
+        {/* Simple data table */}
+        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 && (
+          <div className="mt-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Month
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Distance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Activities
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Avg Pace
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {yearStats.monthlyData.map((month: any) => (
+                    <tr key={month.month}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        {month.month}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {month.distance.toFixed(1)} km
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {month.activities}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {formatPace(1000 / month.avgPace)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CalendarHeatmapSection({ selectedYear, yearStats }: { selectedYear: number, yearStats: any }) {
+  // Transform monthly data to daily data for calendar heatmap
+  const calendarData = yearStats?.monthlyData ? 
+    yearStats.monthlyData.map((month: any, index: number) => ({
+      date: `${selectedYear}-${(index + 1).toString().padStart(2, '0')}-15`, // Use mid-month as representative
+      count: month.activities,
+      distance: month.distance,
+    })) : []
+
+  return (
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-5 sm:p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Activity Calendar - {selectedYear}
+        </h3>
+        <CalendarHeatmap 
+          data={calendarData}
+          year={selectedYear}
+          height={200}
+        />
+      </div>
+    </div>
+  )
+}
+
+function ActivityTypesSection({ yearStats }: { yearStats: any }) {
+  return (
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-5 sm:p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Activity Types Distribution
+        </h3>
+        {yearStats?.activityTypes && yearStats.activityTypes.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Pie Chart
+              </h4>
+              <ActivityTypeChart 
+                data={yearStats.activityTypes}
+                height={250}
+                chartType="pie"
+              />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Bar Chart
+              </h4>
+              <ActivityTypeChart 
+                data={yearStats.activityTypes}
+                height={250}
+                chartType="bar"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-2">📊</div>
+              <p className="text-gray-500 dark:text-gray-400">Loading activity types...</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -242,7 +234,30 @@ function Achievements() {
 
 export default function StatsPage() {
   const [selectedYear, setSelectedYear] = useState(2024)
-  const currentStats = mockYearlyStats[selectedYear as keyof typeof mockYearlyStats]
+  const { data: yearStats, isLoading } = useActivityStats(selectedYear)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Statistics</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+            Loading your running analytics...
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+              <div className="p-5">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -258,24 +273,18 @@ export default function StatsPage() {
       <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
 
       {/* Yearly Stats Grid */}
-      <YearlyStatsGrid stats={currentStats} />
+      <YearlyStatsGrid stats={yearStats?.summary} />
 
       {/* Charts and Visualizations */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="space-y-8">
         {/* Monthly Chart */}
-        <div className="lg:col-span-2">
-          <MonthlyChart />
-        </div>
+        <MonthlyChart yearStats={yearStats} />
+
+        {/* Activity Types */}
+        <ActivityTypesSection yearStats={yearStats} />
 
         {/* Calendar Heatmap */}
-        <div className="lg:col-span-2">
-          <CalendarHeatmap />
-        </div>
-
-        {/* Achievements */}
-        <div className="lg:col-span-2">
-          <Achievements />
-        </div>
+        <CalendarHeatmapSection selectedYear={selectedYear} yearStats={yearStats} />
       </div>
     </div>
   )
