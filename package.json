@@ -13,7 +13,12 @@
     "start": "npm run start --workspace=apps/web",
     "lint": "npm run lint --workspace=apps/web",
     "type-check": "npm run type-check --workspace=apps/web",
-    "clean": "rm -rf apps/web/.next apps/web/out node_modules apps/web/node_modules"
+    "clean": "rm -rf apps/web/.next apps/web/out node_modules apps/web/node_modules",
+    "migrate": "node scripts/migrate-data.js",
+    "db:init": "node -e \"require('./apps/web/src/lib/database/connection').getDatabase(); console.log('Database initialized')\"",
+    "db:migrate": "npm run migrate",
+    "vercel-build": "cd apps/web && npm run build",
+    "vercel-dev": "cd apps/web && npm run dev"
   },
   "devDependencies": {
     "@types/node": "^20.10.8",

@@ -4,7 +4,22 @@ import path from 'path';
 import fs from 'fs';
 
 // Database configuration
-const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
+const isProduction = process.env.NODE_ENV === 'production';
+const isVercel = process.env.VERCEL === '1';
+
+// Database path configuration
+let DB_PATH: string;
+if (isVercel) {
+  // On Vercel, use /tmp directory for SQLite (note: data will be lost on each deployment)
+  DB_PATH = '/tmp/running_page_2.db';
+} else if (isProduction) {
+  // Other production environments
+  DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
+} else {
+  // Development environment
+  DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'running_page_2.db');
+}
+
 const SCHEMA_PATH = path.join(process.cwd(), 'src', 'lib', 'database', 'schema.sql');
 
 // Ensure data directory exists
@@ -44,11 +59,243 @@ function initializeDatabase(database: Database.Database) {
     console.log('Initializing new database...');
     
     // Read and execute schema
-    const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
-    database.exec(schema);
+    let schema: string;
+    try {
+      schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
+    } catch (error) {
+      // Fallback schema for production environments where file system access might be limited
+      console.log('Using fallback schema...');
+      schema = getFallbackSchema();
+    }
     
+    database.exec(schema);
     console.log('Database initialized successfully');
+    
+    // In production, we might want to seed with some sample data
+    if (isVercel && process.env.SEED_SAMPLE_DATA === 'true') {
+      seedSampleData(database);
+    }
   }
+}
+
+// Fallback schema for environments where file system access is limited
+function getFallbackSchema(): string {
+  return `
+    -- Users table for multi-user support (future)
+    CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email VARCHAR(255) UNIQUE,
+        name VARCHAR(255),
+        timezone VARCHAR(50) DEFAULT 'UTC',
+        preferences JSON,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Activities table (enhanced from original)
+    CREATE TABLE activities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        external_id VARCHAR(255),
+        user_id INTEGER DEFAULT 1,
+        source VARCHAR(50) NOT NULL,
+        
+        -- Basic activity info
+        name VARCHAR(255),
+        description TEXT,
+        type VARCHAR(50) NOT NULL,
+        sport_type VARCHAR(50),
+        
+        -- Time and date
+        start_date DATETIME NOT NULL,
+        start_date_local DATETIME NOT NULL,
+        timezone VARCHAR(50),
+        
+        -- Distance and duration
+        distance REAL,
+        moving_time INTEGER,
+        elapsed_time INTEGER,
+        total_elevation_gain REAL,
+        
+        -- Performance metrics
+        average_speed REAL,
+        max_speed REAL,
+        average_pace REAL,
+        best_pace REAL,
+        
+        -- Heart rate data
+        average_heartrate REAL,
+        max_heartrate REAL,
+        heartrate_zones JSON,
+        
+        -- Location data
+        start_latitude REAL,
+        start_longitude REAL,
+        end_latitude REAL,
+        end_longitude REAL,
+        location_city VARCHAR(255),
+        location_state VARCHAR(255),
+        location_country VARCHAR(255),
+        
+        -- Route data
+        summary_polyline TEXT,
+        detailed_polyline TEXT,
+        map_id VARCHAR(255),
+        
+        -- Additional metrics
+        calories REAL,
+        average_cadence REAL,
+        average_power REAL,
+        weighted_average_power REAL,
+        training_stress_score REAL,
+        
+        -- Weather data (if available)
+        weather JSON,
+        
+        -- Privacy and sharing
+        visibility VARCHAR(20) DEFAULT 'private',
+        privacy_zones JSON,
+        
+        -- Metadata
+        gear_id VARCHAR(255),
+        device_name VARCHAR(255),
+        raw_data JSON,
+        
+        -- Timestamps
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        synced_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        -- Constraints
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(external_id, source)
+    );
+
+    -- Sync logs for tracking data synchronization
+    CREATE TABLE sync_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        source VARCHAR(50) NOT NULL,
+        sync_type VARCHAR(50),
+        
+        -- Sync results
+        status VARCHAR(20) NOT NULL,
+        activities_processed INTEGER DEFAULT 0,
+        activities_created INTEGER DEFAULT 0,
+        activities_updated INTEGER DEFAULT 0,
+        activities_skipped INTEGER DEFAULT 0,
+        
+        -- Error handling
+        error_message TEXT,
+        error_details JSON,
+        
+        -- Timing
+        started_at DATETIME NOT NULL,
+        completed_at DATETIME,
+        duration_seconds INTEGER,
+        
+        -- Metadata
+        sync_params JSON,
+        api_calls_made INTEGER DEFAULT 0,
+        rate_limit_remaining INTEGER,
+        
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- User settings for data sources
+    CREATE TABLE data_source_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        source VARCHAR(50) NOT NULL,
+        
+        -- Authentication
+        access_token TEXT,
+        refresh_token TEXT,
+        token_expires_at DATETIME,
+        
+        -- Sync preferences
+        auto_sync BOOLEAN DEFAULT true,
+        sync_frequency VARCHAR(20) DEFAULT 'daily',
+        last_sync_at DATETIME,
+        
+        -- Data preferences
+        activity_types JSON,
+        privacy_settings JSON,
+        
+        -- Status
+        is_active BOOLEAN DEFAULT true,
+        connection_status VARCHAR(20) DEFAULT 'connected',
+        
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, source)
+    );
+
+    -- Indexes for performance
+    CREATE INDEX idx_activities_user_date ON activities(user_id, start_date DESC);
+    CREATE INDEX idx_activities_type ON activities(type);
+    CREATE INDEX idx_activities_source ON activities(source);
+    CREATE INDEX idx_activities_external_id ON activities(external_id, source);
+    CREATE INDEX idx_sync_logs_user_source ON sync_logs(user_id, source);
+    CREATE INDEX idx_sync_logs_date ON sync_logs(started_at DESC);
+
+    -- Insert default user for single-user setup
+    INSERT INTO users (id, email, name, timezone) 
+    VALUES (1, 'user@example.com', 'Runner', 'UTC');
+  `;
+}
+
+// Seed sample data for demo purposes
+function seedSampleData(database: Database.Database) {
+  console.log('Seeding sample data...');
+  
+  const sampleActivities = [
+    {
+      name: 'Morning Run',
+      type: 'Run',
+      distance: 5000,
+      moving_time: 1800,
+      start_date: new Date(Date.now() - 86400000).toISOString(),
+      source: 'demo'
+    },
+    {
+      name: 'Evening Walk',
+      type: 'Walk', 
+      distance: 3000,
+      moving_time: 2400,
+      start_date: new Date(Date.now() - 172800000).toISOString(),
+      source: 'demo'
+    }
+  ];
+
+  const insertActivity = database.prepare(`
+    INSERT INTO activities (
+      name, type, distance, moving_time, start_date, start_date_local,
+      source, created_at, updated_at, synced_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const now = new Date().toISOString();
+  
+  for (const activity of sampleActivities) {
+    insertActivity.run(
+      activity.name,
+      activity.type,
+      activity.distance,
+      activity.moving_time,
+      activity.start_date,
+      activity.start_date,
+      activity.source,
+      now,
+      now,
+      now
+    );
+  }
+  
+  console.log(`Seeded ${sampleActivities.length} sample activities`);
 }
 
 export function closeDatabase() {
