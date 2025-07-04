@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "migrate": "node ../../scripts/migrate-data.js",
+    "db:init": "node -e \"require('./src/lib/database/connection').getDatabase(); console.log('Database initialized')\"",
+    "db:migrate": "npm run migrate"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
@@ -19,10 +22,13 @@
     "@sindresorhus/slugify": "^2.1.0",
     "@tailwindcss/postcss": "^4.1.7",
     "@tailwindcss/typography": "^0.5.7",
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.19.4",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18",
     "@types/react-highlight-words": "^0.16.4",
+    "@types/sqlite3": "^5.1.0",
+    "axios": "^1.10.0",
+    "better-sqlite3": "^12.2.0",
     "clsx": "^2.1.0",
     "fast-glob": "^3.2.12",
     "flexsearch": "^0.7.31",
@@ -34,6 +40,7 @@
     "react-dom": "^18.2.0",
     "react-highlight-words": "^0.20.0",
     "simple-functional-loader": "^1.2.1",
+    "sqlite3": "^5.1.7",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.3.3"
   },
