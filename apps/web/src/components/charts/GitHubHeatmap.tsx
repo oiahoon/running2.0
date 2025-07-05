@@ -208,13 +208,14 @@ export default function GitHubHeatmap({
 
       {/* Heatmap */}
       <div className="relative bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="overflow-x-auto">
-          <svg 
-            width={svgWidth} 
-            height={svgHeight} 
-            className="font-mono text-xs min-w-full"
-            style={{ minWidth: `${svgWidth}px` }}
-          >
+        {/* Scrollable container with proper width constraints */}
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-max">
+            <svg 
+              width={svgWidth} 
+              height={svgHeight} 
+              className="font-mono text-xs"
+            >
             {/* Month labels */}
             {showMonthLabels && monthLabels.map((label, index) => (
             <text
@@ -275,6 +276,7 @@ export default function GitHubHeatmap({
             )
           })}
         </svg>
+          </div>
         </div>
         
         {/* Tooltip */}

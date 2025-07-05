@@ -236,33 +236,38 @@ function RecentActivitiesWithMap() {
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
                         <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 mt-0.5"
                           style={{ backgroundColor: config.color }}
                         >
                           {config.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate mb-1">
                             {activity.name}
                           </p>
-                          <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{formatDistance(activity.distance)}</span>
-                            <span>•</span>
-                            <span>{formatDuration(activity.moving_time)}</span>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                            <span className="flex-shrink-0">{formatDistance(activity.distance)}</span>
+                            <span className="flex-shrink-0">•</span>
+                            <span className="flex-shrink-0">{formatDuration(activity.moving_time)}</span>
                             {hasGps && (
                               <>
-                                <span className="hidden sm:inline">•</span>
-                                <span className="text-green-600 dark:text-green-400 hidden sm:inline">📍 GPS</span>
+                                <span className="hidden sm:inline flex-shrink-0">•</span>
+                                <span className="text-green-600 dark:text-green-400 hidden sm:inline flex-shrink-0">📍 GPS</span>
                               </>
                             )}
                           </div>
                         </div>
                       </div>
                       <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden md:block">
-                        {new Date(activity.start_date).toLocaleDateString()}
+                        <div className="text-right">
+                          {new Date(activity.start_date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -305,35 +310,35 @@ function RecentActivitiesWithMap() {
                   
                   {/* Activity Details */}
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 truncate">
                       {selectedActivity.name}
                     </h4>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Distance</span>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                      <div className="min-w-0">
+                        <span className="text-gray-500 dark:text-gray-400 block text-xs">Distance</span>
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
                           {formatDistance(selectedActivity.distance)}
                         </p>
                       </div>
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Time</span>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                      <div className="min-w-0">
+                        <span className="text-gray-500 dark:text-gray-400 block text-xs">Time</span>
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
                           {formatDuration(selectedActivity.moving_time)}
                         </p>
                       </div>
                       {selectedActivity.distance > 0 && selectedActivity.moving_time > 0 && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Avg Pace</span>
-                          <p className="font-medium text-gray-900 dark:text-white">
+                        <div className="min-w-0">
+                          <span className="text-gray-500 dark:text-gray-400 block text-xs">Avg Pace</span>
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
                             {formatPace((selectedActivity.moving_time / 60) / (selectedActivity.distance / 1000))}
                           </p>
                         </div>
                       )}
                       {selectedActivity.total_elevation_gain > 0 && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Elevation</span>
-                          <p className="font-medium text-gray-900 dark:text-white">
+                        <div className="min-w-0">
+                          <span className="text-gray-500 dark:text-gray-400 block text-xs">Elevation</span>
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
                             {Math.round(selectedActivity.total_elevation_gain)}m
                           </p>
                         </div>
@@ -341,7 +346,7 @@ function RecentActivitiesWithMap() {
                     </div>
                     
                     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {new Date(selectedActivity.start_date).toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
