@@ -72,11 +72,10 @@ async function createCachedMapboxUrl(
   bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number },
   width: number,
   height: number,
-  mapType: 'overview' | 'single',
   token: string
 ): Promise<string> {
   // For single activity with polyline, try to use cache
-  if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
+  if (activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
     
     // Check cache first (client-side, we'll use a simpler approach)
@@ -92,7 +91,7 @@ async function createCachedMapboxUrl(
     }
     
     // Generate new URL
-    const newUrl = createSafeMapboxUrl(activities, bounds, width, height, mapType, token)
+    const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
     // Cache the URL
     localStorage.setItem(cacheKey, newUrl)
@@ -102,14 +101,14 @@ async function createCachedMapboxUrl(
   }
   
   // For other cases, use regular URL generation
-  return createSafeMapboxUrl(activities, bounds, width, height, mapType, token)
+  return createSafeMapboxUrl(activities, bounds, width, height, token)
 }
+
 function createSafeMapboxUrl(
   activities: Activity[], 
   bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number },
   width: number,
   height: number,
-  mapType: 'overview' | 'single',
   token: string
 ): string {
   const centerLat = (bounds.minLat + bounds.maxLat) / 2
@@ -132,7 +131,7 @@ function createSafeMapboxUrl(
   const suffix = `/${centerLng},${centerLat},${zoom},0/${width}x${height}@2x?access_token=${token}`
   
   // Strategy 1: Single activity with full route
-  if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
+  if (activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
     const polyline = `path-4+ff0000-1.0(${encodeURIComponent(activity.summary_polyline)})`
     const startMarker = `pin-s-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
@@ -146,42 +145,17 @@ function createSafeMapboxUrl(
     if (url.length < 2000) return url
   }
   
-  // Strategy 2: Overview with multiple routes (simplified)
-  if (mapType === 'overview' && activities.length > 1) {
-    const routeActivities = activities.filter(a => a.summary_polyline).slice(0, 2) // Limit to 2 routes
-    const colors = ['ff0000', '00ff00', '0000ff', 'ffff00', 'ff00ff']
-    
-    const routes = routeActivities.map((activity, index) => {
-      const color = colors[index % colors.length]
-      return `path-3+${color}-0.8(${encodeURIComponent(activity.summary_polyline || '')})`
-    })
-    
-    // Add start markers for all activities
-    const markers = activities
-      .filter(a => a.start_latitude && a.start_longitude)
-      .slice(0, 8) // Limit markers
-      .map((a, index) => {
-        const color = colors[index % colors.length]
-        return `pin-s+${color}(${a.start_longitude},${a.start_latitude})`
-      })
-    
-    const overlays = [...routes, ...markers].join(',')
-    const url = `${baseUrl}${overlays}${suffix}`
-    
-    if (url.length < 2000) return url
-  }
-  
-  // Strategy 3: Just markers for multiple activities
+  // Strategy 2: Multiple activities - just show markers
   const markers = activities
     .filter(a => a.start_latitude && a.start_longitude)
-    .slice(0, mapType === 'single' ? 1 : 10) // Limit markers
+    .slice(0, 10) // Limit markers
     .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
     .join(',')
   
   const markersUrl = `${baseUrl}${markers}${suffix}`
   if (markersUrl.length < 2000) return markersUrl
   
-  // Strategy 4: Fallback to just center point
+  // Strategy 3: Fallback to just center point
   const fallbackUrl = `${baseUrl}pin-l+ff0000(${centerLng},${centerLat})${suffix}`
   return fallbackUrl
 }
@@ -277,19 +251,49 @@ function formatLocation(activity: Activity): { short: string; full: string } {
   return { short: shortLocation, full: fullLocation }
 }
 
-function MapboxMap({ activities, height, mapType, selectedActivity }: {
+function MapboxMap({ activities, height, selectedActivity }: {
   activities: Activity[]
   height: number
-  mapType: 'overview' | 'single'
   selectedActivity: Activity | null
 }) {
   const hasMapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+  const [staticMapUrl, setStaticMapUrl] = useState<string>('')
+  const [isLoadingMap, setIsLoadingMap] = useState(true)
   
-  const displayActivities = mapType === 'single' && selectedActivity 
+  const displayActivities = selectedActivity 
     ? [selectedActivity] 
     : activities.filter(a => a.start_latitude && a.start_longitude)
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
+
+  // Generate map URL
+  useEffect(() => {
+    if (!hasMapboxToken || !bounds || displayActivities.length === 0) {
+      setIsLoadingMap(false)
+      return
+    }
+
+    const generateUrl = async () => {
+      setIsLoadingMap(true)
+      try {
+        const mapWidth = Math.min(600, height * 1.5)
+        const url = await createCachedMapboxUrl(
+          displayActivities,
+          bounds,
+          mapWidth,
+          height,
+          hasMapboxToken
+        )
+        setStaticMapUrl(url)
+      } catch (error) {
+        console.error('Error generating map URL:', error)
+      } finally {
+        setIsLoadingMap(false)
+      }
+    }
+
+    generateUrl()
+  }, [displayActivities, bounds, height, hasMapboxToken])
 
   if (!hasMapboxToken) {
     return (
@@ -532,12 +536,11 @@ export default function RunningMap({
       <MapboxMap 
         activities={selectedActivity ? [selectedActivity] : []}
         height={height}
-        mapType="single"
         selectedActivity={selectedActivity}
       />
       
       {/* Activity Info for Single View */}
-      {mapType === 'single' && selectedActivity && (
+      {selectedActivity && (
         <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <h4 className="font-medium text-gray-900 dark:text-white mb-3">
             📍 {selectedActivity.name}
