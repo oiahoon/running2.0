@@ -141,7 +141,7 @@ function RecentActivitiesWithMap() {
 
   // Handle new data - accumulate for infinite scroll
   useEffect(() => {
-    if (data?.activities) {
+    if (data?.activities && Array.isArray(data.activities)) {
       if (currentPage === 1) {
         setAllActivities(data.activities)
       } else {
@@ -222,7 +222,7 @@ function RecentActivitiesWithMap() {
               className="space-y-3 max-h-96 overflow-y-auto"
               onScroll={handleScroll}
             >
-              {allActivities.map((activity) => {
+              {Array.isArray(allActivities) && allActivities.map((activity) => {
                 const config = getActivityConfig(activity.type)
                 const isSelected = selectedActivity?.id === activity.id
                 const hasGps = activity.start_latitude && activity.start_longitude
