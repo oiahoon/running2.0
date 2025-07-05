@@ -10,6 +10,7 @@ import RunningMap from '@/components/maps/RunningMap'
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import GitHubHeatmap from '@/components/charts/GitHubHeatmap'
 import YearAwareHeatmap from '@/components/charts/YearAwareHeatmap'
+import { smartTruncate, truncateAddress } from '@/lib/utils/textUtils'
 
 function StatsCard({ title, value, subtitle, icon, trend }: {
   title: string
@@ -245,8 +246,16 @@ function RecentActivitiesWithMap() {
                           {config.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate mb-1">
-                            {activity.name}
+                          <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                            <span className="block sm:hidden">
+                              {truncateAddress(activity.name, 25)}
+                            </span>
+                            <span className="hidden sm:block lg:hidden">
+                              {smartTruncate(activity.name, 40)}
+                            </span>
+                            <span className="hidden lg:block truncate">
+                              {activity.name}
+                            </span>
                           </p>
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                             <span className="flex-shrink-0">{formatDistance(activity.distance)}</span>
@@ -310,8 +319,16 @@ function RecentActivitiesWithMap() {
                   
                   {/* Activity Details */}
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 truncate">
-                      {selectedActivity.name}
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+                      <span className="block sm:hidden">
+                        {truncateAddress(selectedActivity.name, 20)}
+                      </span>
+                      <span className="hidden sm:block lg:hidden">
+                        {smartTruncate(selectedActivity.name, 35)}
+                      </span>
+                      <span className="hidden lg:block truncate">
+                        {selectedActivity.name}
+                      </span>
                     </h4>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -424,8 +441,8 @@ export default function DashboardPage() {
               <YearAwareHeatmap 
                 initialYear={currentYear}
                 showYearNavigation={true}
-                height={350}
-                cellSize={16}
+                height={300}
+                cellSize={10}
               />
             </div>
           </div>

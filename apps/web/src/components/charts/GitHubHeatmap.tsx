@@ -142,19 +142,26 @@ export default function GitHubHeatmap({
   }
 
   const weeks = Math.ceil(calendarData.length / 7)
-  const svgWidth = weeks * (cellSize + 2) + 50
-  const svgHeight = 7 * (cellSize + 2) + 50
+  // Responsive cell size and spacing
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+  const responsiveCellSize = isMobile ? Math.min(cellSize, 8) : cellSize
+  const cellSpacing = isMobile ? 1 : 2
+  const svgWidth = weeks * (responsiveCellSize + cellSpacing) + (isMobile ? 30 : 50)
+  const svgHeight = 7 * (responsiveCellSize + cellSpacing) + (isMobile ? 30 : 50)
 
   const monthLabels = useMemo(() => {
     const labels = []
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+    const responsiveCellSize = isMobile ? Math.min(cellSize, 8) : cellSize
+    const cellSpacing = isMobile ? 1 : 2
     
     for (let month = 0; month < 12; month++) {
       const firstDayOfMonth = calendarData.find(d => d.month === month && d.isCurrentYear)
       if (firstDayOfMonth) {
         labels.push({
           month: months[month],
-          x: firstDayOfMonth.week * (cellSize + 2) + 25
+          x: firstDayOfMonth.week * (responsiveCellSize + cellSpacing) + (isMobile ? 15 : 25)
         })
       }
     }
@@ -245,8 +252,14 @@ export default function GitHubHeatmap({
           
           {/* Calendar cells */}
           {calendarData.map((day, index) => {
-            const x = 25 + day.week * (cellSize + 2)
-            const y = 25 + day.dayOfWeek * (cellSize + 2)
+            const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
+            const responsiveCellSize = isMobile ? Math.min(cellSize, 8) : cellSize
+            const cellSpacing = isMobile ? 1 : 2
+            const offsetX = isMobile ? 15 : 25
+            const offsetY = isMobile ? 15 : 25
+            
+            const x = offsetX + day.week * (responsiveCellSize + cellSpacing)
+            const y = offsetY + day.dayOfWeek * (responsiveCellSize + cellSpacing)
             const intensity = getIntensity(day.distance, day.count)
             
             return (
@@ -254,8 +267,8 @@ export default function GitHubHeatmap({
                 key={day.date}
                 x={x}
                 y={y}
-                width={cellSize}
-                height={cellSize}
+                width={responsiveCellSize}
+                height={responsiveCellSize}
                 rx={2}
                 className={`${getColor(intensity, day.isCurrentYear)} stroke-gray-200 dark:stroke-gray-700 hover:stroke-gray-400 dark:hover:stroke-gray-500 cursor-pointer transition-colors`}
                 strokeWidth={0.5}
