@@ -25,6 +25,7 @@ interface RunningMapProps {
   height?: number
   showControls?: boolean
   defaultView?: 'overview' | 'single'
+  showActivityInfo?: boolean // New prop to control activity info display
 }
 
 // Simple polyline decoder for basic route display
@@ -441,7 +442,8 @@ export default function RunningMap({
   activities = [], 
   height = 400, 
   showControls = true,
-  defaultView = 'single'
+  defaultView = 'single',
+  showActivityInfo = true // Default to true for backward compatibility
 }: RunningMapProps) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
 
@@ -507,7 +509,7 @@ export default function RunningMap({
       />
       
       {/* Activity Info for Single View */}
-      {selectedActivity && (
+      {showActivityInfo && selectedActivity && (
         <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <h4 className="font-medium text-gray-900 dark:text-white mb-3">
             📍 {selectedActivity.name}

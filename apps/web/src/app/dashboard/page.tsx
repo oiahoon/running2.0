@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useActivityStats, useActivities } from '@/lib/hooks/useActivities'
-import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
+import { formatDistance, formatDuration, formatPace, getActivityIcon, Activity } from '@/lib/database/models/Activity'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 import RunningMap from '@/components/maps/RunningMap'
@@ -313,23 +313,21 @@ function RecentActivitiesWithMap() {
                       activities={[selectedActivity]}
                       height={192}
                       showControls={false}
+                      showActivityInfo={false} // Disable redundant activity info
                       defaultView="single"
                     />
                   </div>
                   
-                  {/* Activity Details */}
+                  {/* Activity Details - Optimized */}
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-                      <span className="block sm:hidden">
-                        {truncateAddress(selectedActivity.name, 20)}
-                      </span>
-                      <span className="hidden sm:block lg:hidden">
-                        {smartTruncate(selectedActivity.name, 35)}
-                      </span>
-                      <span className="hidden lg:block truncate">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium text-gray-900 dark:text-white truncate flex-1 mr-2">
                         {selectedActivity.name}
+                      </h4>
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 flex-shrink-0">
+                        {selectedActivity.type}
                       </span>
-                    </h4>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="min-w-0">
@@ -362,8 +360,8 @@ function RecentActivitiesWithMap() {
                       )}
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">
                         {new Date(selectedActivity.start_date).toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
@@ -371,6 +369,11 @@ function RecentActivitiesWithMap() {
                           day: 'numeric'
                         })}
                       </p>
+                      {selectedActivity.start_latitude && selectedActivity.start_longitude && (
+                        <span className="text-xs text-green-600 dark:text-green-400 ml-2 flex-shrink-0">
+                          📍 GPS
+                        </span>
+                      )}
                     </div>
                   </div>
                 </>
@@ -393,7 +396,8 @@ function RecentActivitiesWithMap() {
 }
 
 function MapPlaceholder() {
-  const { data: activities } = useRecentActivities(50) // Get more activities for map
+  const { data } = useActivities({}, 1, 50) // Get more activities for map
+  const activities = data?.activities || []
 
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
