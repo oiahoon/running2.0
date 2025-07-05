@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
@@ -39,13 +39,34 @@ export default function WaterfallMapView({
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const pageSize = 20
+  const filtersRef = useRef(filters)
+
+  // Create a stable filter key for comparison
+  const filterKey = JSON.stringify(filters)
+  const prevFilterKeyRef = useRef(filterKey)
 
   const { data, isLoading, error } = useActivities(filters, currentPage, pageSize)
+
+  // Reset when filters change
+  useEffect(() => {
+    if (filterKey !== prevFilterKeyRef.current) {
+      console.log('Filters changed, resetting state')
+      setCurrentPage(1)
+      setAllActivities([])
+      setHasMore(true)
+      setIsInitialized(false)
+      prevFilterKeyRef.current = filterKey
+      filtersRef.current = filters
+    }
+  }, [filterKey, filters])
 
   // Handle new data - accumulate for infinite scroll
   useEffect(() => {
     if (data?.activities) {
+      console.log(`Received ${data.activities.length} activities for page ${currentPage}`)
+      
       // Filter activities that have GPS data and should show on map
       const gpsActivities = data.activities.filter((activity: Activity) => 
         shouldShowOnMap(activity.type) && 
@@ -54,30 +75,32 @@ export default function WaterfallMapView({
         activity.summary_polyline // Only show activities with route data
       )
       
+      console.log(`Filtered to ${gpsActivities.length} GPS activities`)
+      
       if (currentPage === 1) {
         setAllActivities(gpsActivities)
+        setIsInitialized(true)
       } else {
-        setAllActivities(prev => [...prev, ...gpsActivities])
+        setAllActivities(prev => {
+          // Avoid duplicates
+          const existingIds = new Set(prev.map(a => a.id))
+          const newActivities = gpsActivities.filter(a => !existingIds.has(a.id))
+          return [...prev, ...newActivities]
+        })
       }
       setHasMore(data.activities.length === pageSize)
       setIsLoadingMore(false)
     }
   }, [data, currentPage])
 
-  // Reset when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-    setAllActivities([])
-    setHasMore(true)
-  }, [JSON.stringify(filters)]) // Use JSON.stringify to properly detect filter changes
-
   // Infinite scroll handler
   const loadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore && !isLoading) {
+    if (!isLoadingMore && hasMore && !isLoading && isInitialized) {
+      console.log('Loading more activities...')
       setIsLoadingMore(true)
       setCurrentPage(prev => prev + 1)
     }
-  }, [isLoadingMore, hasMore, isLoading])
+  }, [isLoadingMore, hasMore, isLoading, isInitialized])
 
   // Scroll event listener
   useEffect(() => {
@@ -135,7 +158,7 @@ export default function WaterfallMapView({
     )
   }
 
-  if (allActivities.length === 0 && !isLoading) {
+  if (allActivities.length === 0 && !isLoading && isInitialized) {
     return (
       <div className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center ${className}`}>
         <div className="text-4xl mb-4">🗺️</div>

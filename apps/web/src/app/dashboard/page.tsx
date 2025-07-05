@@ -247,14 +247,14 @@ function RecentActivitiesWithMap() {
                           <span>{formatDuration(activity.moving_time)}</span>
                           {hasGps && (
                             <>
-                              <span>•</span>
-                              <span className="text-green-600 dark:text-green-400">📍 GPS</span>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="text-green-600 dark:text-green-400 hidden sm:inline">📍 GPS</span>
                             </>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                    <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden sm:block">
                       {new Date(activity.start_date).toLocaleDateString()}
                     </div>
                   </div>
@@ -284,10 +284,10 @@ function RecentActivitiesWithMap() {
             {selectedActivity ? (
               <>
                 {/* Map */}
-                <div className="h-64">
+                <div className="h-48 sm:h-64">
                   <RunningMap
                     activities={[selectedActivity]}
-                    height={256}
+                    height={192}
                     showControls={false}
                     defaultView="single"
                   />
@@ -343,7 +343,7 @@ function RecentActivitiesWithMap() {
                 </div>
               </>
             ) : (
-              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="h-48 sm:h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-4xl mb-2">🏃‍♂️</div>
                   <p className="text-gray-500 dark:text-gray-400">

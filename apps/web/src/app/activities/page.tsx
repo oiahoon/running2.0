@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
+import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 import RunningMap from '@/components/maps/RunningMap'
 
 // Custom hook for debounced value

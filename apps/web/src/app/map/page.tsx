@@ -6,6 +6,7 @@ import RunningMap from '@/components/maps/RunningMap'
 import WaterfallMapView from '@/components/maps/WaterfallMapView'
 import { formatDistance, formatDuration, getActivityIcon, ActivityType } from '@/lib/database/models/Activity'
 import { getActivityConfig } from '@/lib/config/activities'
+import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 
 interface Activity {
   id: number
@@ -21,9 +22,11 @@ interface Activity {
 type ViewMode = 'map' | 'waterfall'
 
 export default function MapPage() {
-  const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>(['Run', 'Walk', 'Ride', 'Swim', 'Hike'])
+  const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>(
+    getDefaultActivityTypes() as ActivityType[]
+  )
   const [dateRange, setDateRange] = useState<{ start?: Date; end?: Date }>({})
-  const [viewMode, setViewMode] = useState<ViewMode>('map')
+  const [viewMode, setViewMode] = useState<ViewMode>('waterfall') // Default to Gallery view
 
   // Fetch activities with location data
   const { data, isLoading, error } = useActivities({
@@ -193,12 +196,12 @@ export default function MapPage() {
           <div className="flex items-end">
             <button
               onClick={() => {
-                setSelectedTypes(['Run', 'Walk', 'Ride', 'Swim', 'Hike'])
+                setSelectedTypes(getDefaultActivityTypes() as ActivityType[])
                 setDateRange({})
               }}
               className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              Clear Filters
+              Reset Filters
             </button>
           </div>
         </div>
@@ -257,6 +260,7 @@ export default function MapPage() {
         </div>
       ) : (
         <WaterfallMapView 
+          key={`${JSON.stringify(selectedTypes)}-${dateRange.start}-${dateRange.end}`}
           filters={{
             type: selectedTypes.length > 0 ? selectedTypes : undefined,
             startDate: dateRange.start,
