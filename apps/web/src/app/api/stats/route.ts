@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/database/connection'
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const db = getDatabase()
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : new Date().getFullYear()
     const month = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null
     const type = searchParams.get('type')?.split(',').filter(Boolean) || null

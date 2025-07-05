@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createStravaIntegration } from '@/lib/integrations/strava';
 import { getDatabase } from '@/lib/database/connection';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID!;
 const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET!;
 const REDIRECT_URI = process.env.NEXT_PUBLIC_APP_URL + '/api/auth/strava/callback';
@@ -10,20 +13,20 @@ const REDIRECT_URI = process.env.NEXT_PUBLIC_APP_URL + '/api/auth/strava/callbac
 // GET /api/auth/strava/callback - Handle OAuth callback
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const error = searchParams.get('error');
 
     if (error) {
       console.error('Strava OAuth error:', error);
       return NextResponse.redirect(
-        new URL('/dashboard?error=strava_auth_denied', request.url)
+        new URL('/dashboard?error=strava_auth_denied', request.nextUrl.origin)
       );
     }
 
     if (!code) {
       return NextResponse.redirect(
-        new URL('/dashboard?error=strava_auth_failed', request.url)
+        new URL('/dashboard?error=strava_auth_failed', request.nextUrl.origin)
       );
     }
 
@@ -66,13 +69,13 @@ export async function GET(request: NextRequest) {
 
     // Redirect to dashboard with success message
     return NextResponse.redirect(
-      new URL('/dashboard?success=strava_connected', request.url)
+      new URL('/dashboard?success=strava_connected', request.nextUrl.origin)
     );
 
   } catch (error) {
     console.error('Strava callback error:', error);
     return NextResponse.redirect(
-      new URL('/dashboard?error=strava_connection_failed', request.url)
+      new URL('/dashboard?error=strava_connection_failed', request.nextUrl.origin)
     );
   }
 }
