@@ -304,10 +304,25 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
-  // Reset loading state when URL changes
+  // Handle staticMapUrl changes
   useEffect(() => {
     if (staticMapUrl) {
+      // Create a new image to test loading
+      const img = new Image()
+      
+      img.onload = () => {
+        console.log('✅ Map image preloaded successfully:', staticMapUrl)
+        setIsLoadingMap(false)
+      }
+      
+      img.onerror = () => {
+        console.error('❌ Map image preload failed:', staticMapUrl)
+        setIsLoadingMap(false)
+      }
+      
+      // Start loading
       setIsLoadingMap(true)
+      img.src = staticMapUrl
     }
   }, [staticMapUrl])
 
@@ -319,7 +334,6 @@ function MapboxMap({ activities, height, selectedActivity }: {
     }
 
     const generateUrl = async () => {
-      setIsLoadingMap(true)
       try {
         const mapWidth = Math.min(600, height * 1.5)
         const url = await createCachedMapboxUrl(
@@ -330,10 +344,10 @@ function MapboxMap({ activities, height, selectedActivity }: {
           hasMapboxToken
         )
         setStaticMapUrl(url)
-        // Don't set loading to false here - let the image onLoad/onError handle it
+        // Loading state will be handled by the staticMapUrl useEffect above
       } catch (error) {
         console.error('Error generating map URL:', error)
-        setIsLoadingMap(false) // Only set to false on error
+        setIsLoadingMap(false)
       }
     }
 
@@ -457,13 +471,8 @@ function MapboxMap({ activities, height, selectedActivity }: {
           src={staticMapUrl}
           alt="Activity route map"
           className="w-full h-full object-cover"
-          onLoad={() => {
-            console.log('✅ Map image loaded successfully:', staticMapUrl)
-            setIsLoadingMap(false)
-          }}
           onError={(e) => {
-            console.error('❌ Map loading failed:', staticMapUrl)
-            setIsLoadingMap(false)
+            console.error('❌ Map display failed:', staticMapUrl)
             e.currentTarget.style.display = 'none'
             const fallback = e.currentTarget.nextElementSibling as HTMLElement
             if (fallback) fallback.classList.remove('hidden')
