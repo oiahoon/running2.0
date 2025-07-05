@@ -6,6 +6,8 @@ import { formatDistance, formatDuration, formatPace } from '@/lib/database/model
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import ActivityTypeChart from '@/components/charts/ActivityTypeChart'
 import CalendarHeatmap from '@/components/charts/CalendarHeatmap'
+import ActivityBarChart from '@/components/charts/ActivityBarChart'
+import BurnUpChart from '@/components/charts/BurnUpChart'
 import PersonalRecords from '@/components/PersonalRecords'
 import WeeklyProgressChart from '@/components/charts/WeeklyProgressChart'
 import PaceAnalysisChart from '@/components/charts/PaceAnalysisChart'
@@ -106,27 +108,24 @@ function YearlyStatsGrid({ stats }: { stats: any }) {
 }
 
 function MonthlyChart({ yearStats }: { yearStats: any }) {
+  // Transform data for burn-up chart
+  const monthlyData = yearStats?.monthlyData ? 
+    yearStats.monthlyData.map((month: any, index: number) => ({
+      month: new Date(0, index).toLocaleDateString('en-US', { month: 'short' }),
+      distance: month.distance || 0,
+      activities: month.activities || 0
+    })) : []
+
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          Monthly Progress
-        </h3>
-        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 ? (
-          <DistanceTrendChart 
-            data={yearStats.monthlyData}
-            height={300}
-            showArea={false}
-            color="#3b82f6"
-          />
-        ) : (
-          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-2">📊</div>
-              <p className="text-gray-500 dark:text-gray-400">Loading monthly data...</p>
-            </div>
-          </div>
-        )}
+        <BurnUpChart 
+          data={monthlyData}
+          height={300}
+          showTarget={true}
+          targetDistance={1000} // 1000km annual target
+          title="Monthly Progress (Burn-up Chart)"
+        />
         
         {/* Simple data table */}
         {yearStats?.monthlyData && yearStats.monthlyData.length > 0 && (
@@ -176,13 +175,14 @@ function MonthlyChart({ yearStats }: { yearStats: any }) {
   )
 }
 
-function CalendarHeatmapSection({ selectedYear, yearStats }: { selectedYear: number, yearStats: any }) {
-  // Transform monthly data to daily data for calendar heatmap
-  const calendarData = yearStats?.monthlyData ? 
+function ActivityCalendarSection({ selectedYear, yearStats }: { selectedYear: number, yearStats: any }) {
+  // Transform monthly data for bar chart
+  const activityData = yearStats?.monthlyData ? 
     yearStats.monthlyData.map((month: any, index: number) => ({
       date: `${selectedYear}-${(index + 1).toString().padStart(2, '0')}-15`, // Use mid-month as representative
-      count: month.activities,
-      distance: month.distance,
+      count: month.activities || 0,
+      distance: month.distance || 0,
+      duration: month.duration || 0
     })) : []
 
   return (
@@ -191,17 +191,123 @@ function CalendarHeatmapSection({ selectedYear, yearStats }: { selectedYear: num
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Activity Calendar - {selectedYear}
         </h3>
-        <CalendarHeatmap 
-          data={calendarData}
-          year={selectedYear}
-          height={200}
+        <ActivityBarChart 
+          data={activityData}
+          height={300}
+          showDistance={true}
+          title=""
         />
       </div>
     </div>
   )
 }
 
-function ActivityTypesSection({ yearStats }: { yearStats: any }) {
+function YearOverviewStats({ yearStats }: { yearStats: any }) {
+  if (!yearStats?.basicStats) {
+    return (
+      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Year Overview Statistics
+          </h3>
+          <div className="animate-pulse">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const stats = yearStats.basicStats
+
+  return (
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="px-4 py-5 sm:p-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
+          Year Overview Statistics
+        </h3>
+        
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">🏃‍♂️</span>
+                </div>
+              </div>
+              <div className="ml-4">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {stats.total_activities || 0}
+                </div>
+                <div className="text-sm text-blue-600 dark:text-blue-400">
+                  Total Activities
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">📏</span>
+                </div>
+              </div>
+              <div className="ml-4">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {formatDistance((stats.total_distance || 0) * 1000)}
+                </div>
+                <div className="text-sm text-green-600 dark:text-green-400">
+                  Total Distance
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">⏱️</span>
+                </div>
+              </div>
+              <div className="ml-4">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {formatDuration(stats.total_time || 0)}
+                </div>
+                <div className="text-sm text-purple-600 dark:text-purple-400">
+                  Total Time
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">📊</span>
+                </div>
+              </div>
+              <div className="ml-4">
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {formatDistance((stats.avg_distance || 0) * 1000)}
+                </div>
+                <div className="text-sm text-orange-600 dark:text-orange-400">
+                  Avg Distance
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
   return (
     <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="px-4 py-5 sm:p-6">
@@ -344,7 +450,10 @@ export default function StatsPage() {
         </div>
 
         {/* Calendar Heatmap */}
-        <CalendarHeatmapSection selectedYear={selectedYear} yearStats={yearStats} />
+        <ActivityCalendarSection selectedYear={selectedYear} yearStats={yearStats} />
+
+        {/* Year Overview Statistics */}
+        <YearOverviewStats yearStats={yearStats} />
       </div>
     </div>
   )

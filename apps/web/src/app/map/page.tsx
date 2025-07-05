@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import RunningMap from '@/components/maps/RunningMap'
+import WaterfallMapView from '@/components/maps/WaterfallMapView'
 import { formatDistance, formatDuration, getActivityIcon, ActivityType } from '@/lib/database/models/Activity'
+import { getActivityConfig } from '@/lib/config/activities'
 
 interface Activity {
   id: number
@@ -16,9 +18,12 @@ interface Activity {
   start_longitude?: number
 }
 
+type ViewMode = 'map' | 'waterfall'
+
 export default function MapPage() {
-  const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>(['Run', 'Walk', 'Ride', 'Swim', 'Hike', 'WeightTraining'])
+  const [selectedTypes, setSelectedTypes] = useState<ActivityType[]>(['Run', 'Walk', 'Ride', 'Swim', 'Hike'])
   const [dateRange, setDateRange] = useState<{ start?: Date; end?: Date }>({})
+  const [viewMode, setViewMode] = useState<ViewMode>('map')
 
   // Fetch activities with location data
   const { data, isLoading, error } = useActivities({
@@ -89,30 +94,61 @@ export default function MapPage() {
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {/* View Mode Toggle */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              View Mode
+            </label>
+            <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+              <button
+                onClick={() => setViewMode('map')}
+                className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                  viewMode === 'map'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                🗺️ Map
+              </button>
+              <button
+                onClick={() => setViewMode('waterfall')}
+                className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                  viewMode === 'waterfall'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                🌊 Gallery
+              </button>
+            </div>
+          </div>
+
           {/* Activity Types */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Activity Types
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto">
-              {availableTypes.map((type: ActivityType) => (
-                <label key={type} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedTypes.includes(type)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTypes([...selectedTypes, type])
-                      } else {
-                        setSelectedTypes(selectedTypes.filter(t => t !== type))
-                      }
-                    }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 flex items-center">
-                    <span className="mr-1">{getActivityIcon(type)}</span>
-                    {type}
+              {availableTypes.map((type: ActivityType) => {
+                const config = getActivityConfig(type)
+                return (
+                  <label key={type} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.includes(type)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTypes([...selectedTypes, type])
+                        } else {
+                          setSelectedTypes(selectedTypes.filter(t => t !== type))
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 flex items-center">
+                      <span className="mr-1">{config.icon}</span>
+                      {config.displayName}
                   </span>
                 </label>
               ))}
@@ -204,17 +240,27 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="px-4 py-5 sm:p-6">
-          <RunningMap 
-            activities={activitiesWithLocation}
-            height={600}
-            showControls={true}
-            defaultView="overview"
-          />
+      {/* Main Content - Conditional based on view mode */}
+      {viewMode === 'map' ? (
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-5 sm:p-6">
+            <RunningMap 
+              activities={activitiesWithLocation}
+              height={600}
+              showControls={true}
+              defaultView="single"
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <WaterfallMapView 
+          filters={{
+            type: selectedTypes.length > 0 ? selectedTypes : undefined,
+            startDate: dateRange.start,
+            endDate: dateRange.end
+          }}
+        />
+      )}
 
       {/* Activity List for Map */}
       {activitiesWithLocation.length > 0 && (
