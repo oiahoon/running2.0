@@ -207,8 +207,14 @@ export default function GitHubHeatmap({
       </div>
 
       {/* Heatmap */}
-      <div className="relative bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
-        <svg width={svgWidth} height={svgHeight} className="font-mono text-xs">
+      <div className="relative bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="overflow-x-auto">
+          <svg 
+            width={svgWidth} 
+            height={svgHeight} 
+            className="font-mono text-xs min-w-full"
+            style={{ minWidth: `${svgWidth}px` }}
+          >
           {/* Month labels */}
           {showMonthLabels && monthLabels.map((label, index) => (
             <text

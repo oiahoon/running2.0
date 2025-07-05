@@ -260,8 +260,8 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Content */}
       <div className="lg:hidden">
-        <main className="px-4 py-6">
-          <div className="mx-auto max-w-6xl">{children}</div>
+        <main className="px-4 py-6 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl min-w-0">{children}</div>
         </main>
       </div>
     </div>
