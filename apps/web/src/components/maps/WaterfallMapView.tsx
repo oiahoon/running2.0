@@ -6,6 +6,58 @@ import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
 import RunningMap from './RunningMap'
 
+// Lazy loading component for maps
+function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height?: number }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [hasLoaded, setHasLoaded] = useState(false)
+  const elementRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasLoaded) {
+          setIsVisible(true)
+          setHasLoaded(true)
+        }
+      },
+      {
+        rootMargin: '100px', // Start loading 100px before entering viewport
+        threshold: 0.1
+      }
+    )
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current)
+    }
+
+    return () => {
+      if (elementRef.current) {
+        observer.unobserve(elementRef.current)
+      }
+    }
+  }, [hasLoaded])
+
+  return (
+    <div ref={elementRef} className="h-full">
+      {isVisible ? (
+        <RunningMap
+          activities={[activity]}
+          height={height}
+          showControls={false}
+          defaultView="single"
+        />
+      ) : (
+        <div className="h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <div className="text-gray-400 dark:text-gray-500">
+            <div className="text-2xl mb-2">🗺️</div>
+            <div className="text-sm">Loading map...</div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface Activity {
   id: number
   name: string
@@ -62,7 +114,7 @@ export default function WaterfallMapView({
     }
   }, [filterKey, filters])
 
-  // Handle new data - accumulate for infinite scroll
+  // Handle new data - accumulate for infinite scroll with limits
   useEffect(() => {
     if (data?.activities) {
       console.log(`Received ${data.activities.length} activities for page ${currentPage}`)
@@ -82,20 +134,26 @@ export default function WaterfallMapView({
         setIsInitialized(true)
       } else {
         setAllActivities(prev => {
-          // Avoid duplicates
+          // Avoid duplicates and limit total activities to prevent performance issues
           const existingIds = new Set(prev.map(a => a.id))
           const newActivities = gpsActivities.filter(a => !existingIds.has(a.id))
-          return [...prev, ...newActivities]
+          const combined = [...prev, ...newActivities]
+          
+          // Limit to 100 activities to prevent performance issues
+          return combined.slice(0, 100)
         })
       }
-      setHasMore(data.activities.length === pageSize)
+      
+      // Stop loading more if we have too many activities
+      const shouldHaveMore = data.activities.length === pageSize && allActivities.length < 100
+      setHasMore(shouldHaveMore)
       setIsLoadingMore(false)
     }
-  }, [data, currentPage])
+  }, [data, currentPage, allActivities.length])
 
-  // Infinite scroll handler
+  // Throttled infinite scroll handler
   const loadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore && !isLoading && isInitialized) {
+    if (!isLoadingMore && hasMore && !isLoading && isInitialized && allActivities.length < 100) {
       console.log('Loading more activities...')
       setIsLoadingMore(true)
       setCurrentPage(prev => prev + 1)
@@ -207,11 +265,9 @@ export default function WaterfallMapView({
             >
               {/* Map */}
               <div className="h-48 relative overflow-hidden">
-                <RunningMap
-                  activities={[activity]}
+                <LazyRunningMap
+                  activity={activity}
                   height={192}
-                  showControls={false}
-                  defaultView="single"
                 />
                 
                 {/* Activity type badge */}

@@ -304,36 +304,59 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
-  // Handle staticMapUrl changes
+  // Handle staticMapUrl changes with proper cleanup
   useEffect(() => {
-    if (staticMapUrl) {
-      // Create a new image to test loading
-      const img = new Image()
-      
-      img.onload = () => {
+    if (!staticMapUrl) {
+      setIsLoadingMap(false)
+      return
+    }
+
+    let isCancelled = false
+    const img = new Image()
+    
+    const handleLoad = () => {
+      if (!isCancelled) {
         console.log('✅ Map image preloaded successfully:', staticMapUrl)
         setIsLoadingMap(false)
       }
-      
-      img.onerror = () => {
+    }
+    
+    const handleError = () => {
+      if (!isCancelled) {
         console.error('❌ Map image preload failed:', staticMapUrl)
         setIsLoadingMap(false)
       }
-      
-      // Start loading
-      setIsLoadingMap(true)
-      img.src = staticMapUrl
+    }
+    
+    img.onload = handleLoad
+    img.onerror = handleError
+    
+    // Start loading
+    setIsLoadingMap(true)
+    img.src = staticMapUrl
+    
+    // Cleanup function
+    return () => {
+      isCancelled = true
+      img.onload = null
+      img.onerror = null
+      img.src = '' // Cancel loading
     }
   }, [staticMapUrl])
 
-  // Generate map URL
+  // Generate map URL with debouncing
   useEffect(() => {
     if (!hasMapboxToken || !bounds || displayActivities.length === 0) {
       setIsLoadingMap(false)
       return
     }
 
-    const generateUrl = async () => {
+    let isCancelled = false
+    
+    // Add a small delay to debounce rapid changes
+    const timeoutId = setTimeout(async () => {
+      if (isCancelled) return
+      
       try {
         const mapWidth = Math.min(600, height * 1.5)
         const url = await createCachedMapboxUrl(
@@ -343,15 +366,22 @@ function MapboxMap({ activities, height, selectedActivity }: {
           height,
           hasMapboxToken
         )
-        setStaticMapUrl(url)
-        // Loading state will be handled by the staticMapUrl useEffect above
+        
+        if (!isCancelled) {
+          setStaticMapUrl(url)
+        }
       } catch (error) {
-        console.error('Error generating map URL:', error)
-        setIsLoadingMap(false)
+        if (!isCancelled) {
+          console.error('Error generating map URL:', error)
+          setIsLoadingMap(false)
+        }
       }
+    }, 100) // 100ms debounce
+    
+    return () => {
+      isCancelled = true
+      clearTimeout(timeoutId)
     }
-
-    generateUrl()
   }, [displayActivities, bounds, height, hasMapboxToken])
 
   if (!hasMapboxToken) {

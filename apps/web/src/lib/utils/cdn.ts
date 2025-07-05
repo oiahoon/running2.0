@@ -72,10 +72,64 @@ export function getStaticMapUrl(activityId: string, options: {
   throw new Error(`No CDN available for activity ${activityId}`)
 }
 
+// Cache for CDN check results to avoid repeated requests
+const cdnCheckCache = new Map<string, {
+  result: { exists: boolean; url: string; source: 'cdn' | 'local' }
+  timestamp: number
+}>()
+
+// Cache duration: 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000
+
+// Ongoing requests to prevent duplicate checks
+const ongoingChecks = new Map<string, Promise<{ exists: boolean; url: string; source: 'cdn' | 'local' }>>()
+
 /**
- * Check if static map exists (with CDN support)
+ * Check if static map exists (with CDN support and caching)
  */
 export async function checkStaticMapExists(activityId: string): Promise<{
+  exists: boolean
+  url: string
+  source: 'cdn' | 'local'
+}> {
+  // Check cache first
+  const cached = cdnCheckCache.get(activityId)
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    console.log(`📦 Using cached CDN check for activity ${activityId}`)
+    return cached.result
+  }
+  
+  // Check if there's an ongoing request for this activity
+  const ongoing = ongoingChecks.get(activityId)
+  if (ongoing) {
+    console.log(`⏳ Waiting for ongoing CDN check for activity ${activityId}`)
+    return ongoing
+  }
+  
+  // Create new check promise
+  const checkPromise = performCdnCheck(activityId)
+  ongoingChecks.set(activityId, checkPromise)
+  
+  try {
+    const result = await checkPromise
+    
+    // Cache the result
+    cdnCheckCache.set(activityId, {
+      result,
+      timestamp: Date.now()
+    })
+    
+    return result
+  } finally {
+    // Clean up ongoing request
+    ongoingChecks.delete(activityId)
+  }
+}
+
+/**
+ * Perform the actual CDN check
+ */
+async function performCdnCheck(activityId: string): Promise<{
   exists: boolean
   url: string
   source: 'cdn' | 'local'
@@ -84,7 +138,16 @@ export async function checkStaticMapExists(activityId: string): Promise<{
   const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
   
   try {
-    const response = await fetch(cdnUrl, { method: 'HEAD' })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    
+    const response = await fetch(cdnUrl, { 
+      method: 'HEAD',
+      signal: controller.signal
+    })
+    
+    clearTimeout(timeoutId)
+    
     if (response.ok) {
       return {
         exists: true,
@@ -93,13 +156,24 @@ export async function checkStaticMapExists(activityId: string): Promise<{
       }
     }
   } catch (error) {
-    console.log(`CDN check failed for ${activityId}, trying local`)
+    if (error.name !== 'AbortError') {
+      console.log(`CDN check failed for ${activityId}, trying local`)
+    }
   }
   
   // Fallback to local
   const localUrl = `/maps/${activityId}.png`
   try {
-    const response = await fetch(localUrl, { method: 'HEAD' })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+    
+    const response = await fetch(localUrl, { 
+      method: 'HEAD',
+      signal: controller.signal
+    })
+    
+    clearTimeout(timeoutId)
+    
     return {
       exists: response.ok,
       url: localUrl,
