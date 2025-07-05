@@ -385,37 +385,9 @@ function MapboxMap({ activities, height, selectedActivity }: {
     )
   }
 
-  // Generate static map URL with routes - optimized to avoid 494 errors
-  const centerLat = (bounds.minLat + bounds.maxLat) / 2
-  const centerLng = (bounds.minLng + bounds.maxLng) / 2
-  
-  // Calculate zoom level based on bounds
-  const latDiff = bounds.maxLat - bounds.minLat
-  const lngDiff = bounds.maxLng - bounds.minLng
-  const maxDiff = Math.max(latDiff, lngDiff)
-  
-  let zoom = 10
-  if (maxDiff < 0.01) zoom = 14
-  else if (maxDiff < 0.05) zoom = 12
-  else if (maxDiff < 0.1) zoom = 11
-  else if (maxDiff < 0.5) zoom = 9
-  else if (maxDiff < 1) zoom = 8
-  else zoom = 7
-
-  // Generate safe static map URL
-  const mapWidth = Math.min(600, height * 1.5)
-  const staticMapUrl = createSafeMapboxUrl(
-    displayActivities,
-    bounds,
-    mapWidth,
-    height,
-    mapType,
-    hasMapboxToken || ''
-  )
-
   return (
     <div 
-      className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
+      className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden relative"
       style={{ height }}
     >
       {/* Debug info for development */}
@@ -425,21 +397,28 @@ function MapboxMap({ activities, height, selectedActivity }: {
           <br />
           Activities: {displayActivities.length}
           <br />
-          Zoom: {Math.round(((bounds.maxLat + bounds.minLat) / 2) * 100) / 100}
+          Cached: {staticMapUrl.includes('cache') ? 'Yes' : 'No'}
         </div>
       )}
       
-      <img 
-        src={staticMapUrl}
-        alt="Activity routes map"
-        className="w-full h-full object-cover"
-        onError={(e) => {
-          console.error('Map loading failed:', staticMapUrl)
-          e.currentTarget.style.display = 'none'
-          const fallback = e.currentTarget.nextElementSibling as HTMLElement
-          if (fallback) fallback.classList.remove('hidden')
-        }}
-      />
+      {isLoadingMap ? (
+        <div className="h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : staticMapUrl ? (
+        <img 
+          src={staticMapUrl}
+          alt="Activity route map"
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            console.error('Map loading failed:', staticMapUrl)
+            e.currentTarget.style.display = 'none'
+            const fallback = e.currentTarget.nextElementSibling as HTMLElement
+            if (fallback) fallback.classList.remove('hidden')
+          }}
+        />
+      ) : null}
+      
       <div className="hidden h-full flex items-center justify-center">
         <div className="text-center p-8">
           <div className="text-4xl mb-4">🗺️</div>
@@ -447,23 +426,11 @@ function MapboxMap({ activities, height, selectedActivity }: {
             Map Loading Failed
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-2">
-            Unable to load map with current routes
+            Unable to load map with current route
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            Try selecting fewer activities or check your Mapbox token
+            Check your Mapbox token configuration
           </p>
-          {process.env.NODE_ENV === 'development' && (
-            <details className="mt-2 text-left">
-              <summary className="cursor-pointer text-xs">Debug Info</summary>
-              <pre className="text-xs mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-32">
-                URL: {staticMapUrl.substring(0, 200)}...
-                <br />
-                Length: {staticMapUrl.length}
-                <br />
-                Activities: {displayActivities.length}
-              </pre>
-            </details>
-          )}
         </div>
       </div>
     </div>
