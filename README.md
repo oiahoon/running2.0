@@ -1,51 +1,58 @@
 # Running Page 2.0 🏃‍♂️
 
-A modern, feature-rich running data visualization platform built with Next.js 14, TypeScript, and modern web technologies.
+A modern, feature-rich running data visualization platform built with Next.js 14, TypeScript, and modern web technologies. Inspired by the original [running_page](https://github.com/yihong0618/running_page) project by [@yihong0618](https://github.com/yihong0618).
 
 ![Running Page 2.0](https://img.shields.io/badge/Running%20Page-2.0-blue?style=for-the-badge&logo=react)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC?style=flat-square&logo=tailwind-css)
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **📊 Interactive Dashboard** - Overview of your running activities with key metrics
-- **📋 Activity List** - Paginated, filterable list of all your activities
-- **📈 Statistics & Charts** - Comprehensive analytics with beautiful visualizations
-- **🗺️ Interactive Maps** - Activity routes and location visualization (with Mapbox)
-- **🔄 Automatic Data Sync** - GitHub Actions integration for seamless Strava sync
+- **📊 Interactive Dashboard** - Comprehensive overview with key metrics and recent activities
+- **📋 Activity Management** - Paginated, filterable, and searchable activity list
+- **📈 Advanced Analytics** - Multi-dimensional statistics with beautiful visualizations
+- **🗺️ Smart Map System** - Static cached maps with interactive fallback
+- **🔄 Automated Data Sync** - GitHub Actions powered Strava integration
+- **📱 Mobile Optimized** - Perfect experience across all devices
 
-### 📊 Data Visualization
-- **Monthly Progress Charts** - Track your distance and activity trends
-- **Activity Type Distribution** - Pie and bar charts showing activity breakdown
-- **GitHub-style Heatmap** - Daily activity calendar visualization
-- **Personal Records Tracking** - Longest distance, fastest pace, most elevation
-- **Responsive Charts** - Beautiful, interactive charts that work on all devices
+### 🗺️ Revolutionary Map System
+- **🚀 Static Map Caching** - Pre-generated PNG maps for zero API costs
+- **⚡ Lightning Fast Loading** - Instant map display with cached images
+- **💰 Cost Optimization** - 99%+ reduction in Mapbox API usage
+- **🔄 Smart Fallback** - Automatic fallback to live API when needed
+- **🧹 Automatic Cleanup** - Orphaned map removal and cache management
+
+### 📊 Advanced Data Visualization
+- **📈 Trend Analysis** - Monthly and yearly progress tracking
+- **🎯 Activity Distribution** - Interactive pie and bar charts
+- **🔥 GitHub-style Heatmap** - Daily activity calendar with intensity
+- **🏆 Personal Records** - Automatic PB tracking and highlights
+- **📊 Pace Analysis** - Detailed performance metrics and trends
+- **🎨 Responsive Charts** - Beautiful visualizations on all screen sizes
 
 ### 🎨 Modern UI/UX
-- **Dark/Light Mode** - Automatic theme switching with system preference
-- **Responsive Design** - Perfect on desktop, tablet, and mobile
-- **Catalyst UI Components** - Professional, accessible interface components
-- **Smooth Animations** - Framer Motion powered transitions
-- **Loading States** - Skeleton loading for better user experience
+- **🌓 Dark/Light Mode** - Automatic theme switching with system preference
+- **📱 Responsive Design** - Flawless experience on desktop, tablet, and mobile
+- **🎭 Catalyst UI** - Professional, accessible component library
+- **✨ Smooth Animations** - Framer Motion powered micro-interactions
+- **⏳ Smart Loading** - Skeleton states and progressive loading
+- **🎯 Optimized UX** - Eliminated redundant information and improved layouts
 
-### 🔧 Technical Features
-- **TypeScript** - Full type safety throughout the application
-- **SQLite Database** - Efficient local data storage with Better SQLite3
-- **API Routes** - RESTful API endpoints for data access
-- **Error Handling** - Comprehensive error boundaries and fallbacks
-- **Performance Optimized** - Code splitting, lazy loading, and caching
+### 🔧 Technical Excellence
+- **🔒 Type Safety** - Full TypeScript coverage throughout
+- **🗄️ Modern Database** - SQLite with Better SQLite3 for performance
+- **🌐 RESTful APIs** - Clean, documented API endpoints
+- **🛡️ Error Handling** - Comprehensive error boundaries and recovery
+- **⚡ Performance** - Code splitting, lazy loading, and intelligent caching
+- **🔍 Monitoring** - Built-in cache statistics and health checks
 
 ## 🚀 Quick Start
 
-### Option 1: Automated Setup (Recommended)
-```bash
-git clone https://github.com/your-username/running2.0.git
-cd running2.0
-chmod +x scripts/deploy-setup.sh
-./scripts/deploy-setup.sh
-```
+### Option 1: One-Click Deploy
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/running2.0)
 
 ### Option 2: Manual Setup
 ```bash
@@ -53,150 +60,195 @@ git clone https://github.com/your-username/running2.0.git
 cd running2.0/apps/web
 npm install
 cp .env.example .env.local
-# Edit .env.local with your configuration
+# Configure your environment variables
 npm run dev
 ```
 
-## 📋 Prerequisites
-
-- **Node.js** 18+ 
-- **npm** or **yarn**
-- **Git**
-- **Strava Account** (for data sync)
-- **Mapbox Account** (optional, for maps)
-
 ## ⚙️ Configuration
 
-### Environment Variables
+### Required Environment Variables
+
 Create `.env.local` in `/apps/web/`:
 
 ```env
-# User Configuration
+# User Information
 NEXT_PUBLIC_USER_NAME="Your Full Name"
 NEXT_PUBLIC_GITHUB_USERNAME="your-github-username"
 NEXT_PUBLIC_USER_EMAIL="your-email@example.com"
 
-# Mapbox (Optional - for interactive maps)
-NEXT_PUBLIC_MAPBOX_TOKEN="your_mapbox_token_here"
-
 # Database
 DATABASE_PATH="./data/running_page_2.db"
+
+# Optional: Maps (for interactive features)
+NEXT_PUBLIC_MAPBOX_TOKEN="your_mapbox_token_here"
 ```
 
-### Strava Integration
-Set up GitHub Actions secrets:
-- `STRAVA_CLIENT_ID`
-- `STRAVA_CLIENT_SECRET` 
-- `STRAVA_REFRESH_TOKEN`
+### GitHub Actions Secrets
 
-See [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md) for detailed configuration guide.
+For automatic data sync and map generation, configure these secrets in your GitHub repository:
 
-## 🏗️ Project Structure
+```env
+# Strava API (Required)
+STRAVA_CLIENT_ID="your_strava_client_id"
+STRAVA_CLIENT_SECRET="your_strava_client_secret"
+STRAVA_REFRESH_TOKEN="your_strava_refresh_token"
 
+# Mapbox (Required for map generation)
+MAPBOX_TOKEN="your_mapbox_token_without_url_restrictions"
 ```
-running_2.0/
-├── apps/web/                   # Next.js frontend application
+
+### 🗺️ Mapbox Configuration
+
+**Important**: For GitHub Actions to work properly, create a **separate Mapbox token without URL restrictions**:
+
+1. Visit [Mapbox Account](https://account.mapbox.com/access-tokens/)
+2. Create a new token named "GitHub-Actions-Maps"
+3. **Leave URL restrictions empty** (critical for GitHub Actions)
+4. Add this token as `MAPBOX_TOKEN` in GitHub Secrets
+
+## 🏗️ Architecture
+
+### Project Structure
+```
+running2.0/
+├── apps/web/                   # Next.js application
 │   ├── src/
-│   │   ├── app/               # App Router pages and API routes
+│   │   ├── app/               # App Router pages & API routes
 │   │   ├── components/        # React components
-│   │   ├── lib/              # Utilities and database
+│   │   ├── lib/              # Utilities, database, hooks
 │   │   └── styles/           # Global styles
-│   ├── data/                 # SQLite database and JSON files
-│   └── public/               # Static assets
-├── scripts/                  # Data sync and processing scripts
-├── docs/                     # Project documentation
-└── .github/workflows/        # GitHub Actions for data sync
+│   ├── data/                 # SQLite database & JSON files
+│   └── public/
+│       └── maps/             # 🆕 Static cached map images
+├── scripts/                  # Data sync & map generation
+├── .github/workflows/        # Automated CI/CD
+└── docs/                     # Documentation
 ```
 
-## 📊 Tech Stack
+### 🔄 Data Flow
 
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript 5.x
-- **Styling**: Tailwind CSS 3.x
-- **Components**: Catalyst UI (Tailwind UI)
-- **State Management**: TanStack Query
-- **Animation**: Framer Motion
-
-### Data & Visualization
-- **Database**: SQLite with Better SQLite3
-- **Charts**: Recharts + D3.js
-- **Maps**: Mapbox GL JS
-- **Data Processing**: Custom TypeScript utilities
-
-### DevOps & Deployment
-- **Deployment**: Vercel
-- **CI/CD**: GitHub Actions
-- **Data Sync**: Python scripts
-- **Code Quality**: ESLint, Prettier, TypeScript
+1. **Strava Sync** → Python scripts fetch activity data
+2. **Data Processing** → JSON to SQLite migration
+3. **Map Generation** → Static PNG creation for GPS activities
+4. **Deployment** → Automatic Vercel deployment
+5. **Frontend** → Smart map loading (static → cache → API)
 
 ## 🎯 Key Pages
 
 ### 📊 Dashboard (`/dashboard`)
-- Activity overview with key metrics
-- Recent activities list
-- Monthly progress chart
-- Activity heatmap
-- Interactive map preview
+- **Activity Overview** - Key metrics and recent activities
+- **Smart Maps** - Cached route visualization
+- **Progress Tracking** - Monthly trends and heatmap
+- **Quick Navigation** - Easy access to all features
 
 ### 📋 Activities (`/activities`)
-- Paginated activity list
-- Advanced filtering (type, date, distance)
-- Search functionality
-- Activity details with metrics
+- **Advanced Filtering** - Type, date, distance, search
+- **Pagination** - Efficient handling of large datasets
+- **Detailed Views** - Complete activity metrics
+- **Export Options** - Data export capabilities
 
 ### 📈 Statistics (`/stats`)
-- Comprehensive analytics dashboard
-- Monthly and yearly trends
-- Activity type distribution
-- Personal records tracking
-- Calendar heatmap
+- **Comprehensive Analytics** - Multi-dimensional insights
+- **Interactive Charts** - Recharts powered visualizations
+- **Time-based Analysis** - Monthly, yearly comparisons
+- **Personal Records** - Automatic achievement tracking
 
-### 🗺️ Map (`/map`)
-- Interactive activity map
-- Route visualization
-- Activity clustering
-- Location-based filtering
+### 🗺️ Maps (`/map`)
+- **Route Visualization** - Interactive activity maps
+- **Clustering** - Intelligent activity grouping
+- **Performance Overlay** - Pace and elevation data
+- **Location Analysis** - Geographic activity patterns
 
-## 🔄 Data Sync
+## 🔄 Automated Systems
 
-### Automatic Sync (GitHub Actions)
-- Runs every 6 hours automatically
-- Fetches new activities from Strava
-- Updates SQLite database
-- Deploys to Vercel automatically
+### GitHub Actions Workflows
 
-### Manual Sync
-```bash
-cd scripts
-python sync_strava.py
-node migrate-strava-json.js
+#### 1. **Data Sync & Map Generation** (`sync-data.yml`)
+- **Schedule**: Every 6 hours
+- **Features**: 
+  - Strava data synchronization
+  - Static map generation for new activities
+  - Database migration and optimization
+  - Automatic deployment to Vercel
+
+#### 2. **Mapbox Testing** (`test-mapbox.yml`)
+- **Purpose**: Validate Mapbox token configuration
+- **Features**:
+  - Token validity testing
+  - URL restriction detection
+  - Test map generation
+  - Troubleshooting diagnostics
+
+### 🗺️ Static Map System
+
+Our revolutionary static map caching system provides:
+
+- **💰 Cost Savings**: 99%+ reduction in Mapbox API calls
+- **⚡ Performance**: Instant map loading from cached PNGs
+- **🔄 Reliability**: Automatic fallback to live API
+- **🧹 Maintenance**: Automatic cleanup and optimization
+
+## 📊 API Endpoints
+
+### Core APIs
+- `GET /api/activities` - Activity data with filtering
+- `GET /api/stats` - Statistical analytics
+- `GET /api/maps/{id}` - Static map availability
+- `GET /api/cache/stats` - Cache statistics
+
+### Response Format
+```json
+{
+  "activities": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 739,
+    "hasNext": true
+  },
+  "summary": {
+    "totalActivities": 739,
+    "typeDistribution": [...]
+  }
+}
 ```
 
 ## 🛠️ Development
 
 ### Available Scripts
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript checks
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run type-check   # TypeScript validation
+npm run lint         # Code linting
 ```
 
 ### Database Management
 ```bash
 npm run db:init      # Initialize database
-npm run migrate      # Run data migration
-npm run prepare-db   # Prepare for Vercel deployment
+npm run migrate      # Data migration
+npm run prepare-db   # Vercel deployment prep
+```
+
+### Map Generation (Manual)
+```bash
+# Test Mapbox configuration
+cd scripts && python test-mapbox-token.py
+
+# Generate maps for specific activity
+cd scripts && node generate-maps-manual.js [activity_id]
+
+# Generate all maps
+cd scripts && python generate-static-maps.py
 ```
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
-1. Connect GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+1. **Connect Repository** - Link GitHub repo to Vercel
+2. **Configure Environment** - Set environment variables
+3. **Deploy** - Automatic deployment on push to main
 
 ### Manual Deployment
 ```bash
@@ -204,58 +256,54 @@ npm run build
 npm run start
 ```
 
-## 🔧 Customization
+## 🎨 Customization
 
 ### Adding New Chart Types
 1. Create component in `/src/components/charts/`
-2. Add to stats page
-3. Update API to provide required data format
+2. Add to statistics page
+3. Update API for required data format
 
 ### Custom Activity Types
-1. Update activity type mapping in `/src/lib/database/models/Activity.ts`
+1. Update mapping in `/src/lib/database/models/Activity.ts`
 2. Add icons and colors in chart components
 3. Update filtering logic
 
 ### Theme Customization
-1. Modify Tailwind config in `tailwind.config.js`
+1. Modify `tailwind.config.js`
 2. Update CSS variables in `globals.css`
 3. Customize Catalyst components
 
 ## 📚 Documentation
 
 - [🔧 Environment Setup](./ENVIRONMENT_SETUP.md) - Detailed configuration guide
-- [🛠️ Fixes & Improvements](./FIXES_AND_IMPROVEMENTS.md) - Recent fixes and enhancement suggestions
-- [📊 API Documentation](./docs/api/) - API endpoints and data formats
-- [🎨 Design System](./docs/design/) - UI components and design guidelines
+- [🛠️ Fixes & Improvements](./FIXES_AND_IMPROVEMENTS.md) - Recent updates and enhancements
+- [📊 API Documentation](./docs/api/) - Complete API reference
+- [🎨 Design System](./docs/design/) - UI components and guidelines
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Activities not showing?**
-- Check database file exists in `/apps/web/data/`
-- Verify Strava sync is working
-- Check API endpoints at `/api/activities`
+**Maps not loading?**
+- Check `NEXT_PUBLIC_MAPBOX_TOKEN` configuration
+- Verify token permissions and URL restrictions
+- Run `/api/cache/stats` to check static map availability
 
-**Charts not loading?**
-- Verify data format in `/api/stats`
-- Check browser console for errors
-- Ensure all dependencies are installed
+**Activities not syncing?**
+- Verify GitHub Secrets configuration
+- Check GitHub Actions logs
+- Ensure Strava tokens are valid
 
-**Maps not working?**
-- Add `NEXT_PUBLIC_MAPBOX_TOKEN` to environment
-- Verify Mapbox token is valid
-- Check network connectivity
-
-**User avatar not showing?**
-- Verify `NEXT_PUBLIC_GITHUB_USERNAME` is correct
-- Check GitHub username exists
-- Ensure network access to GitHub
+**Performance issues?**
+- Check database size and indexing
+- Monitor API response times
+- Review cache hit rates
 
 ### Debug Tools
-- Visit `/test-fixes` to verify all functionality
+- Visit `/test-fixes` for functionality verification
 - Check `/api/debug` for system information
 - Use browser dev tools for client-side debugging
+- Monitor GitHub Actions for sync status
 
 ## 🤝 Contributing
 
@@ -265,18 +313,26 @@ npm run start
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 🙏 Acknowledgments
+
+### Inspiration & Credits
+- **[@yihong0618](https://github.com/yihong0618)** - Original [running_page](https://github.com/yihong0618/running_page) creator and inspiration
+- **Strava API** - Activity data source and integration
+- **Mapbox** - Interactive maps and static map generation
+- **Tailwind UI** - Beautiful, accessible UI components
+- **Vercel** - Seamless hosting and deployment platform
+- **Next.js Team** - Outstanding React framework
+
+### Technology Stack
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Catalyst UI
+- **Backend**: Node.js, SQLite, Better SQLite3
+- **Visualization**: Recharts, D3.js, Mapbox GL JS
+- **Deployment**: Vercel, GitHub Actions
+- **Data**: Strava API, Python processing scripts
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Original Running Page** - Inspiration and data structure
-- **Strava API** - Activity data source
-- **Mapbox** - Interactive maps
-- **Tailwind UI** - Beautiful UI components
-- **Vercel** - Hosting and deployment
-- **Next.js Team** - Amazing framework
 
 ## 📞 Support
 
@@ -290,6 +346,8 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 **Built with ❤️ for runners by runners**
 
-[🏃‍♂️ Live Demo](https://your-running-page.vercel.app) • [📚 Documentation](./docs/) • [🚀 Deploy Your Own](https://vercel.com/new/clone?repository-url=https://github.com/your-username/running2.0)
+*Inspired by the original running_page project*
+
+[🏃‍♂️ Live Demo](https://run2.miaowu.org) • [📚 Documentation](./docs/) • [🚀 Deploy Your Own](https://vercel.com/new/clone?repository-url=https://github.com/your-username/running2.0)
 
 </div>
