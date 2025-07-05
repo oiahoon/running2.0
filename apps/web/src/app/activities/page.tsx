@@ -152,6 +152,10 @@ function ActivityCard({ activity }: { activity: Activity }) {
 export default function ActivitiesPage() {
   const [filters, setFilters] = useState<ActivityFilters>({})
   const [searchInput, setSearchInput] = useState('')
+  const [allActivities, setAllActivities] = useState<Activity[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageSize = 20
 
   // Debounce search input
@@ -163,13 +167,53 @@ export default function ActivitiesPage() {
     search: debouncedSearch || undefined
   }
 
-  const { data, isLoading, error } = useActivities(effectiveFilters, 1, pageSize)
+  const { data, isLoading, error } = useActivities(effectiveFilters, currentPage, pageSize)
 
-  const activities: Activity[] = data?.activities || []
+  // Handle new data - accumulate for infinite scroll
+  useEffect(() => {
+    if (data?.activities) {
+      if (currentPage === 1) {
+        setAllActivities(data.activities)
+      } else {
+        setAllActivities(prev => [...prev, ...data.activities])
+      }
+      setHasMore(data.activities.length === pageSize)
+      setIsLoadingMore(false)
+    }
+  }, [data, currentPage])
+
+  // Reset when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+    setAllActivities([])
+    setHasMore(true)
+  }, [effectiveFilters.search, effectiveFilters.type, effectiveFilters.startDate, effectiveFilters.endDate])
+
+  // Infinite scroll handler
+  const loadMore = useCallback(() => {
+    if (!isLoadingMore && hasMore && !isLoading) {
+      setIsLoadingMore(true)
+      setCurrentPage(prev => prev + 1)
+    }
+  }, [isLoadingMore, hasMore, isLoading])
+
+  // Scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop 
+          >= document.documentElement.offsetHeight - 1000) {
+        loadMore()
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [loadMore])
+
   const totalCount = data?.totalCount || 0
 
   // Get available activity types for filter
-  const availableTypes = [...new Set(activities.map((a: Activity) => a.type))].sort()
+  const availableTypes = [...new Set(allActivities.map((a: Activity) => a.type))].sort()
 
   if (error) {
     return (
@@ -289,8 +333,8 @@ export default function ActivitiesPage() {
 
       {/* Activities List */}
       <div className="space-y-6">
-        {isLoading ? (
-          // Loading skeleton
+        {isLoading && currentPage === 1 ? (
+          // Loading skeleton for first page
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
@@ -309,10 +353,28 @@ export default function ActivitiesPage() {
               </div>
             ))}
           </div>
-        ) : activities.length > 0 ? (
-          activities.map((activity: Activity) => (
-            <ActivityCard key={activity.id} activity={activity} />
-          ))
+        ) : allActivities.length > 0 ? (
+          <>
+            {allActivities.map((activity: Activity) => (
+              <ActivityCard key={activity.id} activity={activity} />
+            ))}
+            
+            {/* Load more indicator */}
+            {isLoadingMore && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            )}
+            
+            {/* End of results indicator */}
+            {!hasMore && allActivities.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">
+                  You've reached the end! Showing all {allActivities.length} activities.
+                </p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
             <div className="text-4xl mb-4">🏃‍♂️</div>
@@ -329,11 +391,12 @@ export default function ActivitiesPage() {
         )}
       </div>
 
-      {/* Simple Pagination */}
-      {!isLoading && activities.length > 0 && (
+      {/* Summary info */}
+      {!isLoading && allActivities.length > 0 && (
         <div className="flex justify-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Showing {activities.length} of {totalCount} activities
+            Showing {allActivities.length} of {totalCount} activities
+            {hasMore && ' • Scroll down to load more'}
           </p>
         </div>
       )}

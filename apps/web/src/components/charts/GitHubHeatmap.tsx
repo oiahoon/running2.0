@@ -36,7 +36,13 @@ export default function GitHubHeatmap({
   yearData
 }: GitHubHeatmapProps) {
   const [selectedYear, setSelectedYear] = useState(initialYear)
-  const [hoveredCell, setHoveredCell] = useState<{ date: string; count: number; x: number; y: number } | null>(null)
+  const [hoveredCell, setHoveredCell] = useState<{ 
+    date: string; 
+    count: number; 
+    distance?: number;
+    x: number; 
+    y: number 
+  } | null>(null)
 
   const handleYearChange = (newYear: number) => {
     setSelectedYear(newYear)
@@ -95,17 +101,29 @@ export default function GitHubHeatmap({
     return dates
   }, [currentYearData, selectedYear])
 
-  const maxCount = useMemo(() => {
-    return Math.max(...calendarData.map(d => d.count), 1)
+  // Calculate max distance for better scaling (distance-based heatmap for running)
+  const maxDistance = useMemo(() => {
+    return Math.max(...calendarData.map(d => d.distance), 1000) // At least 1km for scaling
   }, [calendarData])
 
-  const getIntensity = (count: number) => {
-    if (count === 0) return 0
-    if (count === 1) return 1
-    if (count <= maxCount * 0.25) return 1
-    if (count <= maxCount * 0.5) return 2
-    if (count <= maxCount * 0.75) return 3
-    return 4
+  const getIntensity = (distance: number, count: number) => {
+    // For running-focused heatmap, prioritize distance over count
+    if (distance > 0) {
+      const distanceKm = distance / 1000
+      if (distanceKm >= 20) return 4      // 20km+ = highest intensity (long runs)
+      if (distanceKm >= 10) return 3      // 10-20km = high intensity (medium runs)
+      if (distanceKm >= 5) return 2       // 5-10km = medium intensity (short runs)
+      if (distanceKm >= 1) return 1       // 1-5km = low intensity (recovery runs)
+      return 0
+    }
+    
+    // Fallback to activity count for non-distance activities (strength training, etc.)
+    if (count > 0) {
+      if (count >= 3) return 2            // Multiple activities = medium intensity
+      return 1                            // Single activity = low intensity
+    }
+    
+    return 0 // No activity
   }
 
   const getColor = (intensity: number, isCurrentYear: boolean) => {
@@ -222,7 +240,7 @@ export default function GitHubHeatmap({
           {calendarData.map((day, index) => {
             const x = 25 + day.week * (cellSize + 2)
             const y = 25 + day.dayOfWeek * (cellSize + 2)
-            const intensity = getIntensity(day.count)
+            const intensity = getIntensity(day.distance, day.count)
             
             return (
               <rect
@@ -240,6 +258,7 @@ export default function GitHubHeatmap({
                     setHoveredCell({
                       date: day.date,
                       count: day.count,
+                      distance: day.distance,
                       x: rect.left + rect.width / 2,
                       y: rect.top
                     })
@@ -263,8 +282,16 @@ export default function GitHubHeatmap({
           >
             <div className="text-center">
               <div className="font-medium">
-                {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
+                {hoveredCell.distance && hoveredCell.distance > 0 
+                  ? `${(hoveredCell.distance / 1000).toFixed(1)}km`
+                  : `${hoveredCell.count} ${hoveredCell.count === 1 ? 'activity' : 'activities'}`
+                }
               </div>
+              {hoveredCell.distance && hoveredCell.distance > 0 && hoveredCell.count > 0 && (
+                <div className="text-gray-300">
+                  {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
+                </div>
+              )}
               <div className="text-gray-300">
                 {new Date(hoveredCell.date).toLocaleDateString()}
               </div>
