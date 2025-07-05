@@ -71,23 +71,6 @@ export function getStaticMapUrl(activityId: string, options: {
   
   throw new Error(`No CDN available for activity ${activityId}`)
 }
-      if (CDN_CONFIG.cloudflare.enabled && CDN_CONFIG.cloudflare.baseUrl) {
-        return `${CDN_CONFIG.cloudflare.baseUrl}/maps/${activityId}.png`
-      }
-      break
-      
-    case 'vercel':
-      // Use Vercel's CDN with optimized caching
-      return `/maps/${activityId}.png`
-  }
-  
-  // Fallback to local/Vercel if CDN not available
-  if (fallbackToLocal) {
-    return `/maps/${activityId}.png`
-  }
-  
-  throw new Error(`No CDN available for activity ${activityId}`)
-}
 
 /**
  * Check if static map exists (with CDN support)

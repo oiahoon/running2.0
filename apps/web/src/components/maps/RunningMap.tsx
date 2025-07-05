@@ -67,42 +67,26 @@ function decodePolyline(encoded: string): [number, number][] {
   }
 }
 
+import { getStaticMapUrl as getCDNMapUrl, checkStaticMapExists } from '@/lib/utils/cdn'
+
 // Utility function to check if static map exists and create URL
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
-  // Use external_id for static map filename (Strava activity ID)
-  const activityId = activity.external_id || activity.id
+  // Use externalId for static map filename (Strava activity ID)
+  const activityId = activity.externalId || activity.id
   
-  // Check CDN provider preference
-  const cdnProvider = process.env.NEXT_PUBLIC_CDN_PROVIDER || 'jsdelivr'
-  const githubUser = 'oiahoon' // Your GitHub username
-  
-  let testUrls: string[] = []
-  
-  if (cdnProvider === 'jsdelivr') {
-    // Try jsDelivr CDN first
-    const jsdelivrUrl = `https://cdn.jsdelivr.net/gh/${githubUser}/running2.0@master/apps/web/public/maps/${activityId}.png`
-    testUrls.push(jsdelivrUrl)
-  }
-  
-  // Always include local as fallback
-  testUrls.push(`/maps/${activityId}.png`)
-  
-  // Test URLs in order of preference
-  for (const url of testUrls) {
-    try {
-      console.log(`🧪 Testing map URL: ${url}`)
-      const response = await fetch(url, { method: 'HEAD' })
-      if (response.ok) {
-        const source = url.includes('jsdelivr') ? 'jsDelivr CDN' : 'Local/Vercel'
-        console.log(`✅ Using ${source} for activity ${activityId}: ${url}`)
-        return url
-      }
-    } catch (error) {
-      console.log(`❌ Failed to load from ${url}:`, error)
+  try {
+    // Check if static map exists (tries CDN first, then local)
+    const mapCheck = await checkStaticMapExists(activityId.toString())
+    
+    if (mapCheck.exists) {
+      console.log(`✅ Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
+      return mapCheck.url
     }
+  } catch (error) {
+    // Static map doesn't exist, will fallback to API
+    console.log(`⚠️ Static map not found for activity ${activityId}, using Mapbox API`)
   }
   
-  console.log(`⚠️ No static map found for activity ${activityId}, using Mapbox API`)
   return null
 }
 
@@ -123,9 +107,9 @@ async function createCachedMapboxUrl(
   }
   
   // For single activity with polyline, try localStorage cache
-  if (activities.length === 1 && activities[0].summary_polyline) {
+  if (activities.length === 1 && activities[0].summaryPolyline) {
     const activity = activities[0]
-    const activityId = activity.external_id || activity.id
+    const activityId = activity.externalId || activity.id
     
     // Check cache first (client-side, we'll use a simpler approach)
     const cacheKey = `map-${activityId}-${width}x${height}`
@@ -283,22 +267,22 @@ function formatLocation(activity: Activity): { short: string; full: string } {
   // Create short version
   let shortLocation = ''
   if (activity.location_city && activity.location_country) {
-    shortLocation = `${activity.location_city}, ${activity.location_country}`
-  } else if (activity.location_city) {
-    shortLocation = activity.location_city
-  } else if (activity.location_country) {
-    shortLocation = activity.location_country
+    shortLocation = `${activity.locationCity}, ${activity.locationCountry}`
+  } else if (activity.locationCity) {
+    shortLocation = activity.locationCity
+  } else if (activity.locationCountry) {
+    shortLocation = activity.locationCountry
   } else {
     shortLocation = parts[0]
   }
   
   // If short version is still too long, truncate city name
-  if (shortLocation.length > 25 && activity.location_city) {
-    const truncatedCity = activity.location_city.length > 12 
-      ? activity.location_city.substring(0, 12) + '...'
-      : activity.location_city
-    shortLocation = activity.location_country 
-      ? `${truncatedCity}, ${activity.location_country}`
+  if (shortLocation.length > 25 && activity.locationCity) {
+    const truncatedCity = activity.locationCity.length > 12 
+      ? activity.locationCity.substring(0, 12) + '...'
+      : activity.locationCity
+    shortLocation = activity.locationCountry 
+      ? `${truncatedCity}, ${activity.locationCountry}`
       : truncatedCity
   }
   
@@ -316,7 +300,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
   
   const displayActivities = selectedActivity 
     ? [selectedActivity] 
-    : activities.filter(a => a.start_latitude && a.start_longitude)
+    : activities.filter(a => a.startLatitude && a.startLongitude)
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
@@ -528,7 +512,7 @@ export default function RunningMap({
 
   // Filter activities that should show on map (Run, Walk, Hike, Ride)
   const mapEnabledActivities = activities.filter(activity => 
-    shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
+    shouldShowOnMap(activity.type) && activity.startLatitude && activity.startLongitude
   )
 
   // Auto-select first activity (latest) when activities change

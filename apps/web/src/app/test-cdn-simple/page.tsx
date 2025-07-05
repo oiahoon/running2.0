@@ -46,7 +46,7 @@ export default function SimpleCDNTest() {
           url: test.url,
           success: false,
           loadTime: 0,
-          error: error.message
+          error: error instanceof Error ? error.message : 'Unknown error'
         })
       }
     }
