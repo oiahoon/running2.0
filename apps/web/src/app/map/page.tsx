@@ -33,8 +33,10 @@ export default function MapPage() {
   }, 1, 500) // Get more activities for map
 
   const activities: Activity[] = data?.activities || []
-  const activitiesWithLocation = activities.filter((a: Activity) => 
-    a.start_latitude && a.start_longitude
+
+  // Filter activities with location data for map display
+  const activitiesWithLocation = activities.filter((activity: Activity) => 
+    activity.start_latitude && activity.start_longitude
   )
 
   if (isLoading) {
@@ -43,7 +45,7 @@ export default function MapPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Route Map</h1>
           <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Loading your running routes...
+            Loading map data...
           </p>
         </div>
         <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
@@ -149,9 +151,10 @@ export default function MapPage() {
                     <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 flex items-center">
                       <span className="mr-1">{config.icon}</span>
                       {config.displayName}
-                  </span>
-                </label>
-              ))}
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           </div>
 
@@ -190,7 +193,7 @@ export default function MapPage() {
           <div className="flex items-end">
             <button
               onClick={() => {
-                setSelectedTypes(['Run', 'Walk', 'Ride', 'Swim', 'Hike', 'WeightTraining'])
+                setSelectedTypes(['Run', 'Walk', 'Ride', 'Swim', 'Hike'])
                 setDateRange({})
               }}
               className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -260,46 +263,6 @@ export default function MapPage() {
             endDate: dateRange.end
           }}
         />
-      )}
-
-      {/* Activity List for Map */}
-      {activitiesWithLocation.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Activities with GPS Data ({activitiesWithLocation.length})
-            </h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activitiesWithLocation.slice(0, 12).map((activity: Activity) => (
-                <div key={activity.id} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{getActivityIcon(activity.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {activity.name}
-                      </p>
-                      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{formatDistance(activity.distance)}</span>
-                        <span>•</span>
-                        <span>{formatDuration(activity.moving_time)}</span>
-                        <span>•</span>
-                        <span>{new Date(activity.start_date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {activitiesWithLocation.length > 12 && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Showing 12 of {activitiesWithLocation.length} activities with GPS data
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
       )}
     </div>
   )
