@@ -302,6 +302,13 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
+  // Reset loading state when URL changes
+  useEffect(() => {
+    if (staticMapUrl) {
+      setIsLoadingMap(true)
+    }
+  }, [staticMapUrl])
+
   // Generate map URL
   useEffect(() => {
     if (!hasMapboxToken || !bounds || displayActivities.length === 0) {
@@ -321,10 +328,10 @@ function MapboxMap({ activities, height, selectedActivity }: {
           hasMapboxToken
         )
         setStaticMapUrl(url)
+        // Don't set loading to false here - let the image onLoad/onError handle it
       } catch (error) {
         console.error('Error generating map URL:', error)
-      } finally {
-        setIsLoadingMap(false)
+        setIsLoadingMap(false) // Only set to false on error
       }
     }
 
@@ -429,11 +436,13 @@ function MapboxMap({ activities, height, selectedActivity }: {
       {/* Debug info for development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="absolute top-2 left-2 z-10 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
-          URL Length: {staticMapUrl.length}
+          URL: {staticMapUrl.substring(0, 50)}...
+          <br />
+          Loading: {isLoadingMap ? 'Yes' : 'No'}
           <br />
           Activities: {displayActivities.length}
           <br />
-          Cached: {staticMapUrl.includes('cache') ? 'Yes' : 'No'}
+          Static: {staticMapUrl.startsWith('/maps/') ? 'Yes' : 'No'}
         </div>
       )}
       
@@ -446,14 +455,31 @@ function MapboxMap({ activities, height, selectedActivity }: {
           src={staticMapUrl}
           alt="Activity route map"
           className="w-full h-full object-cover"
+          onLoad={() => {
+            console.log('✅ Map image loaded successfully:', staticMapUrl)
+            setIsLoadingMap(false)
+          }}
           onError={(e) => {
-            console.error('Map loading failed:', staticMapUrl)
+            console.error('❌ Map loading failed:', staticMapUrl)
+            setIsLoadingMap(false)
             e.currentTarget.style.display = 'none'
             const fallback = e.currentTarget.nextElementSibling as HTMLElement
             if (fallback) fallback.classList.remove('hidden')
           }}
         />
-      ) : null}
+      ) : (
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center p-8">
+            <div className="text-4xl mb-4">🗺️</div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              No Map Available
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              Unable to generate map for this activity
+            </p>
+          </div>
+        </div>
+      )}
       
       <div className="hidden h-full flex items-center justify-center">
         <div className="text-center p-8">
