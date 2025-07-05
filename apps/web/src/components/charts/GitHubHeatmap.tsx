@@ -215,8 +215,8 @@ export default function GitHubHeatmap({
             className="font-mono text-xs min-w-full"
             style={{ minWidth: `${svgWidth}px` }}
           >
-          {/* Month labels */}
-          {showMonthLabels && monthLabels.map((label, index) => (
+            {/* Month labels */}
+            {showMonthLabels && monthLabels.map((label, index) => (
             <text
               key={index}
               x={label.x}
@@ -275,6 +275,7 @@ export default function GitHubHeatmap({
             )
           })}
         </svg>
+        </div>
         
         {/* Tooltip */}
         {hoveredCell && showTooltip && (
