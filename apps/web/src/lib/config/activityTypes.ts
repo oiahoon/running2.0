@@ -2,6 +2,7 @@
 export const DEFAULT_ACTIVITY_TYPES = [
   'Run',
   'Walk', 
+  'Hike',
   'Ride'
 ] as const
 
@@ -29,15 +30,17 @@ export const ACTIVITY_TYPE_MAPPINGS = {
   'run': 'Run',
   'running': 'Run',
   
-  // Walking/Hiking variations (Walk is most common in your data)
+  // Walking variations
   'Walk': 'Walk',
   'Walking': 'Walk',
   'walk': 'Walk',
   'walking': 'Walk',
-  'Hike': 'Walk', // Map hiking to walking since Walk is more common
-  'Hiking': 'Walk',
-  'hike': 'Walk',
-  'hiking': 'Walk',
+  
+  // Hiking variations (keep separate from Walk)
+  'Hike': 'Hike',
+  'Hiking': 'Hike',
+  'hike': 'Hike',
+  'hiking': 'Hike',
   
   // Cycling variations (Ride is the term used in your data)
   'Ride': 'Ride',
@@ -54,12 +57,12 @@ export const ACTIVITY_TYPE_MAPPINGS = {
   'swim': 'Swim',
   'swimming': 'Swim',
   
-  // Weight Training (common in your data)
+  // Weight Training (exclude from default filters)
   'WeightTraining': 'WeightTraining',
   'Workout': 'WeightTraining',
   'Gym': 'WeightTraining',
   
-  // Other activities from your data
+  // Other activities from your data (exclude from default filters)
   'Rowing': 'Rowing',
   'Elliptical': 'Elliptical',
   'StandUpPaddling': 'StandUpPaddling'

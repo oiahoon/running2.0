@@ -214,9 +214,9 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             </SidebarSection>
           </SidebarBody>
 
-          <SidebarFooter className="max-lg:hidden">
-            {/* GitHub Link */}
-            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+          <SidebarFooter>
+            {/* GitHub Link - Desktop Only */}
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 max-lg:hidden">
               <a
                 href="https://github.com/oiahoon/running2.0"
                 target="_blank"
@@ -244,7 +244,7 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
               </a>
             </div>
             
-            {/* User Dropdown */}
+            {/* User Dropdown - Always Visible */}
             <Dropdown>
               <DropdownButton as={SidebarItem}>
                 <span className="flex min-w-0 items-center gap-3">

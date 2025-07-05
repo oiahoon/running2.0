@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useActivityStats, useActivities } from '@/lib/hooks/useActivities'
 import { formatDistance, formatDuration, formatPace, getActivityIcon } from '@/lib/database/models/Activity'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
+import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 import RunningMap from '@/components/maps/RunningMap'
 import DistanceTrendChart from '@/components/charts/DistanceTrendChart'
 import GitHubHeatmap from '@/components/charts/GitHubHeatmap'
@@ -53,8 +54,8 @@ function StatsCard({ title, value, subtitle, icon, trend }: {
 }
 
 function StatsGrid() {
-  const currentYear = new Date().getFullYear()
-  const { data: stats, isLoading, error } = useActivityStats(currentYear)
+  // Don't pass year parameter to get all-time stats
+  const { data: stats, isLoading, error } = useActivityStats()
 
   if (isLoading) {
     return (
@@ -131,7 +132,11 @@ function RecentActivitiesWithMap() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageSize = 10
 
-  const { data, isLoading } = useActivities({}, currentPage, pageSize)
+  // Use default activity types for filtering
+  const defaultTypes = getDefaultActivityTypes()
+  const { data, isLoading } = useActivities({ 
+    type: defaultTypes as any[] 
+  }, currentPage, pageSize)
 
   // Handle new data - accumulate for infinite scroll
   useEffect(() => {
