@@ -69,21 +69,19 @@ function decodePolyline(encoded: string): [number, number][] {
 
 // Utility function to check if static map exists and create URL
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
-  // Check if static map file exists using API endpoint
+  // First try direct file access (faster)
   const staticMapPath = `/maps/${activity.id}.png`
   
   try {
-    const response = await fetch(`/api/maps/${activity.id}`, { method: 'GET' })
+    // Try to fetch the static map file directly
+    const response = await fetch(staticMapPath, { method: 'HEAD' })
     if (response.ok) {
-      const data = await response.json()
-      if (data.exists) {
-        console.log(`✅ Using static map for activity ${activity.id}`)
-        return staticMapPath
-      }
+      console.log(`✅ Using static map for activity ${activity.id}`)
+      return staticMapPath
     }
   } catch (error) {
-    // Static map doesn't exist or API error, will fallback to Mapbox API
-    console.log(`⚠️ Static map check failed for activity ${activity.id}, using Mapbox API`)
+    // Static map doesn't exist, will fallback to API
+    console.log(`⚠️ Static map not found for activity ${activity.id}, using Mapbox API`)
   }
   
   return null
@@ -113,7 +111,7 @@ async function createCachedMapboxUrl(
     const cacheKey = `map-${activity.id}-${width}x${height}`
     const cachedUrl = localStorage.getItem(cacheKey)
     
-    if (cachedUrl) {
+    if (cachedUrl && !cachedUrl.startsWith('/maps/')) { // Don't cache static map paths
       // Check if cached URL is still valid (not older than 1 day)
       const cacheTime = localStorage.getItem(`${cacheKey}-time`)
       if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
@@ -126,9 +124,11 @@ async function createCachedMapboxUrl(
     console.log(`🌐 Generating new Mapbox URL for activity ${activity.id}`)
     const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
-    // Cache the URL
-    localStorage.setItem(cacheKey, newUrl)
-    localStorage.setItem(`${cacheKey}-time`, Date.now().toString())
+    // Cache the URL (but don't cache static map paths)
+    if (!newUrl.startsWith('/maps/')) {
+      localStorage.setItem(cacheKey, newUrl)
+      localStorage.setItem(`${cacheKey}-time`, Date.now().toString())
+    }
     
     return newUrl
   }
