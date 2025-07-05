@@ -291,6 +291,7 @@ function RecentActivitiesWithMap() {
                 {/* Map */}
                 <div className="h-48 sm:h-64">
                   <RunningMap
+                    key={selectedActivity.id} // Force re-render when activity changes
                     activities={[selectedActivity]}
                     height={192}
                     showControls={false}

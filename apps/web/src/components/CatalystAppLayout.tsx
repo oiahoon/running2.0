@@ -147,11 +147,13 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
     <SidebarLayout
       navbar={
         <Navbar>
-          <NavbarSpacer />
           <NavbarSection>
             <div className="max-w-md">
               <SearchField />
             </div>
+          </NavbarSection>
+          <NavbarSpacer />
+          <NavbarSection>
             <ThemeToggle />
             <Dropdown>
               <DropdownButton as={NavbarItem}>

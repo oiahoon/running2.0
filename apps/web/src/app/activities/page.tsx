@@ -202,7 +202,7 @@ export default function ActivitiesPage() {
   useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + document.documentElement.scrollTop 
-          >= document.documentElement.offsetHeight - 1000) {
+          >= document.documentElement.offsetHeight - 200) { // Reduced from 1000px to 200px
         loadMore()
       }
     }
