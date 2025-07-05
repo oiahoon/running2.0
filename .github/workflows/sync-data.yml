@@ -75,12 +75,20 @@ jobs:
         cd scripts
         node migrate-strava-json.js
         
+    - name: Test Mapbox token configuration
+      run: |
+        cd scripts
+        python test-mapbox-token.py
+      env:
+        MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+        
     - name: Generate static maps
       run: |
         cd scripts
         python generate-static-maps.py
       env:
         REGENERATE_MAPS: ${{ github.event.inputs.regenerate_maps }}
+        MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
         
     - name: Prepare database for Vercel
       run: |

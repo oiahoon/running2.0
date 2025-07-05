@@ -1,0 +1,93 @@
+name: Test Mapbox Configuration
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: false
+        default: 'basic'
+        type: choice
+        options:
+        - basic
+        - full
+
+permissions:
+  contents: read
+
+env:
+  MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+
+jobs:
+  test-mapbox:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Python dependencies
+      run: |
+        pip install requests
+        
+    - name: Test Mapbox token configuration
+      run: |
+        cd scripts
+        python test-mapbox-token.py
+        
+    - name: Generate test map (if basic test passes)
+      if: success()
+      run: |
+        cd scripts
+        mkdir -p ../apps/web/public/maps
+        
+        # Create a simple test script to generate one map
+        cat > test-single-map.py << 'EOF'
+        import os
+        import requests
+        
+        token = os.getenv('MAPBOX_TOKEN')
+        if token:
+            # Generate a simple test map
+            url = f"https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+ff0000(-122.4194,37.7749)/-122.4194,37.7749,12,0/400x300@2x?access_token={token}"
+            
+            response = requests.get(url)
+            if response.status_code == 200:
+                with open('../apps/web/public/maps/test-map.png', 'wb') as f:
+                    f.write(response.content)
+                print(f"✅ Test map generated successfully ({len(response.content)} bytes)")
+            else:
+                print(f"❌ Failed to generate test map: {response.status_code}")
+                print(response.text)
+        else:
+            print("❌ No MAPBOX_TOKEN found")
+        EOF
+        
+        python test-single-map.py
+        
+    - name: Upload test map as artifact
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-map
+        path: apps/web/public/maps/test-map.png
+        retention-days: 1
+        
+    - name: Summary
+      run: |
+        echo "## Mapbox Configuration Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "- **Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Type**: ${{ github.event.inputs.test_type }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "apps/web/public/maps/test-map.png" ]; then
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Map**: Generated successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Status**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Issue**: Could not generate test map" >> $GITHUB_STEP_SUMMARY
+        fi
