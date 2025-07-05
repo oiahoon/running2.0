@@ -67,7 +67,91 @@ function decodePolyline(encoded: string): [number, number][] {
   }
 }
 
-import { getStaticMapUrl as getCDNMapUrl, checkStaticMapExists } from '@/lib/utils/cdn'
+// Image preload cache to prevent unnecessary reloading
+const imagePreloadCache = new Map<string, {
+  loaded: boolean
+  loading: boolean
+  error: boolean
+  image: HTMLImageElement
+  timestamp: number
+}>()
+
+// Cache duration: 10 minutes
+const IMAGE_CACHE_DURATION = 10 * 60 * 1000
+
+// Clean up old cache entries periodically
+const cleanupImageCache = () => {
+  const now = Date.now()
+  for (const [url, entry] of imagePreloadCache.entries()) {
+    if (now - entry.timestamp > IMAGE_CACHE_DURATION) {
+      imagePreloadCache.delete(url)
+    }
+  }
+}
+
+// Preload adjacent activity maps for better UX
+const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number) => {
+  const preloadPromises: Promise<void>[] = []
+  
+  // Preload previous and next 2 activities
+  for (let i = Math.max(0, currentIndex - 2); i <= Math.min(activities.length - 1, currentIndex + 2); i++) {
+    if (i === currentIndex) continue // Skip current activity
+    
+    const activity = activities[i]
+    if (!activity.startLatitude || !activity.startLongitude) continue
+    
+    const activityId = activity.externalId || activity.id
+    
+    preloadPromises.push(
+      checkStaticMapExists(activityId.toString())
+        .then(mapCheck => {
+          if (mapCheck.exists && !imagePreloadCache.has(mapCheck.url)) {
+            // Preload in background
+            const img = new Image()
+            
+            imagePreloadCache.set(mapCheck.url, {
+              loaded: false,
+              loading: true,
+              error: false,
+              image: img,
+              timestamp: Date.now()
+            })
+            
+            img.onload = () => {
+              imagePreloadCache.set(mapCheck.url, {
+                loaded: true,
+                loading: false,
+                error: false,
+                image: img,
+                timestamp: Date.now()
+              })
+              console.log('🚀 Preloaded adjacent map:', mapCheck.url)
+            }
+            
+            img.onerror = () => {
+              imagePreloadCache.set(mapCheck.url, {
+                loaded: false,
+                loading: false,
+                error: true,
+                image: img,
+                timestamp: Date.now()
+              })
+            }
+            
+            img.src = mapCheck.url
+          }
+        })
+        .catch(() => {
+          // Ignore preload errors
+        })
+    )
+  }
+  
+  // Don't wait for preloading to complete
+  Promise.all(preloadPromises).catch(() => {
+    // Ignore preload errors
+  })
+}
 
 // Utility function to check if static map exists and create URL
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
@@ -304,26 +388,84 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
-  // Handle staticMapUrl changes with proper cleanup
+  // Handle staticMapUrl changes with caching
   useEffect(() => {
     if (!staticMapUrl) {
       setIsLoadingMap(false)
       return
     }
 
+    // Check if image is already cached
+    const cached = imagePreloadCache.get(staticMapUrl)
+    if (cached) {
+      if (cached.loaded) {
+        console.log('📦 Using cached map image:', staticMapUrl)
+        setIsLoadingMap(false)
+        return
+      } else if (cached.loading) {
+        console.log('⏳ Map image already loading:', staticMapUrl)
+        setIsLoadingMap(true)
+        
+        // Wait for existing load to complete
+        const checkLoaded = () => {
+          const current = imagePreloadCache.get(staticMapUrl)
+          if (current && (current.loaded || current.error)) {
+            setIsLoadingMap(false)
+          } else {
+            setTimeout(checkLoaded, 100)
+          }
+        }
+        checkLoaded()
+        return
+      } else if (cached.error) {
+        console.log('❌ Using cached error state for:', staticMapUrl)
+        setIsLoadingMap(false)
+        return
+      }
+    }
+
     let isCancelled = false
     const img = new Image()
     
+    // Mark as loading in cache
+    imagePreloadCache.set(staticMapUrl, {
+      loaded: false,
+      loading: true,
+      error: false,
+      image: img,
+      timestamp: Date.now()
+    })
+    
     const handleLoad = () => {
       if (!isCancelled) {
-        console.log('✅ Map image preloaded successfully:', staticMapUrl)
+        console.log('✅ Map image loaded and cached:', staticMapUrl)
+        
+        // Update cache
+        imagePreloadCache.set(staticMapUrl, {
+          loaded: true,
+          loading: false,
+          error: false,
+          image: img,
+          timestamp: Date.now()
+        })
+        
         setIsLoadingMap(false)
       }
     }
     
     const handleError = () => {
       if (!isCancelled) {
-        console.error('❌ Map image preload failed:', staticMapUrl)
+        console.error('❌ Map image load failed:', staticMapUrl)
+        
+        // Update cache with error state
+        imagePreloadCache.set(staticMapUrl, {
+          loaded: false,
+          loading: false,
+          error: true,
+          image: img,
+          timestamp: Date.now()
+        })
+        
         setIsLoadingMap(false)
       }
     }
@@ -338,9 +480,10 @@ function MapboxMap({ activities, height, selectedActivity }: {
     // Cleanup function
     return () => {
       isCancelled = true
+      
+      // Don't remove from cache, but clean up event listeners
       img.onload = null
       img.onerror = null
-      img.src = '' // Cancel loading
     }
   }, [staticMapUrl])
 
@@ -560,6 +703,17 @@ export default function RunningMap({
       setSelectedActivity(mapEnabledActivities[0])
     }
   }, [mapEnabledActivities, selectedActivity])
+
+  // Preload adjacent maps when selected activity changes
+  useEffect(() => {
+    if (selectedActivity && mapEnabledActivities.length > 1) {
+      const currentIndex = mapEnabledActivities.findIndex(a => a.id === selectedActivity.id)
+      if (currentIndex >= 0) {
+        // Preload adjacent activities in background
+        preloadAdjacentMaps(mapEnabledActivities, currentIndex)
+      }
+    }
+  }, [selectedActivity, mapEnabledActivities])
 
   // If no activities with GPS data, show placeholder
   if (mapEnabledActivities.length === 0) {
