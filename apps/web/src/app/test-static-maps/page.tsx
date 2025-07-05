@@ -84,6 +84,10 @@ export default function TestStaticMapsPage() {
       {
         name: 'Local/Vercel',
         url: `/maps/${activityId}.png`
+      },
+      {
+        name: 'Direct GitHub Raw',
+        url: `https://raw.githubusercontent.com/${githubUser}/running2.0/master/apps/web/public/maps/${activityId}.png`
       }
     ]
 
@@ -91,11 +95,44 @@ export default function TestStaticMapsPage() {
     
     for (const test of testUrls) {
       try {
+        console.log(`Testing ${test.name}: ${test.url}`)
         const response = await fetch(test.url, { method: 'HEAD' })
         console.log(`${test.name}: ${response.status} ${response.statusText}`)
-        console.log(`URL: ${test.url}`)
+        
+        // Also try to load as image
+        const img = new Image()
+        img.onload = () => console.log(`✅ ${test.name} image loaded successfully`)
+        img.onerror = () => console.log(`❌ ${test.name} image failed to load`)
+        img.src = test.url
+        
       } catch (error) {
         console.error(`${test.name} failed:`, error)
+      }
+    }
+  }
+
+  const checkServerFiles = async () => {
+    if (sampleActivityIds.length === 0) return
+
+    console.log('Checking server-side file existence...')
+    
+    // Check maps directory
+    try {
+      const response = await fetch('/api/check-maps', { method: 'POST' })
+      const data = await response.json()
+      console.log('Maps directory info:', data)
+    } catch (error) {
+      console.error('Failed to check maps directory:', error)
+    }
+    
+    // Check specific files
+    for (const activityId of sampleActivityIds.slice(0, 3)) {
+      try {
+        const response = await fetch(`/api/check-maps?activityId=${activityId}`)
+        const data = await response.json()
+        console.log(`Server check for ${activityId}:`, data)
+      } catch (error) {
+        console.error(`Server check failed for ${activityId}:`, error)
       }
     }
   }
@@ -134,7 +171,7 @@ export default function TestStaticMapsPage() {
             </p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <button
               onClick={testStaticMaps}
               disabled={testing || sampleActivityIds.length === 0}
@@ -149,6 +186,14 @@ export default function TestStaticMapsPage() {
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Test Direct URLs
+            </button>
+            
+            <button
+              onClick={checkServerFiles}
+              disabled={sampleActivityIds.length === 0}
+              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Check Server Files
             </button>
           </div>
         </div>
