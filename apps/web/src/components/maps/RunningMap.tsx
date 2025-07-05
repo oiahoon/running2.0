@@ -72,22 +72,37 @@ async function getStaticMapUrl(activity: Activity, width: number, height: number
   // Use external_id for static map filename (Strava activity ID)
   const activityId = activity.external_id || activity.id
   
-  // Import CDN utilities
-  const { getStaticMapUrl: getCDNUrl, checkStaticMapExists } = await import('@/lib/utils/cdn')
+  // Check CDN provider preference
+  const cdnProvider = process.env.NEXT_PUBLIC_CDN_PROVIDER || 'jsdelivr'
+  const githubUser = 'oiahoon' // Your GitHub username
   
-  try {
-    // Check if static map exists (tries CDN first, then local)
-    const mapCheck = await checkStaticMapExists(activityId.toString())
-    
-    if (mapCheck.exists) {
-      console.log(`✅ Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
-      return mapCheck.url
-    }
-  } catch (error) {
-    // Static map doesn't exist, will fallback to API
-    console.log(`⚠️ Static map not found for activity ${activityId}, using Mapbox API`)
+  let testUrls: string[] = []
+  
+  if (cdnProvider === 'jsdelivr') {
+    // Try jsDelivr CDN first
+    const jsdelivrUrl = `https://cdn.jsdelivr.net/gh/${githubUser}/running2.0@master/apps/web/public/maps/${activityId}.png`
+    testUrls.push(jsdelivrUrl)
   }
   
+  // Always include local as fallback
+  testUrls.push(`/maps/${activityId}.png`)
+  
+  // Test URLs in order of preference
+  for (const url of testUrls) {
+    try {
+      console.log(`🧪 Testing map URL: ${url}`)
+      const response = await fetch(url, { method: 'HEAD' })
+      if (response.ok) {
+        const source = url.includes('jsdelivr') ? 'jsDelivr CDN' : 'Local/Vercel'
+        console.log(`✅ Using ${source} for activity ${activityId}: ${url}`)
+        return url
+      }
+    } catch (error) {
+      console.log(`❌ Failed to load from ${url}:`, error)
+    }
+  }
+  
+  console.log(`⚠️ No static map found for activity ${activityId}, using Mapbox API`)
   return null
 }
 

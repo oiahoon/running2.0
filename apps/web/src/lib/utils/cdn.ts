@@ -34,20 +34,43 @@ export function getStaticMapUrl(activityId: string, options: {
   const { fallbackToLocal = true, preferCDN = 'jsdelivr' } = options
   
   // GitHub repository info (get from environment or config)
-  const githubUser = process.env.NEXT_PUBLIC_GITHUB_USERNAME || 'your-username'
+  const githubUser = (typeof window !== 'undefined' 
+    ? window.location.hostname.includes('run2.miaowu.org') ? 'oiahoon' : 'your-username'
+    : process.env.NEXT_PUBLIC_GITHUB_USERNAME) || 'oiahoon'
   const repoName = 'running2.0'
-  const branch = 'master' // or 'main'
+  const branch = 'master'
   const mapPath = `apps/web/public/maps/${activityId}.png`
+  
+  console.log(`🔧 CDN Config - User: ${githubUser}, Prefer: ${preferCDN}`)
   
   // Try preferred CDN first
   switch (preferCDN) {
     case 'jsdelivr':
       if (CDN_CONFIG.jsdelivr.enabled) {
-        return `${CDN_CONFIG.jsdelivr.baseUrl}/${githubUser}/${repoName}@${branch}/${mapPath}`
+        const url = `${CDN_CONFIG.jsdelivr.baseUrl}/${githubUser}/${repoName}@${branch}/${mapPath}`
+        console.log(`🌐 Generated jsDelivr URL: ${url}`)
+        return url
       }
       break
       
     case 'cloudflare':
+      if (CDN_CONFIG.cloudflare.enabled && CDN_CONFIG.cloudflare.baseUrl) {
+        return `${CDN_CONFIG.cloudflare.baseUrl}/maps/${activityId}.png`
+      }
+      break
+      
+    case 'vercel':
+      // Use Vercel's CDN with optimized caching
+      return `/maps/${activityId}.png`
+  }
+  
+  // Fallback to local/Vercel if CDN not available
+  if (fallbackToLocal) {
+    return `/maps/${activityId}.png`
+  }
+  
+  throw new Error(`No CDN available for activity ${activityId}`)
+}
       if (CDN_CONFIG.cloudflare.enabled && CDN_CONFIG.cloudflare.baseUrl) {
         return `${CDN_CONFIG.cloudflare.baseUrl}/maps/${activityId}.png`
       }
