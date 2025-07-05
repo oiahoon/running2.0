@@ -76,6 +76,7 @@ function StatsGrid() {
   }
 
   if (error || !stats) {
+    console.error('Dashboard stats error:', error)
     return (
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Total Activities" value="0" icon="🏃‍♂️" />
@@ -87,30 +88,31 @@ function StatsGrid() {
   }
 
   const basicStats = stats.basicStats || {}
+  console.log('Dashboard basicStats:', basicStats) // Debug log
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <StatsCard 
         title="Total Activities" 
-        value={basicStats.totalActivities || 0}
+        value={basicStats.total_activities || 0}
         icon="🏃‍♂️"
-        subtitle={`Since ${basicStats.firstActivity ? new Date(basicStats.firstActivity).getFullYear() : 'N/A'}`}
+        subtitle={`Since ${basicStats.first_activity ? new Date(basicStats.first_activity).getFullYear() : 'N/A'}`}
       />
       <StatsCard 
         title="Total Distance" 
-        value={formatDistance(basicStats.totalDistance || 0)}
+        value={formatDistance((basicStats.total_distance || 0) * 1000)} // Convert km to meters for formatDistance
         icon="📏"
         subtitle="All time"
       />
       <StatsCard 
         title="Total Time" 
-        value={formatDuration(basicStats.totalTime || 0)}
+        value={formatDuration(basicStats.total_time || 0)}
         icon="⏱️"
         subtitle="Moving time"
       />
       <StatsCard 
         title="Avg Distance" 
-        value={formatDistance(basicStats.avgDistance || 0)}
+        value={formatDistance((basicStats.avg_distance || 0) * 1000)} // Convert km to meters for formatDistance
         icon="📊"
         subtitle="Per activity"
       />

@@ -66,7 +66,44 @@ function decodePolyline(encoded: string): [number, number][] {
   }
 }
 
-// Utility function to create safe Mapbox URLs that won't exceed limits
+// Utility function to create safe Mapbox URLs with caching
+async function createCachedMapboxUrl(
+  activities: Activity[], 
+  bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number },
+  width: number,
+  height: number,
+  mapType: 'overview' | 'single',
+  token: string
+): Promise<string> {
+  // For single activity with polyline, try to use cache
+  if (mapType === 'single' && activities.length === 1 && activities[0].summary_polyline) {
+    const activity = activities[0]
+    
+    // Check cache first (client-side, we'll use a simpler approach)
+    const cacheKey = `map-${activity.id}-${width}x${height}`
+    const cachedUrl = localStorage.getItem(cacheKey)
+    
+    if (cachedUrl) {
+      // Check if cached URL is still valid (not older than 1 day)
+      const cacheTime = localStorage.getItem(`${cacheKey}-time`)
+      if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
+        return cachedUrl
+      }
+    }
+    
+    // Generate new URL
+    const newUrl = createSafeMapboxUrl(activities, bounds, width, height, mapType, token)
+    
+    // Cache the URL
+    localStorage.setItem(cacheKey, newUrl)
+    localStorage.setItem(`${cacheKey}-time`, Date.now().toString())
+    
+    return newUrl
+  }
+  
+  // For other cases, use regular URL generation
+  return createSafeMapboxUrl(activities, bounds, width, height, mapType, token)
+}
 function createSafeMapboxUrl(
   activities: Activity[], 
   bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number },
@@ -433,58 +470,59 @@ export default function RunningMap({
   activities = [], 
   height = 400, 
   showControls = true,
-  defaultView = 'overview'
+  defaultView = 'single'
 }: RunningMapProps) {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
-  const [mapType, setMapType] = useState<'overview' | 'single'>(defaultView)
 
   // Filter activities that should show on map (Run, Walk, Hike, Ride)
   const mapEnabledActivities = activities.filter(activity => 
     shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
   )
 
-  // Filter activities that should show tracks
-  const trackEnabledActivities = mapEnabledActivities.filter(activity =>
-    shouldShowTrack(activity.type) && activity.summary_polyline
-  )
-
-  // Auto-select first activity when switching to single mode
+  // Auto-select first activity (latest) when activities change
   useEffect(() => {
-    if (mapType === 'single' && !selectedActivity && mapEnabledActivities.length > 0) {
+    if (!selectedActivity && mapEnabledActivities.length > 0) {
       setSelectedActivity(mapEnabledActivities[0])
     }
-  }, [mapType, selectedActivity, mapEnabledActivities])
+  }, [mapEnabledActivities, selectedActivity])
+
+  // If no activities with GPS data, show placeholder
+  if (mapEnabledActivities.length === 0) {
+    return (
+      <div 
+        className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center justify-center"
+        style={{ height }}
+      >
+        <div className="text-center p-8">
+          <div className="text-4xl mb-4">🗺️</div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No GPS Activities
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            Activities with GPS data will show here
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       {/* Controls */}
-      {showControls && mapEnabledActivities.length > 0 && (
+      {showControls && mapEnabledActivities.length > 1 && (
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center space-x-4">
-            <select
-              value={mapType}
-              onChange={(e) => setMapType(e.target.value as 'overview' | 'single')}
-              className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value="overview">Overview - All Routes</option>
-              <option value="single">Single Activity</option>
-            </select>
-            
-            {mapType === 'single' && (
-              <ActivitySelector
-                selectedActivity={selectedActivity}
-                onActivitySelect={setSelectedActivity}
-                className="min-w-64"
-              />
-            )}
+            <ActivitySelector
+              selectedActivity={selectedActivity}
+              onActivitySelect={setSelectedActivity}
+              className="min-w-64"
+            />
           </div>
           
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            {mapType === 'overview' 
-              ? `${mapEnabledActivities.length} routes displayed`
-              : selectedActivity 
-                ? `Route: ${selectedActivity.name}`
-                : 'No route selected'
+            {selectedActivity 
+              ? `Route: ${selectedActivity.name}`
+              : 'No route selected'
             }
           </div>
         </div>
@@ -492,9 +530,9 @@ export default function RunningMap({
 
       {/* Map */}
       <MapboxMap 
-        activities={mapEnabledActivities}
+        activities={selectedActivity ? [selectedActivity] : []}
         height={height}
-        mapType={mapType}
+        mapType="single"
         selectedActivity={selectedActivity}
       />
       
