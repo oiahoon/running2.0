@@ -67,6 +67,28 @@ function decodePolyline(encoded: string): [number, number][] {
   }
 }
 
+// Utility function to check if static map exists and create URL
+async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
+  // Check if static map file exists using API endpoint
+  const staticMapPath = `/maps/${activity.id}.png`
+  
+  try {
+    const response = await fetch(`/api/maps/${activity.id}`, { method: 'GET' })
+    if (response.ok) {
+      const data = await response.json()
+      if (data.exists) {
+        console.log(`✅ Using static map for activity ${activity.id}`)
+        return staticMapPath
+      }
+    }
+  } catch (error) {
+    // Static map doesn't exist or API error, will fallback to Mapbox API
+    console.log(`⚠️ Static map check failed for activity ${activity.id}, using Mapbox API`)
+  }
+  
+  return null
+}
+
 // Utility function to create safe Mapbox URLs with caching
 async function createCachedMapboxUrl(
   activities: Activity[], 
@@ -75,7 +97,15 @@ async function createCachedMapboxUrl(
   height: number,
   token: string
 ): Promise<string> {
-  // For single activity with polyline, try to use cache
+  // For single activity, try static map first
+  if (activities.length === 1) {
+    const staticUrl = await getStaticMapUrl(activities[0], width, height)
+    if (staticUrl) {
+      return staticUrl
+    }
+  }
+  
+  // For single activity with polyline, try localStorage cache
   if (activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
     
@@ -87,11 +117,13 @@ async function createCachedMapboxUrl(
       // Check if cached URL is still valid (not older than 1 day)
       const cacheTime = localStorage.getItem(`${cacheKey}-time`)
       if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
+        console.log(`📦 Using cached map URL for activity ${activity.id}`)
         return cachedUrl
       }
     }
     
     // Generate new URL
+    console.log(`🌐 Generating new Mapbox URL for activity ${activity.id}`)
     const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
     // Cache the URL
@@ -102,6 +134,7 @@ async function createCachedMapboxUrl(
   }
   
   // For other cases, use regular URL generation
+  console.log(`🗺️ Using regular Mapbox URL for ${activities.length} activities`)
   return createSafeMapboxUrl(activities, bounds, width, height, token)
 }
 

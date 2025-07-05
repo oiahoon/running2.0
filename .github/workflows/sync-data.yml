@@ -11,6 +11,11 @@ on:
         required: false
         default: 'false'
         type: boolean
+      regenerate_maps:
+        description: 'Regenerate all static maps'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: write
@@ -19,6 +24,7 @@ env:
   STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
   STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
   STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+  MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
 
 jobs:
   sync-data:
@@ -55,6 +61,7 @@ jobs:
       run: |
         mkdir -p apps/web/data
         mkdir -p apps/web/public
+        mkdir -p apps/web/public/maps
         
     - name: Run Strava sync
       run: |
@@ -67,6 +74,13 @@ jobs:
       run: |
         cd scripts
         node migrate-strava-json.js
+        
+    - name: Generate static maps
+      run: |
+        cd scripts
+        python generate-static-maps.py
+      env:
+        REGENERATE_MAPS: ${{ github.event.inputs.regenerate_maps }}
         
     - name: Prepare database for Vercel
       run: |
@@ -94,6 +108,13 @@ jobs:
           echo "- Database records: $DB_COUNT" >> sync-report.md
         fi
         
+        # Map statistics
+        if [ -d "../public/maps" ]; then
+          MAP_COUNT=$(find ../public/maps -name "*.png" | wc -l)
+          MAP_SIZE=$(du -sh ../public/maps 2>/dev/null | cut -f1 || echo "0")
+          echo "- Static maps: $MAP_COUNT files ($MAP_SIZE)" >> sync-report.md
+        fi
+        
         echo "" >> sync-report.md
         echo "Last sync: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> sync-report.md
         
@@ -117,7 +138,7 @@ jobs:
         git diff --staged --name-only
         
         # Commit with detailed message
-        COMMIT_MSG="🔄 Auto-sync Strava data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        COMMIT_MSG="🔄 Auto-sync Strava data with static maps - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         
         if [ -f "apps/web/data/sync-report.md" ]; then
           echo "$COMMIT_MSG" > commit_body.txt
