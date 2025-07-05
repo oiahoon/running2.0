@@ -71,14 +71,17 @@ function decodePolyline(encoded: string): [number, number][] {
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
   // Use external_id for static map filename (Strava activity ID)
   const activityId = activity.external_id || activity.id
-  const staticMapPath = `/maps/${activityId}.png`
+  
+  // Import CDN utilities
+  const { getStaticMapUrl: getCDNUrl, checkStaticMapExists } = await import('@/lib/utils/cdn')
   
   try {
-    // Try to fetch the static map file directly
-    const response = await fetch(staticMapPath, { method: 'HEAD' })
-    if (response.ok) {
-      console.log(`✅ Using static map for activity ${activityId}`)
-      return staticMapPath
+    // Check if static map exists (tries CDN first, then local)
+    const mapCheck = await checkStaticMapExists(activityId.toString())
+    
+    if (mapCheck.exists) {
+      console.log(`✅ Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
+      return mapCheck.url
     }
   } catch (error) {
     // Static map doesn't exist, will fallback to API
