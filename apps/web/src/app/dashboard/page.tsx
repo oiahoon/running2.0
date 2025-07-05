@@ -199,7 +199,7 @@ function RecentActivitiesWithMap() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-full overflow-hidden">
       <div className="px-4 py-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -400,32 +400,34 @@ export default function DashboardPage() {
   console.log('Dashboard stats error:', error)
   
   return (
-    <div className="space-y-8 overflow-x-hidden">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Welcome back! Here&apos;s an overview of your all-time running activities and recent progress.
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <StatsGrid />
-
-      {/* Main Content - Mobile Responsive */}
+    <div className="w-full max-w-full overflow-x-hidden">
       <div className="space-y-8">
-        {/* Recent Activities with Integrated Map */}
-        <RecentActivitiesWithMap />
+        {/* Page Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+            Welcome back! Here&apos;s an overview of your all-time running activities and recent progress.
+          </p>
+        </div>
 
-        {/* GitHub Style Heatmap - Enhanced */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <YearAwareHeatmap 
-              initialYear={currentYear}
-              showYearNavigation={true}
-              height={350}
-              cellSize={16}
-            />
+        {/* Stats Grid */}
+        <StatsGrid />
+
+        {/* Main Content - Mobile Responsive */}
+        <div className="space-y-8">
+          {/* Recent Activities with Integrated Map */}
+          <RecentActivitiesWithMap />
+
+          {/* GitHub Style Heatmap - Enhanced */}
+          <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="px-4 py-5 sm:p-6">
+              <YearAwareHeatmap 
+                initialYear={currentYear}
+                showYearNavigation={true}
+                height={350}
+                cellSize={16}
+              />
+            </div>
           </div>
         </div>
       </div>
