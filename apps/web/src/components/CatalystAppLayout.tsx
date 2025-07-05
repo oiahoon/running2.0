@@ -198,6 +198,10 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
                 <HomeIcon className="w-5 h-5" />
                 <SidebarLabel>Dashboard</SidebarLabel>
               </SidebarItem>
+              <SidebarItem href="/map" current={pathname === '/map'}>
+                <MapIcon className="w-5 h-5" />
+                <SidebarLabel>Map</SidebarLabel>
+              </SidebarItem>
               <SidebarItem href="/activities" current={pathname === '/activities'}>
                 <ListBulletIcon className="w-5 h-5" />
                 <SidebarLabel>Activities</SidebarLabel>
@@ -205,10 +209,6 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
               <SidebarItem href="/stats" current={pathname === '/stats'}>
                 <ChartBarIcon className="w-5 h-5" />
                 <SidebarLabel>Statistics</SidebarLabel>
-              </SidebarItem>
-              <SidebarItem href="/map" current={pathname === '/map'}>
-                <MapIcon className="w-5 h-5" />
-                <SidebarLabel>Map</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/sync" current={pathname === '/sync'}>
                 <ArrowPathIcon className="w-5 h-5" />

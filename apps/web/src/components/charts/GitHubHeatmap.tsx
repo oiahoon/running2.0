@@ -273,28 +273,42 @@ export default function GitHubHeatmap({
         {/* Tooltip */}
         {hoveredCell && showTooltip && (
           <div
-            className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-md px-2 py-1 pointer-events-none shadow-lg"
+            className="fixed z-50 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-md px-3 py-2 pointer-events-none shadow-lg border border-gray-700"
             style={{
               left: hoveredCell.x,
-              top: hoveredCell.y - 40,
+              top: hoveredCell.y - 50,
               transform: 'translateX(-50%)'
             }}
           >
             <div className="text-center">
-              <div className="font-medium">
-                {hoveredCell.distance && hoveredCell.distance > 0 
-                  ? `${(hoveredCell.distance / 1000).toFixed(1)}km`
-                  : `${hoveredCell.count} ${hoveredCell.count === 1 ? 'activity' : 'activities'}`
-                }
+              <div className="font-medium text-blue-200 mb-1">
+                {new Date(hoveredCell.date).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
               </div>
-              {hoveredCell.distance && hoveredCell.distance > 0 && hoveredCell.count > 0 && (
-                <div className="text-gray-300">
-                  {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
-                </div>
+              {hoveredCell.distance && hoveredCell.distance > 0 ? (
+                <>
+                  <div className="font-bold text-lg text-white">
+                    {(hoveredCell.distance / 1000).toFixed(1)}km
+                  </div>
+                  <div className="text-gray-300 text-xs">
+                    🏃‍♂️ {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1 border-t border-gray-600 pt-1">
+                    💡 Intensity based on distance
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-lg text-white">
+                    {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1 border-t border-gray-600 pt-1">
+                    💡 Non-distance activity
+                  </div>
+                </>
               )}
-              <div className="text-gray-300">
-                {new Date(hoveredCell.date).toLocaleDateString()}
-              </div>
             </div>
           </div>
         )}

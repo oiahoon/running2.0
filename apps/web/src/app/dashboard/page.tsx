@@ -126,26 +126,48 @@ function StatsGrid() {
 function RecentActivitiesWithMap() {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [allActivities, setAllActivities] = useState<Activity[]>([])
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageSize = 10
 
   const { data, isLoading } = useActivities({}, currentPage, pageSize)
-  const activities = data?.activities || []
-  const totalCount = data?.totalCount || 0
-  const hasMore = currentPage * pageSize < totalCount
+
+  // Handle new data - accumulate for infinite scroll
+  useEffect(() => {
+    if (data?.activities) {
+      if (currentPage === 1) {
+        setAllActivities(data.activities)
+      } else {
+        setAllActivities(prev => [...prev, ...data.activities])
+      }
+      setHasMore(data.activities.length === pageSize)
+      setIsLoadingMore(false)
+    }
+  }, [data, currentPage])
 
   // Auto-select first activity with GPS data
   useEffect(() => {
-    if (!selectedActivity && activities.length > 0) {
-      const firstGpsActivity = activities.find(a => 
+    if (!selectedActivity && allActivities.length > 0) {
+      const firstGpsActivity = allActivities.find(a => 
         a.start_latitude && a.start_longitude && shouldShowOnMap(a.type)
       )
-      setSelectedActivity(firstGpsActivity || activities[0])
+      setSelectedActivity(firstGpsActivity || allActivities[0])
     }
-  }, [activities, selectedActivity])
+  }, [allActivities, selectedActivity])
 
   const loadMore = () => {
-    if (hasMore && !isLoading) {
+    if (hasMore && !isLoading && !isLoadingMore) {
+      setIsLoadingMore(true)
       setCurrentPage(prev => prev + 1)
+    }
+  }
+
+  // Scroll event listener for the activities container
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    if (scrollHeight - scrollTop <= clientHeight + 100) { // 100px threshold
+      loadMore()
     }
   }
 
@@ -188,8 +210,11 @@ function RecentActivitiesWithMap() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Activities List */}
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {activities.map((activity) => {
+          <div 
+            className="space-y-3 max-h-96 overflow-y-auto"
+            onScroll={handleScroll}
+          >
+            {allActivities.map((activity) => {
               const config = getActivityConfig(activity.type)
               const isSelected = selectedActivity?.id === activity.id
               const hasGps = activity.start_latitude && activity.start_longitude
@@ -237,15 +262,20 @@ function RecentActivitiesWithMap() {
               )
             })}
             
-            {/* Load More Button */}
-            {hasMore && (
-              <button
-                onClick={loadMore}
-                disabled={isLoading}
-                className="w-full p-3 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg border border-dashed border-blue-300 dark:border-blue-600 disabled:opacity-50 transition-colors"
-              >
-                {isLoading ? 'Loading...' : `Load More (${totalCount - activities.length} remaining)`}
-              </button>
+            {/* Loading More Indicator */}
+            {isLoadingMore && (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              </div>
+            )}
+            
+            {/* End of Results */}
+            {!hasMore && allActivities.length > 0 && (
+              <div className="text-center py-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  All activities loaded
+                </p>
+              </div>
             )}
           </div>
 

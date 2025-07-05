@@ -69,7 +69,7 @@ export default function WaterfallMapView({
     setCurrentPage(1)
     setAllActivities([])
     setHasMore(true)
-  }, [filters])
+  }, [JSON.stringify(filters)]) // Use JSON.stringify to properly detect filter changes
 
   // Infinite scroll handler
   const loadMore = useCallback(() => {

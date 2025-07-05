@@ -398,64 +398,57 @@ export default function StatsPage() {
 
       {/* Charts and Visualizations */}
       <div className="space-y-8">
-        {/* Monthly Chart */}
-        <MonthlyChart yearStats={yearStats} />
+        {/* Year Overview Statistics - First */}
+        {yearStats?.basicStats && (
+          <YearOverviewStats yearStats={yearStats} />
+        )}
 
-        {/* Activity Types */}
-        <ActivityTypesSection yearStats={yearStats} />
+        {/* Monthly Progress Chart - Overview */}
+        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 && (
+          <MonthlyChart yearStats={yearStats} />
+        )}
+
+        {/* Activity Calendar */}
+        {yearStats?.monthlyData && yearStats.monthlyData.length > 0 && (
+          <ActivityCalendarSection selectedYear={selectedYear} yearStats={yearStats} />
+        )}
+
+        {/* Activity Types Distribution */}
+        {yearStats?.activityTypes && yearStats.activityTypes.length > 0 && (
+          <ActivityTypesSection yearStats={yearStats} />
+        )}
 
         {/* Personal Records */}
-        <PersonalRecords 
-          records={yearStats?.personalRecords || {}} 
-          isLoading={isLoading}
-        />
+        {yearStats?.personalRecords && Object.keys(yearStats.personalRecords).length > 0 && (
+          <PersonalRecords 
+            records={yearStats.personalRecords} 
+            isLoading={isLoading}
+          />
+        )}
 
         {/* Weekly Progress */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              📈 Weekly Progress
-            </h3>
-            {yearStats?.weeklyStats && yearStats.weeklyStats.length > 0 ? (
+        {yearStats?.weeklyStats && yearStats.weeklyStats.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                📈 Weekly Progress
+              </h3>
               <WeeklyProgressChart data={yearStats.weeklyStats} />
-            ) : (
-              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">📊</div>
-                  <p className="text-gray-500 dark:text-gray-400">Loading weekly progress...</p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Pace Analysis */}
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              ⚡ Pace Analysis
-            </h3>
-            {yearStats?.paceAnalysis && yearStats.paceAnalysis.length > 0 ? (
+        {yearStats?.paceAnalysis && yearStats.paceAnalysis.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                ⚡ Pace Analysis
+              </h3>
               <PaceAnalysisChart data={yearStats.paceAnalysis} />
-            ) : (
-              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">⚡</div>
-                  <p className="text-gray-500 dark:text-gray-400">No pace data available</p>
-                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                    Pace analysis shows after running activities
-                  </p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-
-        {/* Calendar Heatmap */}
-        <ActivityCalendarSection selectedYear={selectedYear} yearStats={yearStats} />
-
-        {/* Year Overview Statistics */}
-        <YearOverviewStats yearStats={yearStats} />
+        )}
       </div>
     </div>
   )
