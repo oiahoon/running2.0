@@ -134,12 +134,50 @@ async function performCdnCheck(activityId: string): Promise<{
   url: string
   source: 'cdn' | 'local'
 }> {
-  // Try CDN first
+  // For debugging: prefer local files first if we're in development or if CDN is having issues
+  const preferLocal = process.env.NODE_ENV === 'development' || 
+                     process.env.NEXT_PUBLIC_PREFER_LOCAL_MAPS === 'true'
+  
+  if (preferLocal) {
+    console.log(`🏠 Preferring local files for debugging`)
+    
+    // Try local first
+    const localUrl = `/maps/${activityId}.png`
+    console.log(`🏠 Testing local URL: ${localUrl}`)
+    
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+      
+      const response = await fetch(localUrl, { 
+        method: 'HEAD',
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      console.log(`🏠 Local response: ${response.status} ${response.statusText}`)
+      
+      if (response.ok) {
+        return {
+          exists: true,
+          url: localUrl,
+          source: 'local'
+        }
+      }
+    } catch (error) {
+      console.log(`❌ Local check failed for ${activityId}:`, error.message)
+    }
+  }
+  
+  // Try CDN
   const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
+  
+  console.log(`🧪 Testing CDN URL: ${cdnUrl}`)
   
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // Increased to 10 seconds
     
     const response = await fetch(cdnUrl, { 
       method: 'HEAD',
@@ -147,6 +185,8 @@ async function performCdnCheck(activityId: string): Promise<{
     })
     
     clearTimeout(timeoutId)
+    
+    console.log(`📡 CDN response: ${response.status} ${response.statusText}`)
     
     if (response.ok) {
       return {
@@ -157,34 +197,44 @@ async function performCdnCheck(activityId: string): Promise<{
     }
   } catch (error) {
     if (error.name !== 'AbortError') {
-      console.log(`CDN check failed for ${activityId}, trying local`)
+      console.log(`❌ CDN check failed for ${activityId}:`, error.message)
+    } else {
+      console.log(`⏰ CDN check timeout for ${activityId}`)
     }
   }
   
-  // Fallback to local
-  const localUrl = `/maps/${activityId}.png`
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+  // Fallback to local if not already tried
+  if (!preferLocal) {
+    const localUrl = `/maps/${activityId}.png`
+    console.log(`🏠 Testing local URL: ${localUrl}`)
     
-    const response = await fetch(localUrl, { 
-      method: 'HEAD',
-      signal: controller.signal
-    })
-    
-    clearTimeout(timeoutId)
-    
-    return {
-      exists: response.ok,
-      url: localUrl,
-      source: 'local'
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout for local
+      
+      const response = await fetch(localUrl, { 
+        method: 'HEAD',
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      console.log(`🏠 Local response: ${response.status} ${response.statusText}`)
+      
+      return {
+        exists: response.ok,
+        url: localUrl,
+        source: 'local'
+      }
+    } catch (error) {
+      console.log(`❌ Local check failed for ${activityId}:`, error.message)
     }
-  } catch (error) {
-    return {
-      exists: false,
-      url: localUrl,
-      source: 'local'
-    }
+  }
+  
+  return {
+    exists: false,
+    url: `/maps/${activityId}.png`,
+    source: 'local'
   }
 }
 
