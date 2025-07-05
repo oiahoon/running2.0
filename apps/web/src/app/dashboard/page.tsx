@@ -213,7 +213,7 @@ function RecentActivitiesWithMap() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Left: Activities List */}
           <div 
             className="space-y-3 max-h-96 overflow-y-auto"
@@ -259,7 +259,7 @@ function RecentActivitiesWithMap() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden sm:block">
+                    <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 hidden md:block">
                       {new Date(activity.start_date).toLocaleDateString()}
                     </div>
                   </div>
@@ -289,7 +289,7 @@ function RecentActivitiesWithMap() {
             {selectedActivity ? (
               <>
                 {/* Map */}
-                <div className="h-48 sm:h-64">
+                <div className="h-48 sm:h-64 xl:h-80">
                   <RunningMap
                     key={selectedActivity.id} // Force re-render when activity changes
                     activities={[selectedActivity]}
@@ -349,7 +349,7 @@ function RecentActivitiesWithMap() {
                 </div>
               </>
             ) : (
-              <div className="h-48 sm:h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="h-48 sm:h-64 xl:h-80 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-4xl mb-2">🏃‍♂️</div>
                   <p className="text-gray-500 dark:text-gray-400">
@@ -402,21 +402,21 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <StatsGrid />
 
-      {/* Main Content Grid */}
-      {/* Recent Activities with Integrated Map */}
-      <div className="col-span-1 lg:col-span-2">
+      {/* Main Content - Mobile Responsive */}
+      <div className="space-y-8">
+        {/* Recent Activities with Integrated Map */}
         <RecentActivitiesWithMap />
-      </div>
 
-      {/* GitHub Style Heatmap - Enhanced */}
-      <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="px-4 py-5 sm:p-6">
-          <YearAwareHeatmap 
-            initialYear={currentYear}
-            showYearNavigation={true}
-            height={350}
-            cellSize={16}
-          />
+        {/* GitHub Style Heatmap - Enhanced */}
+        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="px-4 py-5 sm:p-6">
+            <YearAwareHeatmap 
+              initialYear={currentYear}
+              showYearNavigation={true}
+              height={350}
+              cellSize={16}
+            />
+          </div>
         </div>
       </div>
     </div>

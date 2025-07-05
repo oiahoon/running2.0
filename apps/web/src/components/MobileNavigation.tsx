@@ -104,17 +104,7 @@ export default function MobileNavigation({ className = '' }: MobileNavigationPro
       {/* Mobile Navigation Header - Only visible on mobile */}
       <div className={`lg:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 ${className}`}>
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Logo/Title */}
-          <div className="flex items-center space-x-3">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 text-white">
-              🏃‍♂️
-            </div>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Running Page 2.0
-            </h1>
-          </div>
-
-          {/* Menu Button */}
+          {/* Menu Button - Left Side */}
           <button
             onClick={toggleMenu}
             className="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -126,6 +116,19 @@ export default function MobileNavigation({ className = '' }: MobileNavigationPro
               <MenuIcon className="w-6 h-6" />
             )}
           </button>
+
+          {/* Logo/Title - Center */}
+          <div className="flex items-center space-x-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 text-white">
+              🏃‍♂️
+            </div>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Running Page 2.0
+            </h1>
+          </div>
+
+          {/* Spacer - Right Side */}
+          <div className="w-10"></div>
         </div>
       </div>
 
