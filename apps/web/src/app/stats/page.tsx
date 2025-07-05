@@ -52,61 +52,6 @@ function YearSelector({ selectedYear, onYearChange }: {
   )
 }
 
-function YearlyStatsGrid({ stats }: { stats: any }) {
-  if (!stats) {
-    return (
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
-            <div className="p-5">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  const statItems = [
-    { name: 'Total Distance', value: formatDistance(stats.totalDistance), icon: '📏' },
-    { name: 'Total Time', value: formatDuration(stats.totalTime), icon: '⏱️' },
-    { name: 'Activities', value: stats.totalActivities.toString(), icon: '🏃' },
-    { name: 'Average Pace', value: formatPace(stats.averageDistance > 0 ? stats.totalTime / (stats.totalDistance / 1000) : 0), icon: '⚡' },
-    { name: 'Longest Run', value: formatDistance(stats.longestRun), icon: '🎯' },
-    { name: 'Average Distance', value: formatDistance(stats.averageDistance), icon: '📊' },
-  ]
-
-  return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {statItems.map((item) => (
-        <div
-          key={item.name}
-          className="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700"
-        >
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="text-2xl">{item.icon}</div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                    {item.name}
-                  </dt>
-                  <dd className="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {item.value}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function MonthlyChart({ yearStats }: { yearStats: any }) {
   // Transform data for burn-up chart
   const monthlyData = yearStats?.monthlyData ? 
@@ -392,9 +337,6 @@ export default function StatsPage() {
 
       {/* Year Selector */}
       <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
-
-      {/* Yearly Stats Grid */}
-      <YearlyStatsGrid stats={yearStats?.summary} />
 
       {/* Charts and Visualizations */}
       <div className="space-y-8">

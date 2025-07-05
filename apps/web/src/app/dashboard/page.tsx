@@ -82,10 +82,10 @@ function StatsGrid() {
     console.error('Dashboard stats error:', error)
     return (
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Total Activities" value="0" icon="🏃‍♂️" />
+        <StatsCard title="All-Time Activities" value="0" icon="🏃‍♂️" />
         <StatsCard title="Total Distance" value="0 km" icon="📏" />
         <StatsCard title="Total Time" value="0h 0m" icon="⏱️" />
-        <StatsCard title="Avg Distance" value="0 km" icon="📊" />
+        <StatsCard title="Average Distance" value="0 km" icon="📊" />
       </div>
     )
   }
@@ -96,7 +96,7 @@ function StatsGrid() {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <StatsCard 
-        title="Total Activities" 
+        title="All-Time Activities" 
         value={basicStats.total_activities || 0}
         icon="🏃‍♂️"
         subtitle={`Since ${basicStats.first_activity ? new Date(basicStats.first_activity).getFullYear() : 'N/A'}`}
@@ -111,10 +111,10 @@ function StatsGrid() {
         title="Total Time" 
         value={formatDuration(basicStats.total_time || 0)}
         icon="⏱️"
-        subtitle="Moving time"
+        subtitle="All moving time"
       />
       <StatsCard 
-        title="Avg Distance" 
+        title="Average Distance" 
         value={formatDistance((basicStats.avg_distance || 0) * 1000)} // Convert km to meters for formatDistance
         icon="📊"
         subtitle="Per activity"
@@ -384,7 +384,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Welcome back! Here&apos;s an overview of your running activities.
+          Welcome back! Here&apos;s an overview of your all-time running activities and recent progress.
         </p>
       </div>
 
