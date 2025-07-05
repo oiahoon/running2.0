@@ -376,7 +376,12 @@ function MapPlaceholder() {
 
 export default function DashboardPage() {
   const currentYear = new Date().getFullYear()
-  const { data: stats } = useActivityStats()
+  const { data: stats, isLoading, error } = useActivityStats()
+  
+  // Debug logging
+  console.log('Dashboard stats:', stats)
+  console.log('Dashboard stats loading:', isLoading)
+  console.log('Dashboard stats error:', error)
   
   return (
     <div className="space-y-8">

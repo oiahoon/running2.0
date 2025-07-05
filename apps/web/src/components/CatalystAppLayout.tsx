@@ -155,11 +155,11 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
             <Dropdown>
               <DropdownButton as={NavbarItem}>
-                <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} />
+                <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} className="size-8" />
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
                 <DropdownItem href="/dashboard">
-                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} />
+                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} className="size-6" />
                   <DropdownLabel>Dashboard</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
@@ -248,7 +248,7 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             <Dropdown>
               <DropdownButton as={SidebarItem}>
                 <span className="flex min-w-0 items-center gap-3">
-                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} className="size-10" />
+                  <Avatar src={userInfo.avatar} initials={userInfo.name.charAt(0)} className="size-8" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
                       {userInfo.name}

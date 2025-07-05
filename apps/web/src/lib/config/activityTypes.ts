@@ -1,7 +1,7 @@
 // Activity types configuration with environment variable support
 export const DEFAULT_ACTIVITY_TYPES = [
   'Run',
-  'Hike', 
+  'Walk', 
   'Ride'
 ] as const
 
@@ -29,16 +29,17 @@ export const ACTIVITY_TYPE_MAPPINGS = {
   'run': 'Run',
   'running': 'Run',
   
-  // Hiking variations
-  'Hike': 'Hike',
-  'Hiking': 'Hike',
-  'hike': 'Hike',
-  'hiking': 'Hike',
-  'Walk': 'Hike', // Map walking to hiking
-  'walk': 'Hike',
-  'walking': 'Hike',
+  // Walking/Hiking variations (Walk is most common in your data)
+  'Walk': 'Walk',
+  'Walking': 'Walk',
+  'walk': 'Walk',
+  'walking': 'Walk',
+  'Hike': 'Walk', // Map hiking to walking since Walk is more common
+  'Hiking': 'Walk',
+  'hike': 'Walk',
+  'hiking': 'Walk',
   
-  // Cycling variations
+  // Cycling variations (Ride is the term used in your data)
   'Ride': 'Ride',
   'Cycling': 'Ride',
   'Bike': 'Ride',
@@ -53,10 +54,15 @@ export const ACTIVITY_TYPE_MAPPINGS = {
   'swim': 'Swim',
   'swimming': 'Swim',
   
-  // Other activities
+  // Weight Training (common in your data)
   'WeightTraining': 'WeightTraining',
   'Workout': 'WeightTraining',
-  'Gym': 'WeightTraining'
+  'Gym': 'WeightTraining',
+  
+  // Other activities from your data
+  'Rowing': 'Rowing',
+  'Elliptical': 'Elliptical',
+  'StandUpPaddling': 'StandUpPaddling'
 } as const
 
 // Normalize activity type
