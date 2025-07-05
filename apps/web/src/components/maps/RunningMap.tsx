@@ -69,19 +69,20 @@ function decodePolyline(encoded: string): [number, number][] {
 
 // Utility function to check if static map exists and create URL
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
-  // First try direct file access (faster)
-  const staticMapPath = `/maps/${activity.id}.png`
+  // Use external_id for static map filename (Strava activity ID)
+  const activityId = activity.external_id || activity.id
+  const staticMapPath = `/maps/${activityId}.png`
   
   try {
     // Try to fetch the static map file directly
     const response = await fetch(staticMapPath, { method: 'HEAD' })
     if (response.ok) {
-      console.log(`✅ Using static map for activity ${activity.id}`)
+      console.log(`✅ Using static map for activity ${activityId}`)
       return staticMapPath
     }
   } catch (error) {
     // Static map doesn't exist, will fallback to API
-    console.log(`⚠️ Static map not found for activity ${activity.id}, using Mapbox API`)
+    console.log(`⚠️ Static map not found for activity ${activityId}, using Mapbox API`)
   }
   
   return null
@@ -106,22 +107,23 @@ async function createCachedMapboxUrl(
   // For single activity with polyline, try localStorage cache
   if (activities.length === 1 && activities[0].summary_polyline) {
     const activity = activities[0]
+    const activityId = activity.external_id || activity.id
     
     // Check cache first (client-side, we'll use a simpler approach)
-    const cacheKey = `map-${activity.id}-${width}x${height}`
+    const cacheKey = `map-${activityId}-${width}x${height}`
     const cachedUrl = localStorage.getItem(cacheKey)
     
     if (cachedUrl && !cachedUrl.startsWith('/maps/')) { // Don't cache static map paths
       // Check if cached URL is still valid (not older than 1 day)
       const cacheTime = localStorage.getItem(`${cacheKey}-time`)
       if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
-        console.log(`📦 Using cached map URL for activity ${activity.id}`)
+        console.log(`📦 Using cached map URL for activity ${activityId}`)
         return cachedUrl
       }
     }
     
     // Generate new URL
-    console.log(`🌐 Generating new Mapbox URL for activity ${activity.id}`)
+    console.log(`🌐 Generating new Mapbox URL for activity ${activityId}`)
     const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
     // Cache the URL (but don't cache static map paths)

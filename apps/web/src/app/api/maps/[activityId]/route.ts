@@ -9,7 +9,7 @@ export async function GET(
   try {
     const activityId = params.activityId
     
-    // Check if static map exists
+    // Check if static map exists (try both the provided ID and as external_id)
     const mapPath = path.join(process.cwd(), 'public', 'maps', `${activityId}.png`)
     
     try {
@@ -27,7 +27,8 @@ export async function GET(
     } catch {
       return NextResponse.json({
         exists: false,
-        url: null
+        url: null,
+        message: `Static map not found for activity ${activityId}`
       })
     }
   } catch (error) {

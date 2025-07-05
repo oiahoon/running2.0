@@ -34,7 +34,8 @@ export default function TestMapsPage() {
             apiCheck: mapData.exists,
             fileAccess: fileResponse.ok,
             fileSize: file.size,
-            url: `/maps/${activityId}.png`
+            url: `/maps/${activityId}.png`,
+            message: mapData.message || 'OK'
           })
         }
 
@@ -134,6 +135,11 @@ export default function TestMapsPage() {
                 
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Size: {(result.fileSize / 1024).toFixed(1)} KB
+                  {result.message && result.message !== 'OK' && (
+                    <span className="block text-red-600 dark:text-red-400 mt-1">
+                      {result.message}
+                    </span>
+                  )}
                 </div>
 
                 {/* Display the actual map */}
