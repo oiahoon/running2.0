@@ -1,0 +1,46 @@
+{
+  "name": "running-page-2-homepage",
+  "version": "2.0.0",
+  "description": "Homepage for Running Page 2.0 - The Ultimate Running Data Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "build": "npm run optimize-images && npm run minify",
+    "optimize-images": "npx imagemin images/*.{jpg,jpeg,png} --out-dir=images/optimized --plugin=imagemin-mozjpeg --plugin=imagemin-pngquant",
+    "minify": "npx html-minifier --input-dir . --output-dir dist --file-ext html --remove-comments --collapse-whitespace --minify-css --minify-js",
+    "lighthouse": "npx lighthouse http://localhost:3000 --output html --output-path ./lighthouse-report.html",
+    "test": "npm run lighthouse",
+    "deploy": "vercel --prod",
+    "preview": "vercel"
+  },
+  "keywords": [
+    "running",
+    "fitness",
+    "data-visualization",
+    "strava",
+    "nike-run-club",
+    "garmin",
+    "running-analytics",
+    "open-source"
+  ],
+  "author": "Running Page 2.0 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oiahoon/running2.0.git",
+    "directory": "homepage"
+  },
+  "homepage": "https://running-page-2.vercel.app",
+  "devDependencies": {
+    "html-minifier": "^4.0.0",
+    "imagemin": "^8.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "lighthouse": "^11.0.0",
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

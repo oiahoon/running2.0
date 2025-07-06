@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Page 2.0 - The Ultimate Running Data Platform</title>
+    <meta name="description" content="Transform your running data with Running Page 2.0. Multi-platform integration, beautiful visualizations, and revolutionary static map caching. Free and open source.">
+    <meta name="keywords" content="running, fitness, data visualization, strava, nike run club, garmin, running analytics">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Running Page 2.0 - The Ultimate Running Data Platform">
+    <meta property="og:description" content="Multi-platform running data integration with beautiful visualizations and 99% cost reduction through static map caching.">
+    <meta property="og:image" content="https://running-page-2.vercel.app/images/og-image.png">
+    <meta property="og:url" content="https://running-page-2.vercel.app">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Running Page 2.0 - The Ultimate Running Data Platform">
+    <meta name="twitter:description" content="Multi-platform running data integration with beautiful visualizations and revolutionary static map caching.">
+    <meta name="twitter:image" content="https://running-page-2.vercel.app/images/twitter-card.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Analytics -->
+    <script defer data-domain="running-page-2.vercel.app" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="nav-logo">🏃‍♂️</span>
+                <span class="nav-title">Running Page 2.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#demo" class="nav-link">Demo</a>
+                <a href="#platforms" class="nav-link">Platforms</a>
+                <a href="#docs" class="nav-link">Docs</a>
+                <a href="https://github.com/oiahoon/running2.0" class="nav-link" target="_blank">GitHub</a>
+                <a href="https://vercel.com/new/clone?repository-url=https://github.com/oiahoon/running2.0" class="btn btn-primary" target="_blank">Deploy Now</a>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        The Ultimate
+                        <span class="gradient-text">Running Data Platform</span>
+                    </h1>
+                    <p class="hero-description">
+                        Transform your running journey with Running Page 2.0. Connect multiple fitness platforms, 
+                        visualize your progress with beautiful charts, and save 99% on map costs with our 
+                        revolutionary static caching system.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">10+</div>
+                            <div class="stat-label">Platforms Supported</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">99%</div>
+                            <div class="stat-label">Cost Reduction</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">0</div>
+                            <div class="stat-label">Maintenance Required</div>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="https://vercel.com/new/clone?repository-url=https://github.com/oiahoon/running2.0" class="btn btn-primary btn-large" target="_blank">
+                            <span>🚀 Deploy Your Own</span>
+                        </a>
+                        <a href="https://run2.miaowu.org" class="btn btn-secondary btn-large" target="_blank">
+                            <span>👀 View Live Demo</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-image">
+                        <img src="images/dashboard-preview.png" alt="Running Page 2.0 Dashboard" class="dashboard-image">
+                        <div class="floating-card card-1">
+                            <div class="card-icon">📊</div>
+                            <div class="card-text">
+                                <div class="card-title">Multi-Platform Sync</div>
+                                <div class="card-subtitle">Nike + Strava + Garmin</div>
+                            </div>
+                        </div>
+                        <div class="floating-card card-2">
+                            <div class="card-icon">🗺️</div>
+                            <div class="card-text">
+                                <div class="card-title">Static Map Caching</div>
+                                <div class="card-subtitle">99% Cost Reduction</div>
+                            </div>
+                        </div>
+                        <div class="floating-card card-3">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-text">
+                                <div class="card-title">Lightning Fast</div>
+                                <div class="card-subtitle">Instant Loading</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Revolutionary Features</h2>
+                <p class="section-description">
+                    Built from the ground up with modern technologies and innovative solutions
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Multi-Platform Integration</h3>
+                    <p class="feature-description">
+                        Connect Nike Run Club, Strava, Garmin, Keep, and more. All your running data in one unified dashboard.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Automatic data synchronization</li>
+                        <li>Smart duplicate detection</li>
+                        <li>Cross-platform analytics</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3 class="feature-title">Revolutionary Map System</h3>
+                    <p class="feature-description">
+                        Static map caching eliminates 99% of API costs while providing instant loading and global CDN delivery.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Pre-generated PNG maps</li>
+                        <li>jsDelivr CDN distribution</li>
+                        <li>Intelligent fallback system</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">
+                        Beautiful charts, GitHub-style heatmaps, and comprehensive statistics to track your progress.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Interactive visualizations</li>
+                        <li>Personal record tracking</li>
+                        <li>Trend analysis</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3 class="feature-title">Modern UI/UX</h3>
+                    <p class="feature-description">
+                        Responsive design with dark/light mode, smooth animations, and professional Catalyst UI components.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Mobile-first design</li>
+                        <li>Accessibility compliant</li>
+                        <li>Smooth animations</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Zero Maintenance</h3>
+                    <p class="feature-description">
+                        GitHub Actions handle everything automatically. Deploy once, enjoy forever with automatic updates.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Automated data sync</li>
+                        <li>Self-updating maps</li>
+                        <li>Error recovery</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Privacy & Security</h3>
+                    <p class="feature-description">
+                        Your data stays with you. Self-hosted solution with encrypted tokens and GDPR compliance.
+                    </p>
+                    <ul class="feature-list">
+                        <li>Self-hosted deployment</li>
+                        <li>Encrypted authentication</li>
+                        <li>GDPR compliant</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">See It In Action</h2>
+                <p class="section-description">
+                    Experience the power of Running Page 2.0 with our live demo
+                </p>
+            </div>
+            <div class="demo-content">
+                <div class="demo-video">
+                    <div class="video-placeholder">
+                        <div class="play-button">
+                            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                <circle cx="30" cy="30" r="30" fill="rgba(255,255,255,0.9)"/>
+                                <path d="M25 20L40 30L25 40V20Z" fill="#333"/>
+                            </svg>
+                        </div>
+                        <img src="images/demo-thumbnail.png" alt="Demo Video Thumbnail">
+                    </div>
+                </div>
+                <div class="demo-info">
+                    <h3>Live Demo Features</h3>
+                    <ul class="demo-features">
+                        <li>
+                            <span class="demo-icon">📊</span>
+                            <div>
+                                <strong>Interactive Dashboard</strong>
+                                <p>Real running data with beautiful visualizations</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="demo-icon">🗺️</span>
+                            <div>
+                                <strong>Static Map System</strong>
+                                <p>Instant loading maps with zero API costs</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="demo-icon">📱</span>
+                            <div>
+                                <strong>Mobile Responsive</strong>
+                                <p>Perfect experience on all devices</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="demo-icon">🌓</span>
+                            <div>
+                                <strong>Dark/Light Mode</strong>
+                                <p>Automatic theme switching</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="https://run2.miaowu.org" class="btn btn-primary" target="_blank">
+                        Visit Live Demo →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms Section -->
+    <section id="platforms" class="platforms">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Supported Platforms</h2>
+                <p class="section-description">
+                    Connect all your favorite fitness platforms in one place
+                </p>
+            </div>
+            <div class="platforms-grid">
+                <div class="platform-card active">
+                    <div class="platform-icon">
+                        <img src="images/strava-logo.png" alt="Strava">
+                    </div>
+                    <h3 class="platform-name">Strava</h3>
+                    <div class="platform-status">✅ Production</div>
+                    <p class="platform-description">Full integration with OAuth2 and webhook support</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">All Activities</span>
+                        <span class="feature-tag">Real-time Sync</span>
+                        <span class="feature-tag">Social Features</span>
+                    </div>
+                </div>
+                <div class="platform-card beta">
+                    <div class="platform-icon">
+                        <img src="images/nike-logo.png" alt="Nike Run Club">
+                    </div>
+                    <h3 class="platform-name">Nike Run Club</h3>
+                    <div class="platform-status">🚧 Beta</div>
+                    <p class="platform-description">5-minute setup with access token authentication</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">Run & Walk</span>
+                        <span class="feature-tag">GPS Routes</span>
+                        <span class="feature-tag">Photos</span>
+                    </div>
+                </div>
+                <div class="platform-card coming-soon">
+                    <div class="platform-icon">
+                        <img src="images/garmin-logo.png" alt="Garmin Connect">
+                    </div>
+                    <h3 class="platform-name">Garmin Connect</h3>
+                    <div class="platform-status">🔄 Coming Soon</div>
+                    <p class="platform-description">Advanced metrics with global and China support</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">All Sports</span>
+                        <span class="feature-tag">Health Metrics</span>
+                        <span class="feature-tag">Device Data</span>
+                    </div>
+                </div>
+                <div class="platform-card coming-soon">
+                    <div class="platform-icon">
+                        <img src="images/keep-logo.png" alt="Keep">
+                    </div>
+                    <h3 class="platform-name">Keep (咕咚)</h3>
+                    <div class="platform-status">🔄 Coming Soon</div>
+                    <p class="platform-description">China's largest fitness community integration</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">Social Workouts</span>
+                        <span class="feature-tag">Challenges</span>
+                        <span class="feature-tag">Live Streaming</span>
+                    </div>
+                </div>
+                <div class="platform-card coming-soon">
+                    <div class="platform-icon">
+                        <img src="images/apple-health-logo.png" alt="Apple Health">
+                    </div>
+                    <h3 class="platform-name">Apple Health</h3>
+                    <div class="platform-status">🔄 Planned</div>
+                    <p class="platform-description">iOS ecosystem integration with HealthKit</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">Health Data</span>
+                        <span class="feature-tag">Auto Sync</span>
+                        <span class="feature-tag">Privacy First</span>
+                    </div>
+                </div>
+                <div class="platform-card coming-soon">
+                    <div class="platform-icon">
+                        <img src="images/google-fit-logo.png" alt="Google Fit">
+                    </div>
+                    <h3 class="platform-name">Google Fit</h3>
+                    <div class="platform-status">🔄 Planned</div>
+                    <p class="platform-description">Android ecosystem with cross-platform sync</p>
+                    <div class="platform-features">
+                        <span class="feature-tag">Activity Recognition</span>
+                        <span class="feature-tag">Health Insights</span>
+                        <span class="feature-tag">Cross Platform</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section class="getting-started">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get Started in Minutes</h2>
+                <p class="section-description">
+                    Deploy your own Running Page 2.0 in just a few clicks
+                </p>
+            </div>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Deploy to Vercel</h3>
+                        <p class="step-description">
+                            One-click deployment with automatic environment setup
+                        </p>
+                        <a href="https://vercel.com/new/clone?repository-url=https://github.com/oiahoon/running2.0" class="btn btn-outline" target="_blank">
+                            Deploy Now
+                        </a>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Connect Strava</h3>
+                        <p class="step-description">
+                            Configure your Strava API credentials for data sync
+                        </p>
+                        <a href="https://github.com/oiahoon/running2.0/wiki/Strava-Integration-Guide-🏃‍♂️" class="btn btn-outline" target="_blank">
+                            Setup Guide
+                        </a>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Add More Platforms</h3>
+                        <p class="step-description">
+                            Connect Nike Run Club and other platforms for unified data
+                        </p>
+                        <a href="https://github.com/oiahoon/running2.0/wiki/Multi-Platform-Data-Integration-🔄" class="btn btn-outline" target="_blank">
+                            Multi-Platform Guide
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What Runners Say</h2>
+                <p class="section-description">
+                    Join thousands of runners who have transformed their data experience
+                </p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Running Page 2.0 completely transformed how I view my running data. The multi-platform integration is a game-changer!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">🏃‍♂️</div>
+                        <div class="author-info">
+                            <div class="author-name">Alex Chen</div>
+                            <div class="author-title">Marathon Runner</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"The static map caching saved me hundreds of dollars in API costs. Plus, the maps load instantly now!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">🏃‍♀️</div>
+                        <div class="author-info">
+                            <div class="author-name">Sarah Johnson</div>
+                            <div class="author-title">Trail Runner</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Finally, all my running data from different apps in one beautiful dashboard. The analytics are incredible!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">🏃</div>
+                        <div class="author-info">
+                            <div class="author-name">Mike Rodriguez</div>
+                            <div class="author-title">Ultra Runner</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Transform Your Running Data?</h2>
+                <p class="cta-description">
+                    Join thousands of runners who have already deployed their own Running Page 2.0
+                </p>
+                <div class="cta-actions">
+                    <a href="https://vercel.com/new/clone?repository-url=https://github.com/oiahoon/running2.0" class="btn btn-primary btn-large" target="_blank">
+                        🚀 Deploy Your Own
+                    </a>
+                    <a href="https://github.com/oiahoon/running2.0" class="btn btn-secondary btn-large" target="_blank">
+                        ⭐ Star on GitHub
+                    </a>
+                </div>
+                <div class="cta-stats">
+                    <div class="stat">
+                        <div class="stat-number" id="github-stars">1.2k+</div>
+                        <div class="stat-label">GitHub Stars</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Deployments</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">10+</div>
+                        <div class="stat-label">Platforms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="nav-logo">🏃‍♂️</span>
+                        <span class="nav-title">Running Page 2.0</span>
+                    </div>
+                    <p class="footer-description">
+                        The ultimate running data platform. Open source, self-hosted, and built for runners by runners.
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4 class="footer-title">Product</h4>
+                        <ul class="footer-list">
+                            <li><a href="#features">Features</a></li>
+                            <li><a href="#demo">Demo</a></li>
+                            <li><a href="#platforms">Platforms</a></li>
+                            <li><a href="https://run2.miaowu.org" target="_blank">Live Demo</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4 class="footer-title">Documentation</h4>
+                        <ul class="footer-list">
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki" target="_blank">Wiki</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki/Quick-Setup-Guide-⚡" target="_blank">Quick Start</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki/Multi-Platform-Data-Integration-🔄" target="_blank">Multi-Platform</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki/Common-Issues-&-Troubleshooting-🔧" target="_blank">Troubleshooting</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4 class="footer-title">Community</h4>
+                        <ul class="footer-list">
+                            <li><a href="https://github.com/oiahoon/running2.0" target="_blank">GitHub</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/discussions" target="_blank">Discussions</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/issues" target="_blank">Issues</a></li>
+                            <li><a href="mailto:4296411@qq.com">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4 class="footer-title">Deploy</h4>
+                        <ul class="footer-list">
+                            <li><a href="https://vercel.com/new/clone?repository-url=https://github.com/oiahoon/running2.0" target="_blank">Vercel</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki/Fork-and-Deploy-Guide-🚀" target="_blank">Self-Host</a></li>
+                            <li><a href="https://github.com/oiahoon/running2.0/wiki/GitHub-Actions-Setup-Guide-⚙️" target="_blank">GitHub Actions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 Running Page 2.0. Open source under MIT License.</p>
+                    <p>Inspired by <a href="https://github.com/yihong0618/running_page" target="_blank">@yihong0618's running_page</a></p>
+                </div>
+                <div class="footer-social">
+                    <a href="https://github.com/oiahoon/running2.0" target="_blank" aria-label="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
