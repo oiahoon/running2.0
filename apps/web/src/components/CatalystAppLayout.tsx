@@ -40,6 +40,15 @@ function HomeIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   )
 }
 
+function DatabaseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" {...props}>
+      <path d="M8 1c1.573 0 3.022.289 4.096.777C13.563 2.462 14 3.13 14 4v8c0 .87-.437 1.538-1.904 2.223C10.022 14.711 8.573 15 7 15s-3.022-.289-4.096-.777C1.437 13.538 1 12.87 1 12V4c0-.87.437-1.538 1.904-2.223C4.978 1.289 6.427 1 8 1Z" />
+      <path d="M8 2.5c-1.573 0-3.022.289-4.096.777C2.437 3.962 2 4.63 2 5.5s.437 1.538 1.904 2.223C5.978 8.211 7.427 8.5 9 8.5s3.022-.289 4.096-.777C14.563 7.038 15 6.37 15 5.5s-.437-1.538-1.904-2.223C11.022 2.789 9.573 2.5 8 2.5Z" />
+    </svg>
+  )
+}
+
 function ChartBarIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor" {...props}>
@@ -185,6 +194,10 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarItem href="/stats" current={pathname === '/stats'}>
                     <ChartBarIcon className="w-5 h-5" />
                     <SidebarLabel>Statistics</SidebarLabel>
+                  </SidebarItem>
+                  <SidebarItem href="/data-sources" current={pathname === '/data-sources'}>
+                    <DatabaseIcon className="w-5 h-5" />
+                    <SidebarLabel>Data Sources</SidebarLabel>
                   </SidebarItem>
                   <SidebarItem href="/sync" current={pathname === '/sync'}>
                     <ArrowPathIcon className="w-5 h-5" />
