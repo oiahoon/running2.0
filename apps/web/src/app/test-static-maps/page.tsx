@@ -9,13 +9,31 @@ export default function TestStaticMapsPage() {
   const [sampleActivityIds, setSampleActivityIds] = useState<string[]>([])
 
   useEffect(() => {
-    // Get sample activity IDs from activities API
-    fetch('/api/activities?limit=10')
+    // Get sample activity IDs that actually have map files
+    fetch('/api/activities?limit=50')
       .then(res => res.json())
       .then(data => {
-        const ids = data.activities?.slice(0, 5).map((a: any) => a.externalId || a.id.toString()) || []
-        setSampleActivityIds(ids)
-        console.log('Sample activity IDs:', ids)
+        const activities = data.activities || []
+        
+        // Get a mix of activities and check which ones might have maps
+        const candidateIds = activities
+          .filter((a: any) => a.externalId && a.startLatitude && a.startLongitude)
+          .map((a: any) => a.externalId.toString())
+          .slice(0, 20)
+        
+        console.log('Candidate activity IDs:', candidateIds)
+        
+        // For testing, also include some known map file IDs
+        const knownMapIds = [
+          '10112609318', '10112609334', '10112609476', 
+          '10129673832', '10155964048'
+        ]
+        
+        // Combine and deduplicate
+        const testIds = [...new Set([...knownMapIds, ...candidateIds.slice(0, 5)])]
+        
+        setSampleActivityIds(testIds.slice(0, 8))
+        console.log('Final test activity IDs:', testIds.slice(0, 8))
       })
       .catch(console.error)
   }, [])
@@ -59,6 +77,57 @@ export default function TestStaticMapsPage() {
         })
         
         console.error(`Activity ${activityId} failed:`, error)
+      }
+      
+      setTestResults([...results])
+      
+      // Add small delay between tests
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    
+    setTesting(false)
+  }
+
+  const testKnownMaps = async () => {
+    const knownMapIds = [
+      '10112609318', '10112609334', '10112609476', 
+      '10129673832', '10155964048'
+    ]
+    
+    console.log('Testing known existing map files...')
+    setTesting(true)
+    setTestResults([])
+    
+    const results = []
+    
+    for (const activityId of knownMapIds) {
+      console.log(`Testing known map for activity ${activityId}`)
+      
+      try {
+        const startTime = performance.now()
+        const result = await checkStaticMapExists(activityId)
+        const duration = Math.round(performance.now() - startTime)
+        
+        results.push({
+          activityId,
+          ...result,
+          duration,
+          success: true
+        })
+        
+        console.log(`Known map ${activityId}:`, result)
+      } catch (error) {
+        results.push({
+          activityId,
+          exists: false,
+          url: 'N/A',
+          source: 'error',
+          duration: 0,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })
+        
+        console.error(`Known map ${activityId} failed:`, error)
       }
       
       setTestResults([...results])
@@ -178,6 +247,14 @@ export default function TestStaticMapsPage() {
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {testing ? 'Testing...' : 'Test Static Maps'}
+            </button>
+            
+            <button
+              onClick={testKnownMaps}
+              disabled={testing}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Test Known Maps
             </button>
             
             <button
