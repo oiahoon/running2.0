@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/config/activities'
+import { checkStaticMapExists } from '@/lib/utils/cdn'
 import ActivitySelector from '@/components/ActivitySelector'
 
 interface Activity {
