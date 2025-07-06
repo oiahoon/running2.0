@@ -6,10 +6,6 @@ on:
     paths:
       - 'homepage/**'
       - '.github/workflows/deploy-homepage.yml'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'homepage/**'
   workflow_dispatch:
 
 jobs:
@@ -24,26 +20,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: homepage/package.json
         
     - name: Install dependencies
       run: |
         cd homepage
-        npm ci || npm install
-        
-    - name: Build homepage
-      run: |
-        cd homepage
-        npm run build || echo "No build script found, using static files"
-        
-    - name: Optimize images
-      run: |
-        cd homepage
-        # Install imagemin-cli if package.json exists and has the dependency
-        if [ -f package.json ] && grep -q "imagemin" package.json; then
-          npm run optimize-images || echo "No image optimization script found"
-        fi
+        npm install
         
     - name: Generate sitemap
       run: |
@@ -71,70 +52,14 @@ jobs:
         EOF
         
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./homepage
         publish_branch: gh-pages-homepage
-        cname: running-page-2.vercel.app
         
-    - name: Deploy to Vercel
-      if: github.ref == 'refs/heads/master'
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        working-directory: ./homepage
-        vercel-args: '--prod'
-        
-    - name: Lighthouse CI
-      if: github.event_name == 'pull_request'
-      uses: treosh/lighthouse-ci-action@v10
-      with:
-        configPath: './homepage/.lighthouserc.json'
-        uploadArtifacts: true
-        temporaryPublicStorage: true
-        
-    - name: Comment PR with Lighthouse results
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const fs = require('fs');
-          const path = './homepage/lhci_reports/manifest.json';
-          
-          if (fs.existsSync(path)) {
-            const manifest = JSON.parse(fs.readFileSync(path, 'utf8'));
-            const summary = manifest[0].summary;
-            
-            const comment = `## 🚀 Lighthouse Performance Report
-            
-            | Metric | Score |
-            |--------|-------|
-            | Performance | ${summary.performance * 100}/100 |
-            | Accessibility | ${summary.accessibility * 100}/100 |
-            | Best Practices | ${summary['best-practices'] * 100}/100 |
-            | SEO | ${summary.seo * 100}/100 |
-            
-            [View detailed report](${manifest[0].url})
-            `;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-          }
-          
-    - name: Update deployment status
-      if: always()
+    - name: Deployment Summary
       run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ Homepage deployed successfully!"
-          echo "🌐 Live URL: https://running-page-2.vercel.app"
-        else
-          echo "❌ Homepage deployment failed!"
-        fi
+        echo "✅ Homepage deployed successfully!"
+        echo "🌐 GitHub Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+        echo "📁 Files deployed from: ./homepage"
