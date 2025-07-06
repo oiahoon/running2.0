@@ -1,0 +1,71 @@
+name: Deploy Homepage (Foolproof)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - 'homepage/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Prepare deployment files
+      run: |
+        echo "📁 Preparing homepage files for deployment..."
+        
+        # Create a clean deployment directory
+        mkdir -p deploy
+        
+        # Copy all homepage files
+        cp -r homepage/* deploy/
+        
+        # Generate sitemap
+        cat > deploy/sitemap.xml << 'EOF'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <url>
+            <loc>https://oiahoon.github.io/running2.0/</loc>
+            <lastmod>2024-07-06</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>1.0</priority>
+          </url>
+        </urlset>
+        EOF
+        
+        # Generate robots.txt
+        cat > deploy/robots.txt << 'EOF'
+        User-agent: *
+        Allow: /
+        
+        Sitemap: https://oiahoon.github.io/running2.0/sitemap.xml
+        EOF
+        
+        # Add deployment timestamp
+        echo "<!-- Deployed on $(date -u) via GitHub Actions -->" >> deploy/index.html
+        
+        echo "✅ Files prepared:"
+        ls -la deploy/
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./deploy
+        force_orphan: true
+        
+    - name: Deployment complete
+      run: |
+        echo "🎉 Deployment successful!"
+        echo "🌐 Your homepage is now available at:"
+        echo "   https://oiahoon.github.io/running2.0/"
+        echo ""
+        echo "📋 Next steps:"
+        echo "1. Wait 5-10 minutes for GitHub Pages to update"
+        echo "2. Visit the URL above to see your homepage"
+        echo "3. If needed, go to Settings > Pages to verify configuration"
