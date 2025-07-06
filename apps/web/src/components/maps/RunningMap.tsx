@@ -158,19 +158,26 @@ async function getStaticMapUrl(activity: Activity, width: number, height: number
   // Use externalId for static map filename (Strava activity ID)
   const activityId = activity.externalId || activity.id
   
+  console.log(`🔍 Checking static map for activity ${activityId}`)
+  
   try {
     // Check if static map exists (tries CDN first, then local)
     const mapCheck = await checkStaticMapExists(activityId.toString())
     
+    console.log(`📊 Static map check result for ${activityId}:`, mapCheck)
+    
     if (mapCheck.exists) {
       console.log(`✅ Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
       return mapCheck.url
+    } else {
+      console.log(`❌ Static map not found for activity ${activityId}`)
     }
   } catch (error) {
     // Static map doesn't exist, will fallback to API
-    console.log(`⚠️ Static map not found for activity ${activityId}, using Mapbox API`)
+    console.error(`⚠️ Static map check failed for activity ${activityId}:`, error)
   }
   
+  console.log(`🔄 Falling back to Mapbox API for activity ${activityId}`)
   return null
 }
 
@@ -182,18 +189,25 @@ async function createCachedMapboxUrl(
   height: number,
   token: string
 ): Promise<string> {
+  console.log(`🗺️ Creating map URL for ${activities.length} activities`)
+  
   // For single activity, try static map first
   if (activities.length === 1) {
+    console.log(`🎯 Single activity detected, trying static map first`)
     const staticUrl = await getStaticMapUrl(activities[0], width, height)
     if (staticUrl) {
+      console.log(`✅ Static map found, returning: ${staticUrl}`)
       return staticUrl
     }
+    console.log(`❌ Static map not found, continuing to Mapbox API`)
   }
   
   // For single activity with polyline, try localStorage cache
   if (activities.length === 1 && activities[0].summaryPolyline) {
     const activity = activities[0]
     const activityId = activity.externalId || activity.id
+    
+    console.log(`💾 Checking cache for activity ${activityId}`)
     
     // Check cache first (client-side, we'll use a simpler approach)
     const cacheKey = `map-${activityId}-${width}x${height}`
