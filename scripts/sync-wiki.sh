@@ -1,64 +1,66 @@
 #!/bin/bash
 
-# Sync Wiki to GitHub
-# This script clones the GitHub wiki repository and syncs local wiki files
+# Sync Wiki Submodule
+# This script manages the wiki submodule and pushes updates
 
 set -e
 
-REPO_URL="https://github.com/oiahoon/running2.0.wiki.git"
 WIKI_DIR="wiki"
-TEMP_WIKI_DIR="temp-wiki"
 
-echo "🔄 Syncing wiki to GitHub..."
+echo "🔄 Syncing wiki submodule..."
 
-# Check if wiki directory exists
+# Check if wiki submodule exists
 if [ ! -d "$WIKI_DIR" ]; then
-    echo "❌ Wiki directory not found!"
-    exit 1
+    echo "❌ Wiki submodule not found! Initializing..."
+    git submodule update --init --recursive
 fi
 
-# Clone wiki repository to temp directory
-echo "📥 Cloning wiki repository..."
-if [ -d "$TEMP_WIKI_DIR" ]; then
-    rm -rf "$TEMP_WIKI_DIR"
+# Navigate to wiki directory
+cd "$WIKI_DIR"
+
+# Pull latest changes from wiki repository
+echo "📥 Pulling latest wiki changes..."
+git pull origin master
+
+# Check if there are local changes to commit
+if ! git diff --quiet || ! git diff --staged --quiet; then
+    echo "📝 Committing local wiki changes..."
+    git add .
+    git commit -m "📚 Update wiki documentation
+
+Auto-synced from main repository at $(date)
+
+- Updated documentation
+- Improved technical details
+- Enhanced troubleshooting guides"
+    
+    echo "🚀 Pushing wiki changes..."
+    git push origin master
+else
+    echo "✅ No local changes to commit"
 fi
 
-git clone "$REPO_URL" "$TEMP_WIKI_DIR"
-
-# Copy local wiki files to temp directory
-echo "📋 Copying wiki files..."
-cp -r "$WIKI_DIR"/* "$TEMP_WIKI_DIR"/
-
-# Navigate to temp wiki directory
-cd "$TEMP_WIKI_DIR"
-
-# Check if there are changes
-if git diff --quiet && git diff --staged --quiet; then
-    echo "✅ No changes to sync"
-    cd ..
-    rm -rf "$TEMP_WIKI_DIR"
-    exit 0
-fi
-
-# Add and commit changes
-echo "📝 Committing changes..."
-git add .
-git commit -m "📚 Update wiki documentation
-
-- Updated Static Map Caching documentation
-- Added latest cache configuration
-- Improved troubleshooting guide
-- Added performance monitoring section
-
-Auto-synced from main repository"
-
-# Push changes
-echo "🚀 Pushing to GitHub wiki..."
-git push origin master
-
-# Cleanup
+# Go back to main repository
 cd ..
-rm -rf "$TEMP_WIKI_DIR"
 
-echo "✅ Wiki synced successfully!"
-echo "🔗 View at: https://github.com/oiahoon/running2.0/wiki"
+# Update submodule reference in main repository
+echo "🔗 Updating submodule reference in main repository..."
+git add wiki
+if ! git diff --staged --quiet; then
+    git commit -m "📚 Update wiki submodule reference
+
+Updated wiki documentation with latest changes"
+    
+    echo "🚀 Pushing main repository changes..."
+    git push origin master
+else
+    echo "✅ No submodule reference changes"
+fi
+
+echo "✅ Wiki sync completed successfully!"
+echo "🔗 View wiki at: https://github.com/oiahoon/running2.0/wiki"
+
+# Display current submodule status
+echo ""
+echo "📊 Current submodule status:"
+git submodule status
