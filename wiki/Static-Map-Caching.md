@@ -1,474 +1,289 @@
-# Static Map Caching System 🗺️💰
+# Static Map Caching System
 
-Deep dive into the revolutionary static map caching system that reduces Mapbox costs by 99%+ while improving performance.
+Running Page 2.0 features a revolutionary static map caching system that provides **99%+ cost reduction** and **instant loading** for activity maps.
 
-## 📋 Table of Contents
+## 🚀 System Overview
 
-- [System Overview](#system-overview)
-- [How It Works](#how-it-works)
-- [Cost Analysis](#cost-analysis)
-- [Performance Benefits](#performance-benefits)
-- [Configuration](#configuration)
-- [Monitoring and Statistics](#monitoring-and-statistics)
-- [Troubleshooting](#troubleshooting)
-- [Advanced Usage](#advanced-usage)
-
-## System Overview
-
-### The Problem
-
-Traditional map implementations call external APIs for every map display:
-- **Every page load** = API request
-- **Every user visit** = Multiple API calls
-- **High traffic** = Expensive bills
-- **API limits** = Service interruptions
-
-### The Solution
-
-Static map caching pre-generates and stores map images:
-- **One-time generation** per activity
-- **Permanent storage** in your repository
-- **Instant loading** from cached files
-- **99%+ cost reduction** compared to live API calls
+### Architecture
+```
+Activity Request → Static Map Check → CDN/Local → Fallback to API
+                     ↓
+              [jsDelivr CDN] → [Local Files] → [Mapbox API]
+```
 
 ### Key Benefits
+- **💰 Zero Runtime Costs** - Pre-generated maps eliminate API calls
+- **⚡ Instant Loading** - 0ms load time for cached maps
+- **🌐 Global CDN** - jsDelivr provides worldwide fast delivery
+- **🧠 Smart Preloading** - Adjacent activities preloaded automatically
+- **🔄 Intelligent Fallback** - Seamless fallback when maps unavailable
 
-- 💰 **Massive cost savings** - From $100s/month to $5 one-time
-- ⚡ **Lightning performance** - 50-100ms vs 500-2000ms loading
-- 🔄 **High reliability** - No dependency on external API availability
-- 🌐 **CDN friendly** - Static files cached globally
-- 📱 **Better mobile experience** - Faster loading on slow connections
+## ⚙️ Configuration
 
-## How It Works
+### Environment Variables
 
-### Three-Tier Architecture
+```env
+# Optional: Force CDN-first mode (recommended for production)
+NEXT_PUBLIC_PREFER_CDN=true
 
+# Optional: Prefer local maps (development only)
+NEXT_PUBLIC_PREFER_LOCAL_MAPS=true
 ```
-1. Static PNG Files (Priority 1)
-   ↓ (if not found)
-2. Browser localStorage (Priority 2)
-   ↓ (if not found)
-3. Live Mapbox API (Priority 3)
+
+### Cache Behavior Settings
+
+#### **Image Preload Cache**
+```typescript
+const IMAGE_CACHE_DURATION = 10 * 60 * 1000 // 10 minutes
+const imagePreloadCache = new Map<string, CacheEntry>()
+
+// Automatic cleanup every 5 minutes
+setInterval(cleanupImageCache, 5 * 60 * 1000)
 ```
 
-### Generation Process
+#### **CDN Cache Strategy**
+- **jsDelivr CDN**: 7-day cache with global distribution
+- **Browser Cache**: 10-minute cache for instant switching
+- **Preload Strategy**: ±2 adjacent activities preloaded
+- **Fallback Chain**: CDN → Local → Mapbox API
 
-1. **Activity Detection**: New GPS activities identified
-2. **Route Processing**: Polyline data decoded and analyzed
-3. **Map Generation**: Static PNG created via Mapbox API
-4. **Storage**: Image saved to `/public/maps/{activityId}.png`
-5. **Deployment**: Files committed and deployed automatically
-6. **Frontend**: Smart loading prioritizes static files
+## 🔧 Technical Implementation
 
-### File Naming Convention
-
+### Cache Detection Logic
+```typescript
+// Automatic cache detection
+const mapCheck = await checkStaticMapExists(activityId)
+if (mapCheck.exists) {
+  // Use CDN URL
+  return `https://cdn.jsdelivr.net/gh/user/repo@master/apps/web/public/maps/${activityId}.png`
+} else {
+  // Fallback to Mapbox API
+  return generateMapboxUrl(activity)
+}
 ```
-/public/maps/
-├── 10112609318.png    # Strava activity ID
-├── 10112609334.png    # Each file ~50-200KB
-├── 10112609476.png    # High-quality PNG format
+
+### Production Environment Detection
+```typescript
+const isProduction = process.env.NODE_ENV === 'production'
+const preferCDN = process.env.NEXT_PUBLIC_PREFER_CDN === 'true' || isProduction
+
+if (preferCDN || isProduction) {
+  // Always try CDN first in production
+  console.log(`🌐 Trying CDN first (production mode): ${cdnUrl}`)
+}
+```
+
+### Intelligent Preloading
+```typescript
+// Preload adjacent activity maps for better UX
+const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number) => {
+  // Preload previous and next 2 activities
+  for (let i = Math.max(0, currentIndex - 2); i <= Math.min(activities.length - 1, currentIndex + 2); i++) {
+    if (i === currentIndex) continue // Skip current activity
+    
+    const activity = activities[i]
+    if (!activity.startLatitude || !activity.startLongitude) continue
+    
+    // Preload in background without blocking UI
+    preloadMapInBackground(activity)
+  }
+}
+```
+
+## 📊 Performance Monitoring
+
+### Cache Statistics API
+```bash
+# Check cache performance
+curl https://your-domain.com/api/cache/stats
+
+# Response
+{
+  "totalMaps": 423,
+  "cacheHitRate": "94.2%",
+  "avgLoadTime": "245ms",
+  "cdnHits": 387,
+  "localHits": 36,
+  "apiFallbacks": 0
+}
+```
+
+### Browser Console Debugging
+```javascript
+// Expected logs for successful cache hit
+🔍 Checking static map for activity 15002226211
+📊 Static map check result: {exists: true, source: 'cdn'}
+✅ Using cdn map: https://cdn.jsdelivr.net/gh/oiahoon/running2.0@master/apps/web/public/maps/15002226211.png
+📦 Using cached map image (instant load)
+```
+
+### Performance Metrics
+- **Cache Hit Rate**: 90%+ expected
+- **Load Time**: 
+  - Cached maps: 0-200ms
+  - CDN maps: 200-1000ms
+  - API fallback: 2000-5000ms
+- **Cost Reduction**: 99%+ API calls eliminated
+
+## 🗺️ Map Generation Process
+
+### Automated Generation (GitHub Actions)
+```yaml
+# .github/workflows/sync-data.yml
+- name: Generate Static Maps
+  run: |
+    cd scripts
+    python generate-static-maps.py
+    
+- name: Commit Maps
+  run: |
+    git add apps/web/public/maps/
+    git commit -m "🗺️ Update static maps"
+    git push
+```
+
+### Manual Generation
+```bash
+# Generate maps for specific activity
+cd scripts && node generate-maps-manual.js [activity_id]
+
+# Generate all missing maps
+cd scripts && python generate-static-maps.py
+
+# Test map generation
+cd scripts && python test-mapbox-token.py
+```
+
+### Map File Structure
+```
+apps/web/public/maps/
+├── 15002226211.png    # Activity external_id as filename
+├── 15002226156.png
+├── 15002226174.png
 └── ...
 ```
 
-### Smart Loading Logic
+## 🔄 Cache Lifecycle
 
+### 1. Map Request
 ```typescript
-// Frontend loading priority
-async function loadMap(activity) {
-  // 1. Try static cached file
-  const staticUrl = `/maps/${activity.externalId}.png`
-  if (await fileExists(staticUrl)) {
-    return staticUrl  // ✅ Instant loading
-  }
-  
-  // 2. Try localStorage cache
-  const cachedUrl = localStorage.getItem(`map-${activity.id}`)
-  if (cachedUrl && !expired(cachedUrl)) {
-    return cachedUrl  // ✅ Fast loading
-  }
-  
-  // 3. Generate new API URL
-  const apiUrl = generateMapboxUrl(activity)
-  localStorage.setItem(`map-${activity.id}`, apiUrl)
-  return apiUrl  // ⚠️ Slower, costs money
-}
+🗺️ Creating map URL for 1 activities
+🎯 Single activity detected, trying static map first
 ```
 
-## Cost Analysis
-
-### Traditional Approach (Without Caching)
-
-**Scenario**: 500 activities, 10 page views per day
-
-```
-Daily API calls: 500 activities × 10 views = 5,000 calls
-Monthly API calls: 5,000 × 30 days = 150,000 calls
-Monthly cost: 150,000 × $0.0015 = $225/month
-Annual cost: $225 × 12 = $2,700/year
+### 2. CDN Check (Production)
+```typescript
+🔧 Environment: production, preferCDN: true, preferLocal: false
+🌐 Trying CDN first (production mode): https://cdn.jsdelivr.net/gh/...
+📡 CDN response: 200 OK
 ```
 
-### With Static Caching
-
-```
-One-time generation: 500 activities × 1 call = 500 calls
-One-time cost: 500 × $0.0015 = $0.75
-Daily API calls: 0 (using cached files)
-Monthly cost: $0
-Annual cost: $0.75 one-time
+### 3. Cache Hit
+```typescript
+✅ Using cdn map for activity 15002226211: https://cdn.jsdelivr.net/gh/...
+📦 Using cached map image (instant load)
 ```
 
-### Savings Calculation
-
-```
-Annual savings: $2,700 - $0.75 = $2,699.25
-Cost reduction: 99.97%
-ROI: Immediate and permanent
+### 4. Preloading
+```typescript
+🚀 Preloaded adjacent map: https://cdn.jsdelivr.net/gh/.../15002226156.png
+🚀 Preloaded adjacent map: https://cdn.jsdelivr.net/gh/.../15002226174.png
 ```
 
-### Real-World Examples
-
-**Light Usage** (100 activities, 5 views/day):
-- Without caching: $67.50/month
-- With caching: $0.15 one-time
-- Savings: 99.8%
-
-**Heavy Usage** (1000 activities, 20 views/day):
-- Without caching: $900/month
-- With caching: $1.50 one-time
-- Savings: 99.98%
-
-## Performance Benefits
-
-### Loading Speed Comparison
-
-| Method | First Load | Cached Load | Mobile 3G |
-|--------|------------|-------------|-----------|
-| Live API | 1500ms | 800ms | 3000ms |
-| Static Cache | 100ms | 50ms | 200ms |
-| **Improvement** | **15x faster** | **16x faster** | **15x faster** |
-
-### User Experience Impact
-
-**Before Caching**:
-- ⏳ Visible loading delays
-- 📱 Poor mobile experience
-- 🌐 Network dependency
-- 💸 Usage anxiety
-
-**After Caching**:
-- ⚡ Instant map display
-- 📱 Smooth mobile experience
-- 🔄 Works offline (cached)
-- 😌 No cost concerns
-
-### Technical Performance
-
-**Reduced Server Load**:
-- No API rate limiting concerns
-- Fewer external dependencies
-- Better error handling
-- Improved reliability
-
-**CDN Benefits**:
-- Global edge caching
-- Reduced bandwidth costs
-- Better geographic performance
-- Automatic compression
-
-## Configuration
-
-### Required Setup
-
-1. **Mapbox Token** (GitHub Secret):
-   ```
-   MAPBOX_TOKEN = "pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV4YW1wbGUifQ.no-restrictions"
-   ```
-   ⚠️ **Critical**: Token must have NO URL restrictions
-
-2. **GitHub Actions Workflow**:
-   ```yaml
-   - name: Generate static maps
-     run: python generate-static-maps.py
-     env:
-       MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
-   ```
-
-3. **Frontend Configuration**:
-   ```typescript
-   // Automatic - no configuration needed
-   // Smart loading is built into components
-   ```
-
-### Optional Customization
-
-**Map Style**:
-```python
-# In generate-static-maps.py
-base_url = "https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/"
-# Options: streets-v11, outdoors-v11, light-v10, dark-v10, satellite-v9
-```
-
-**Image Quality**:
-```python
-# Standard quality (default)
-width, height = 400, 300
-
-# High quality (larger files)
-width, height = 600, 400
-
-# Mobile optimized (smaller files)
-width, height = 300, 200
-```
-
-**Route Styling**:
-```python
-# Route color and width
-polyline_overlay = f"path-4+ff0000-1.0({encoded_polyline})"
-# Format: path-{width}+{color}-{opacity}
-```
-
-## Monitoring and Statistics
-
-### Cache Statistics API
-
-Access real-time statistics:
-```bash
-curl https://your-site.com/api/cache/stats
-```
-
-**Response Example**:
-```json
-{
-  "totalFiles": 423,
-  "totalSizeMB": "89.2",
-  "oldestFile": "2024-01-01T10:00:00Z",
-  "newestFile": "2024-01-15T15:30:00Z",
-  "files": [
-    {
-      "name": "10112609318.png",
-      "activityId": "10112609318",
-      "size": 156789,
-      "sizeMB": "0.15",
-      "lastModified": "2024-01-15T15:30:00Z",
-      "url": "/maps/10112609318.png"
-    }
-  ]
-}
-```
-
-### Key Metrics to Monitor
-
-**Cache Hit Rate**:
-- Target: >95%
-- Monitor via browser Network tab
-- Look for `/maps/*.png` requests vs `api.mapbox.com` requests
-
-**File Storage**:
-- Average file size: 50-200KB
-- Total storage growth: ~100MB per 1000 activities
-- GitHub repository size limits: 1GB soft limit
-
-**Generation Success Rate**:
-- Monitor GitHub Actions logs
-- Target: >98% success rate
-- Failed generations fall back to live API
-
-### Performance Monitoring
-
-**Page Load Times**:
-```javascript
-// Measure map loading performance
-const startTime = performance.now()
-await loadMapImage(activity)
-const loadTime = performance.now() - startTime
-console.log(`Map loaded in ${loadTime}ms`)
-```
-
-**Cache Effectiveness**:
-```javascript
-// Track cache usage
-const cacheHits = staticMapRequests
-const cacheMisses = apiMapRequests
-const hitRate = (cacheHits / (cacheHits + cacheMisses)) * 100
-console.log(`Cache hit rate: ${hitRate}%`)
-```
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-#### 1. Maps Not Generating
-
-**Symptoms**: No PNG files in `/public/maps/`
-
-**Diagnosis**:
-```bash
-# Check GitHub Actions logs
-Actions → Latest workflow → "Generate static maps" step
+#### Maps Not Loading
+**Symptoms**: All maps show Mapbox API URLs instead of CDN
+**Debug**: Check browser console for:
+```
+⚠️ Static map check failed: ReferenceError: checkStaticMapExists is not defined
+```
+**Solution**: Ensure proper import in components:
+```typescript
+import { checkStaticMapExists } from '@/lib/utils/cdn'
 ```
 
-**Solutions**:
-- Verify `MAPBOX_TOKEN` in GitHub Secrets
-- Ensure token has no URL restrictions
-- Check for API rate limiting
-- Verify activities have GPS data
-
-#### 2. High API Usage Despite Caching
-
-**Symptoms**: Unexpected Mapbox charges
-
-**Diagnosis**:
-```bash
-# Check cache hit rate
-curl https://your-site.com/api/cache/stats
-
-# Check browser Network tab for api.mapbox.com requests
+#### CDN 404 Errors
+**Symptoms**: CDN URLs return 404 Not Found
+**Debug**: 
 ```
-
-**Solutions**:
-- Verify static files are accessible
-- Check file naming matches activity IDs
-- Ensure frontend uses correct loading logic
-- Clear browser cache and test
-
-#### 3. Large Repository Size
-
-**Symptoms**: GitHub warnings about repository size
-
-**Solutions**:
-```bash
-# Check total map size
-du -sh apps/web/public/maps/
-
-# Remove orphaned maps
-cd scripts && python cleanup-orphaned-maps.py
-
-# Optimize image quality if needed
+📡 CDN response: 404 Not Found
+🔄 Falling back to Mapbox API
 ```
-
-#### 4. Slow Map Generation
-
-**Symptoms**: GitHub Actions timeout or slow completion
-
 **Solutions**:
-- Implement batch processing
-- Add rate limiting between requests
-- Skip existing maps more efficiently
-- Process in parallel (advanced)
+1. Wait for jsDelivr to sync (up to 24 hours)
+2. Check if files exist in GitHub repository
+3. Verify GitHub repository is public
+
+#### Slow Loading
+**Symptoms**: Maps take 2-5 seconds to load
+**Debug**: Check Network tab for:
+- CDN requests timing out
+- Fallback to Mapbox API
+**Solutions**:
+1. Increase CDN timeout: `setTimeout(() => controller.abort(), 20000)`
+2. Enable CDN-first mode: `NEXT_PUBLIC_PREFER_CDN=true`
 
 ### Debug Commands
 
-**Test Token**:
+#### Browser Console
+```javascript
+// Check cache status
+localStorage.getItem('map-cache-stats')
+
+// Clear cache
+localStorage.clear()
+
+// Monitor performance
+performance.getEntriesByType('navigation')
+```
+
+#### API Testing
 ```bash
-curl "https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=YOUR_TOKEN"
+# Test specific map availability
+curl -I "https://cdn.jsdelivr.net/gh/oiahoon/running2.0@master/apps/web/public/maps/15002226211.png"
+
+# Check server-side files
+curl "https://your-domain.com/api/check-maps?activityId=15002226211"
+
+# Monitor cache statistics
+curl "https://your-domain.com/api/cache/stats"
 ```
 
-**Test Map Generation**:
-```bash
-curl "https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+ff0000(-122.4194,37.7749)/-122.4194,37.7749,12,0/400x300@2x?access_token=YOUR_TOKEN"
-```
+## 🎯 Best Practices
 
-**Check File Accessibility**:
-```bash
-curl -I https://your-site.com/maps/10112609318.png
-```
+### Development
+1. **Use local preference**: Set `NEXT_PUBLIC_PREFER_LOCAL_MAPS=true`
+2. **Test CDN URLs manually** before deployment
+3. **Monitor console logs** for cache behavior
+4. **Clear browser cache** when testing changes
 
-## Advanced Usage
+### Production
+1. **Enable CDN-first mode**: `NEXT_PUBLIC_PREFER_CDN=true`
+2. **Monitor cache hit rates** via `/api/cache/stats`
+3. **Set up alerts** for high API usage (indicates cache misses)
+4. **Regular map generation** via GitHub Actions
 
-### Batch Processing
+### Optimization
+1. **Preload strategy**: Adjust preload range based on user behavior
+2. **Cache duration**: Balance between freshness and performance
+3. **CDN timeout**: Optimize based on your CDN performance
+4. **Fallback strategy**: Ensure graceful degradation
 
-For large activity counts:
-```python
-# Process in batches to avoid timeouts
-batch_size = 50
-for i in range(0, len(activities), batch_size):
-    batch = activities[i:i + batch_size]
-    process_batch(batch)
-    time.sleep(1)  # Rate limiting
-```
+## 📈 Expected Performance
 
-### Custom Map Styles
+### Before Static Caching
+- **Map Load Time**: 2-5 seconds per map
+- **API Calls**: 1 call per map view
+- **Cost**: $X per 1000 map views
+- **User Experience**: Loading states, delays
 
-Create custom Mapbox styles:
-1. Design style in Mapbox Studio
-2. Get style URL: `mapbox://styles/username/style-id`
-3. Update generation script:
-   ```python
-   base_url = f"https://api.mapbox.com/styles/v1/{username}/{style_id}/static/"
-   ```
+### After Static Caching
+- **Map Load Time**: 0-200ms (cached), 200-1000ms (CDN)
+- **API Calls**: <1% of original (99%+ reduction)
+- **Cost**: Near zero for cached maps
+- **User Experience**: Instant switching, smooth navigation
 
-### Multi-Resolution Support
-
-Generate multiple sizes:
-```python
-sizes = [
-    (300, 200),  # Mobile
-    (400, 300),  # Desktop
-    (600, 400),  # High-DPI
-]
-
-for width, height in sizes:
-    filename = f"{activity_id}_{width}x{height}.png"
-    generate_map(activity, width, height, filename)
-```
-
-### Progressive Enhancement
-
-Implement progressive loading:
-```typescript
-// Load low-res first, then high-res
-const lowRes = `/maps/${activity.id}_300x200.png`
-const highRes = `/maps/${activity.id}_600x400.png`
-
-// Show low-res immediately
-setMapUrl(lowRes)
-
-// Preload high-res in background
-preloadImage(highRes).then(() => {
-  setMapUrl(highRes)
-})
-```
-
-### Analytics Integration
-
-Track cache performance:
-```typescript
-// Google Analytics event
-gtag('event', 'map_load', {
-  'method': isStaticMap ? 'cache' : 'api',
-  'load_time': loadTime,
-  'activity_id': activity.id
-})
-```
-
-## Future Enhancements
-
-### Planned Features
-
-- **WebP format support** for smaller file sizes
-- **Automatic quality optimization** based on usage
-- **CDN integration** for global distribution
-- **Batch regeneration** for style updates
-- **Smart preloading** for likely-viewed activities
-
-### Community Contributions
-
-Help improve the caching system:
-- 🔧 **Performance optimizations**
-- 🎨 **New map styles and themes**
-- 📊 **Better analytics and monitoring**
-- 🛠️ **Advanced configuration options**
-
-## 🎉 Success Metrics
-
-A well-configured static map caching system should achieve:
-
-- ✅ **99%+ cost reduction** compared to live API
-- ✅ **10-20x faster** map loading times
-- ✅ **95%+ cache hit rate** for returning visitors
-- ✅ **Zero ongoing maintenance** after setup
-- ✅ **Improved user experience** across all devices
-
----
-
-**The static map caching system transforms an expensive, slow feature into a fast, cost-effective solution that enhances your running page experience while protecting your budget! 🏃‍♂️💰**
+This caching system transforms the user experience from slow, costly map generation to instant, free map display! 🚀
