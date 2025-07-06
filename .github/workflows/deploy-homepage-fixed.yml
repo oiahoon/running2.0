@@ -1,0 +1,88 @@
+name: Deploy Homepage (Fixed)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - 'homepage/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Prepare deployment files
+      run: |
+        echo "📁 Preparing homepage files for deployment..."
+        
+        # Create a clean deployment directory
+        mkdir -p deploy
+        
+        # Copy ONLY homepage files (not the redirect index.html)
+        cp homepage/index.html deploy/
+        cp homepage/styles.css deploy/
+        cp homepage/script.js deploy/
+        cp homepage/favicon.svg deploy/
+        cp homepage/test.html deploy/
+        cp homepage/package.json deploy/
+        cp homepage/vercel.json deploy/
+        cp homepage/README.md deploy/
+        
+        # Copy images directory if it exists
+        if [ -d "homepage/images" ]; then
+          cp -r homepage/images deploy/
+        fi
+        
+        # Generate sitemap
+        cat > deploy/sitemap.xml << 'EOF'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <url>
+            <loc>https://oiahoon.github.io/running2.0/</loc>
+            <lastmod>2024-07-06</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>1.0</priority>
+          </url>
+        </urlset>
+        EOF
+        
+        # Generate robots.txt
+        cat > deploy/robots.txt << 'EOF'
+        User-agent: *
+        Allow: /
+        
+        Sitemap: https://oiahoon.github.io/running2.0/sitemap.xml
+        EOF
+        
+        # Add deployment timestamp to homepage
+        echo "<!-- Deployed on $(date -u) via GitHub Actions -->" >> deploy/index.html
+        
+        echo "✅ Files prepared for deployment:"
+        ls -la deploy/
+        
+        echo "📄 Checking main index.html:"
+        head -5 deploy/index.html
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./deploy
+        force_orphan: true
+        
+    - name: Deployment complete
+      run: |
+        echo "🎉 Deployment successful!"
+        echo "🌐 Your homepage is now available at:"
+        echo "   https://oiahoon.github.io/running2.0/"
+        echo ""
+        echo "📋 What was deployed:"
+        echo "- Homepage files from /homepage directory"
+        echo "- Generated sitemap.xml and robots.txt"
+        echo "- Clean gh-pages branch without redirect loops"
+        echo ""
+        echo "⏰ Please wait 5-10 minutes for GitHub Pages to update"
