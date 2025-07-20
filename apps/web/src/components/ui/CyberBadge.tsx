@@ -74,15 +74,16 @@ export function CyberStatusBadge({
 }: Omit<CyberBadgeProps, 'variant'> & {
   status: 'online' | 'offline' | 'warning' | 'error' | 'syncing'
 }) {
-  const statusConfig = {
-    online: { variant: 'success' as const, text: 'Online', pulse: true },
-    offline: { variant: 'secondary' as const, text: 'Offline', pulse: false },
-    warning: { variant: 'warning' as const, text: 'Warning', pulse: true },
-    error: { variant: 'danger' as const, text: 'Error', pulse: true },
-    syncing: { variant: 'info' as const, text: 'Syncing', pulse: true }
+  const statusConfig: Record<string, { variant: CyberBadgeProps['variant'], text: string, pulse: boolean }> = {
+    online: { variant: 'success', text: 'Online', pulse: true },
+    offline: { variant: 'secondary', text: 'Offline', pulse: false },
+    warning: { variant: 'warning', text: 'Warning', pulse: true },
+    error: { variant: 'danger', text: 'Error', pulse: true },
+    syncing: { variant: 'info', text: 'Syncing', pulse: true }
   }
 
-  const config = statusConfig[status]
+  // 安全获取配置，如果状态不存在则使用默认配置
+  const config = statusConfig[status] || statusConfig.online
 
   return (
     <CyberBadge
@@ -110,17 +111,47 @@ export function CyberActivityBadge({
   className,
   ...props
 }: Omit<CyberBadgeProps, 'variant'> & {
-  type: 'running' | 'cycling' | 'swimming' | 'walking' | 'other'
+  type: string // 支持所有活动类型
 }) {
-  const typeConfig = {
-    running: { variant: 'success' as const, icon: '🏃', color: 'text-neonGreen-500' },
-    cycling: { variant: 'primary' as const, icon: '🚴', color: 'text-neonCyan-400' },
-    swimming: { variant: 'info' as const, icon: '🏊', color: 'text-neonPurple-500' },
-    walking: { variant: 'warning' as const, icon: '🚶', color: 'text-neonOrange-500' },
-    other: { variant: 'secondary' as const, icon: '⚡', color: 'text-neonPink-500' }
+  const typeConfig: Record<string, { variant: CyberBadgeProps['variant'], icon: string, color: string }> = {
+    // 跑步相关
+    run: { variant: 'success', icon: '🏃', color: 'text-neonGreen-500' },
+    running: { variant: 'success', icon: '🏃', color: 'text-neonGreen-500' },
+    
+    // 骑行相关
+    ride: { variant: 'primary', icon: '🚴', color: 'text-neonCyan-400' },
+    cycling: { variant: 'primary', icon: '🚴', color: 'text-neonCyan-400' },
+    
+    // 游泳相关
+    swim: { variant: 'info', icon: '🏊', color: 'text-neonPurple-500' },
+    swimming: { variant: 'info', icon: '🏊', color: 'text-neonPurple-500' },
+    
+    // 步行相关
+    walk: { variant: 'warning', icon: '🚶', color: 'text-neonOrange-500' },
+    walking: { variant: 'warning', icon: '🚶', color: 'text-neonOrange-500' },
+    
+    // 徒步相关
+    hike: { variant: 'success', icon: '🥾', color: 'text-neonGreen-500' },
+    hiking: { variant: 'success', icon: '🥾', color: 'text-neonGreen-500' },
+    
+    // 健身相关
+    workout: { variant: 'danger', icon: '💪', color: 'text-red-400' },
+    weighttraining: { variant: 'danger', icon: '🏋️', color: 'text-red-400' },
+    
+    // 其他运动
+    elliptical: { variant: 'secondary', icon: '🏃‍♀️', color: 'text-neonPink-500' },
+    rowing: { variant: 'info', icon: '🚣', color: 'text-neonPurple-500' },
+    standuppaddling: { variant: 'primary', icon: '🏄', color: 'text-neonCyan-400' },
+    
+    // 默认
+    other: { variant: 'secondary', icon: '⚡', color: 'text-neonPink-500' }
   }
 
-  const config = typeConfig[type]
+  // 将类型转换为小写以匹配配置
+  const normalizedType = type.toLowerCase()
+  
+  // 安全获取配置，如果类型不存在则使用默认配置
+  const config = typeConfig[normalizedType] || typeConfig.other
 
   return (
     <CyberBadge
