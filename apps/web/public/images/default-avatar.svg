@@ -1,0 +1,7 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#0a0a0a"/>
+  <circle cx="100" cy="80" r="30" fill="#22d3ee"/>
+  <path d="M50 150 Q100 120 150 150 L150 200 L50 200 Z" fill="#22d3ee"/>
+  <circle cx="100" cy="100" r="80" stroke="#22d3ee" stroke-width="2" fill="none" opacity="0.3"/>
+  <text x="100" y="180" text-anchor="middle" fill="#22d3ee" font-family="monospace" font-size="12">RUNNER</text>
+</svg>

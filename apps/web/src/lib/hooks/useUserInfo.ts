@@ -29,7 +29,7 @@ export function useUserInfo(): UserInfo {
     if (userInfo.username && userInfo.username !== 'runner' && !userInfo.avatar) {
       setUserInfo(prev => ({
         ...prev,
-        avatar: `https://github.com/${userInfo.username}.png?size=200`,
+        avatar: '/images/default-avatar.svg', // 使用本地默认头像
         githubUrl: `https://github.com/${userInfo.username}`
       }))
     }
@@ -47,7 +47,7 @@ export function getUserInfo(): UserInfo {
     username,
     email: process.env.NEXT_PUBLIC_USER_EMAIL || `${username}@example.com`,
     avatar: username !== 'runner' 
-      ? `https://github.com/${username}.png?size=200`
+      ? '/images/default-avatar.svg' // 使用本地默认头像
       : process.env.NEXT_PUBLIC_USER_AVATAR || '',
     githubUrl: username !== 'runner' ? `https://github.com/${username}` : undefined
   }

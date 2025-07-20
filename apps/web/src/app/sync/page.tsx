@@ -80,7 +80,7 @@ const mockDataSources: DataSource[] = [
     totalActivities: 739,
     userInfo: {
       name: 'Huang Yuyao',
-      avatar: 'https://github.com/huangyuyao.png?size=100',
+      avatar: '/images/default-avatar.svg', // 使用本地默认头像
       profile: 'https://www.strava.com/athletes/your-id'
     }
   }

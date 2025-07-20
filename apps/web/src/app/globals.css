@@ -1,38 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles */
+/* 赛博朋克基础样式 */
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+    @apply bg-cyber-950 text-white antialiased;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cyber-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neonCyan-400 rounded-full;
+    box-shadow: 0 0 5px #22d3ee;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neonCyan-300;
+    box-shadow: 0 0 10px #22d3ee;
+  }
+
+  /* 选择文本样式 */
+  ::selection {
+    @apply bg-neonCyan-400 text-black;
+  }
+
+  ::-moz-selection {
+    @apply bg-neonCyan-400 text-black;
   }
 }
 
-/* Custom component styles */
+/* 赛博朋克组件样式 */
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  /* 霓虹按钮样式 */
+  .btn-neon-primary {
+    @apply bg-transparent border-2 border-neonCyan-400 text-neonCyan-400 px-6 py-3 rounded-lg font-mono uppercase tracking-wider transition-all duration-300 hover:bg-neonCyan-400 hover:text-black hover:shadow-neon-cyan;
   }
   
-  .btn-secondary {
-    @apply inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700;
+  .btn-neon-secondary {
+    @apply bg-transparent border-2 border-neonPink-500 text-neonPink-500 px-6 py-3 rounded-lg font-mono uppercase tracking-wider transition-all duration-300 hover:bg-neonPink-500 hover:text-black hover:shadow-neon-pink;
   }
   
-  .card {
-    @apply bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700;
+  .btn-neon-success {
+    @apply bg-transparent border-2 border-neonGreen-500 text-neonGreen-500 px-6 py-3 rounded-lg font-mono uppercase tracking-wider transition-all duration-300 hover:bg-neonGreen-500 hover:text-black hover:shadow-neon-green;
   }
-  
-  .input-field {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white sm:text-sm;
+
+  .btn-neon-ghost {
+    @apply bg-transparent text-white hover:text-neonCyan-400 px-6 py-3 rounded-lg font-mono uppercase tracking-wider transition-all duration-300 hover:shadow-neon-cyan;
+  }
+
+  /* 赛博朋克卡片样式 */
+  .cyber-card {
+    @apply bg-cyber-900/80 border border-cyber-700 rounded-lg backdrop-blur-sm relative overflow-hidden;
+    background-image: 
+      linear-gradient(rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .cyber-card-glow {
+    @apply cyber-card border-neonCyan-400 shadow-neon-cyan;
+  }
+
+  .cyber-card-terminal {
+    @apply bg-black border-2 border-neonGreen-500 text-neonGreen-500 font-mono shadow-neon-green relative overflow-hidden;
+  }
+
+  .cyber-card-terminal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(34, 197, 94, 0.03) 2px,
+      rgba(34, 197, 94, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* 输入框样式 */
+  .cyber-input {
+    @apply bg-cyber-900/50 border-2 border-cyber-700 text-white rounded-lg px-4 py-2 focus:border-neonCyan-400 focus:shadow-neon-cyan focus:outline-none transition-all duration-300 backdrop-blur-sm;
+  }
+
+  /* 标题样式 */
+  .cyber-title {
+    @apply font-display text-neonCyan-400 uppercase tracking-wider;
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .cyber-subtitle {
+    @apply font-mono text-neonPink-500 uppercase tracking-widest text-sm;
+  }
+
+  /* 终端文本样式 */
+  .terminal-text {
+    @apply font-mono text-neonGreen-500;
+    text-shadow: 0 0 5px currentColor;
+  }
+
+  /* 数据流动效果 */
+  .data-stream {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .data-stream::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(34, 211, 238, 0.2),
+      transparent
+    );
+    animation: dataFlow 3s infinite;
+  }
+
+  /* 扫描线效果 */
+  .scan-lines::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(34, 211, 238, 0.03) 2px,
+      rgba(34, 211, 238, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* 网格背景 */
+  .cyber-grid {
+    background-image: 
+      linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* 霓虹文字效果 */
+  .neon-text {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 15px currentColor,
+      0 0 20px currentColor;
+  }
+
+  .neon-text-pulse {
+    animation: neonPulse 2s ease-in-out infinite alternate;
+  }
+
+  /* 发光边框 */
+  .glow-border {
+    box-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 15px currentColor,
+      inset 0 0 5px currentColor;
+  }
+
+  /* 状态指示器 */
+  .status-online {
+    @apply bg-neonGreen-500 shadow-neon-green;
+  }
+
+  .status-offline {
+    @apply bg-cyber-600;
+  }
+
+  .status-warning {
+    @apply bg-neonOrange-500 shadow-neon-orange;
+  }
+
+  .status-error {
+    @apply bg-neonPink-500 shadow-neon-pink;
   }
 }
 
-/* Custom utility styles */
+/* 工具类样式 */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -46,32 +223,95 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* 霓虹发光工具类 */
+  .glow-cyan {
+    box-shadow: 0 0 5px #22d3ee, 0 0 10px #22d3ee, 0 0 15px #22d3ee;
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 5px #ec4899, 0 0 10px #ec4899, 0 0 15px #ec4899;
+  }
+
+  .glow-green {
+    box-shadow: 0 0 5px #22c55e, 0 0 10px #22c55e, 0 0 15px #22c55e;
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 5px #a855f7, 0 0 10px #a855f7, 0 0 15px #a855f7;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 5px #f97316, 0 0 10px #f97316, 0 0 15px #f97316;
+  }
+
+  /* 响应式发光效果 - 移动端减弱 */
+  @media (max-width: 768px) {
+    .glow-cyan,
+    .glow-pink,
+    .glow-green,
+    .glow-purple,
+    .glow-orange {
+      box-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
+    }
+
+    .neon-text {
+      text-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
+    }
+  }
+
+  /* 减少动画偏好支持 */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-neon-pulse,
+    .animate-data-flow,
+    .animate-scan-line,
+    .animate-glow-pulse,
+    .animate-cyber-flicker {
+      animation: none;
+    }
+
+    .neon-text-pulse {
+      animation: none;
+    }
+  }
 }
 
-/* Chart and visualization styles */
+/* 图表和可视化样式 */
 .recharts-wrapper {
-  @apply text-gray-600 dark:text-gray-400;
+  @apply text-gray-300;
 }
 
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
-  @apply stroke-gray-200 dark:stroke-gray-700;
+  @apply stroke-cyber-700;
 }
 
 .recharts-tooltip-wrapper {
   @apply drop-shadow-lg;
 }
 
-/* Map styles */
+.recharts-tooltip-content {
+  @apply bg-cyber-900 border border-neonCyan-400 rounded-lg shadow-neon-cyan;
+}
+
+/* 地图样式 */
 .mapboxgl-popup {
-  @apply text-gray-900;
+  @apply text-white;
 }
 
 .mapboxgl-popup-content {
-  @apply rounded-lg shadow-lg;
+  @apply bg-cyber-900 border border-neonCyan-400 rounded-lg shadow-neon-cyan;
 }
 
-/* Loading animations */
+.mapboxgl-ctrl-group {
+  @apply bg-cyber-900 border border-cyber-700 rounded-lg;
+}
+
+.mapboxgl-ctrl button {
+  @apply bg-cyber-800 text-white hover:bg-cyber-700;
+}
+
+/* 加载动画 */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -83,11 +323,74 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite linear;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #262626 25%, #404040 50%, #262626 75%);
   background-size: 200px 100%;
 }
 
-.dark .animate-shimmer {
-  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-  background-size: 200px 100%;
+/* 终端光标效果 */
+.terminal-cursor::after {
+  content: '█';
+  @apply text-neonGreen-500 animate-pulse;
+}
+
+/* 数据表格样式 */
+.cyber-table {
+  @apply bg-cyber-900/50 border border-cyber-700 rounded-lg overflow-hidden;
+}
+
+.cyber-table th {
+  @apply bg-cyber-800 text-neonCyan-400 font-mono uppercase tracking-wider text-sm py-3 px-4 border-b border-cyber-700;
+}
+
+.cyber-table td {
+  @apply py-3 px-4 border-b border-cyber-800 text-gray-300;
+}
+
+.cyber-table tr:hover {
+  @apply bg-cyber-800/50;
+}
+
+/* 进度条样式 */
+.cyber-progress {
+  @apply bg-cyber-800 rounded-full overflow-hidden;
+}
+
+.cyber-progress-bar {
+  @apply bg-gradient-to-r from-neonCyan-400 to-neonPink-500 h-full transition-all duration-500;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* 标签样式 */
+.cyber-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-mono uppercase tracking-wider;
+}
+
+.cyber-badge-primary {
+  @apply cyber-badge bg-neonCyan-400/20 text-neonCyan-400 border border-neonCyan-400;
+}
+
+.cyber-badge-secondary {
+  @apply cyber-badge bg-neonPink-500/20 text-neonPink-500 border border-neonPink-500;
+}
+
+.cyber-badge-success {
+  @apply cyber-badge bg-neonGreen-500/20 text-neonGreen-500 border border-neonGreen-500;
+}
+
+.cyber-badge-warning {
+  @apply cyber-badge bg-neonOrange-500/20 text-neonOrange-500 border border-neonOrange-500;
+}
+
+/* 响应式优化 */
+@media (max-width: 640px) {
+  .cyber-card {
+    background-size: 15px 15px;
+  }
+  
+  .btn-neon-primary,
+  .btn-neon-secondary,
+  .btn-neon-success,
+  .btn-neon-ghost {
+    @apply px-4 py-2 text-sm;
+  }
 }
