@@ -92,7 +92,7 @@ function ActivityCard({ activity, index }: { activity: Activity; index: number }
                   size="sm"
                 />
               )}
-              {activity.average_heartrate && (
+              {activity.average_heartrate && activity.average_heartrate > 0 && (
                 <CyberMetricBadge
                   label="HR"
                   value={Math.round(activity.average_heartrate)}

@@ -35,6 +35,10 @@ export function CyberBadge({
   className,
   children
 }: CyberBadgeProps) {
+  // 确保 variant 和 size 有有效值
+  const safeVariant = variant && variants[variant] ? variant : 'primary'
+  const safeSize = size && sizes[size] ? size : 'md'
+  
   return (
     <span
       className={clsx(
@@ -43,10 +47,10 @@ export function CyberBadge({
         'transition-all duration-300',
         
         // 变体样式
-        variants[variant],
+        variants[safeVariant],
         
         // 尺寸样式
-        sizes[size],
+        sizes[safeSize],
         
         // 发光效果
         glow && 'shadow-lg',
