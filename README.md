@@ -1,22 +1,42 @@
-# Running Page 2.0 🏃‍♂️
+# Running Page 2.0 🏃‍♂️⚡
 
-A modern, feature-rich running data visualization platform built with Next.js 14, TypeScript, and modern web technologies. Inspired by the original [running_page](https://github.com/yihong0618/running_page) project by [@yihong0618](https://github.com/yihong0618).
+A **cyberpunk-styled**, feature-rich running data visualization platform built with Next.js 14, TypeScript, and modern web technologies. Inspired by the original [running_page](https://github.com/yihong0618/running_page) project by [@yihong0618](https://github.com/yihong0618).
 
 ![Running Page 2.0](https://img.shields.io/badge/Running%20Page-2.0-blue?style=for-the-badge&logo=react)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC?style=flat-square&logo=tailwind-css)
 ![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)
+![Cyberpunk](https://img.shields.io/badge/Style-Cyberpunk-ff00ff?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjZmYwMGZmIi8+Cjwvc3ZnPgo=)
+
+## 🌟 **NEW: Cyberpunk Geek Style** 
+
+**Complete visual transformation** with a futuristic cyberpunk aesthetic designed for tech enthusiasts and developers:
+
+- **🔮 Neon Color Palette** - Electric cyan, hot pink, and vibrant green accents
+- **⚡ Glitch Effects** - Subtle scan lines and digital artifacts
+- **🖥️ Terminal Aesthetics** - Monospace fonts and command-line inspired UI
+- **💎 Glass Morphism** - Translucent cards with backdrop blur effects
+- **🌈 RGB Glow Effects** - Dynamic lighting and shadow effects
+- **🎮 Gaming-Inspired** - UI elements that feel like a sci-fi interface
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
 - **📊 Interactive Dashboard** - Comprehensive overview with key metrics and recent activities
-- **📋 Activity Management** - Paginated, filterable, and searchable activity list
+- **📋 Activity Management** - Paginated, filterable, and searchable activity list with **working pagination**
 - **📈 Advanced Analytics** - Multi-dimensional statistics with beautiful visualizations
 - **🗺️ Revolutionary Map System** - Static cached maps with intelligent fallback
 - **🔄 Automated Data Sync** - GitHub Actions powered Strava integration
 - **📱 Mobile Optimized** - Perfect experience across all devices
+
+### 🎨 **Cyberpunk UI Components**
+- **🔥 CyberCard** - Futuristic card components with glow effects
+- **⚡ CyberButton** - Neon-styled interactive buttons
+- **🎯 CyberBadge** - Activity type indicators with custom icons
+- **🔍 CyberInput** - Terminal-style form inputs
+- **📊 CyberLoading** - Animated loading states with scan lines
+- **🌐 CyberNavigation** - Sleek breadcrumb and menu systems
 
 ### 🗺️ Revolutionary Static Map System
 - **🚀 Zero-Cost Maps** - Pre-generated PNG maps eliminate API costs
@@ -49,6 +69,26 @@ A modern, feature-rich running data visualization platform built with Next.js 14
 - **🛡️ Error Handling** - Comprehensive error boundaries and recovery
 - **⚡ Performance** - Code splitting, lazy loading, and intelligent caching
 - **🔍 Monitoring** - Built-in cache statistics and health checks
+
+### 🏃‍♂️ **Comprehensive Activity Support**
+- **🏃 Running** - Distance, pace, elevation, heart rate tracking
+- **🚴 Cycling** - Speed, power, route analysis
+- **🏊 Swimming** - Pool and open water sessions
+- **🚶 Walking** - Casual walks and hiking adventures
+- **🥾 Hiking** - Trail exploration with elevation profiles
+- **💪 Workouts** - Gym sessions and strength training
+- **🏋️ Weight Training** - Resistance and strength exercises
+- **🏃‍♀️ Elliptical** - Indoor cardio sessions
+- **🚣 Rowing** - Water and machine rowing
+- **🏄 Stand Up Paddling** - Water sports activities
+
+### ⚡ **Performance Optimized**
+- **🚀 Fast Loading** - Activities page: 7.13 kB, Dashboard: 4.26 kB
+- **🧠 Smart Caching** - 5-minute React Query cache with 10-minute GC
+- **🎬 Smooth Animations** - GPU-accelerated with optimized delays
+- **📱 Mobile First** - 60fps animations on all devices
+- **🔄 Efficient Pagination** - 10 items per page with working Next/Previous
+- **🛡️ Error Recovery** - Defensive programming prevents crashes
 
 ## 🚀 Quick Start
 
