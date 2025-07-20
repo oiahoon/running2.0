@@ -191,6 +191,8 @@ export function CyberActivities() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState('all')
   const [isLoading, setIsLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
 
   const handleSyncData = async () => {
     setIsLoading(true)
@@ -211,6 +213,35 @@ export function CyberActivities() {
     const matchesType = selectedType === 'all' || activity.type === selectedType
     return matchesSearch && matchesType
   })
+
+  // 分页逻辑
+  const totalPages = Math.ceil(filteredActivities.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentActivities = filteredActivities.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // 当搜索或筛选条件改变时重置到第一页
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value)
+    setCurrentPage(1)
+  }
 
   return (
     <div className="space-y-6">
@@ -255,14 +286,14 @@ export function CyberActivities() {
               <CyberSearchInput
                 placeholder="Search activities..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onSearch={setSearchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onSearch={handleSearchChange}
               />
               
               {/* 类型筛选 */}
               <select
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                onChange={(e) => handleTypeChange(e.target.value)}
                 className="cyber-input"
               >
                 <option value="all">All Activities</option>
@@ -359,8 +390,8 @@ export function CyberActivities() {
           <div className="text-center py-12">
             <CyberLoading variant="terminal" text="Synchronizing Data" />
           </div>
-        ) : filteredActivities.length > 0 ? (
-          filteredActivities.map((activity, index) => (
+        ) : currentActivities.length > 0 ? (
+          currentActivities.map((activity, index) => (
             <ActivityCard key={activity.id} activity={activity} index={index} />
           ))
         ) : (
@@ -379,25 +410,51 @@ export function CyberActivities() {
       </motion.div>
 
       {/* 分页控制 */}
-      {filteredActivities.length > 0 && (
+      {filteredActivities.length > 0 && totalPages > 1 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="flex justify-center space-x-4"
+          className="flex justify-center items-center space-x-4"
         >
-          <CyberButton variant="ghost" size="sm">
+          <CyberButton 
+            variant="ghost" 
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className={currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+          >
             ← Previous
           </CyberButton>
+          
           <div className="flex items-center space-x-2 font-mono text-sm">
             <span className="text-gray-400">Page</span>
-            <span className="text-neonCyan-400">1</span>
+            <span className="text-neonCyan-400">{currentPage}</span>
             <span className="text-gray-400">of</span>
-            <span className="text-neonCyan-400">5</span>
+            <span className="text-neonCyan-400">{totalPages}</span>
           </div>
-          <CyberButton variant="ghost" size="sm">
+          
+          <CyberButton 
+            variant="ghost" 
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className={currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}
+          >
             Next →
           </CyberButton>
+        </motion.div>
+      )}
+
+      {/* 显示总数信息 */}
+      {filteredActivities.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+          className="text-center text-sm text-gray-400 font-mono"
+        >
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredActivities.length)} of {filteredActivities.length} activities
         </motion.div>
       )}
     </div>
