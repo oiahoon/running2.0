@@ -104,6 +104,8 @@ GPX_OUT/
 TCX_OUT/
 FIT_OUT/
 activities/
+# Allow web app activities directory
+!apps/web/src/app/activities/
 Workouts/
 
 # Python
