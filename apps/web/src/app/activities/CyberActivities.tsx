@@ -119,15 +119,13 @@ export function CyberActivities() {
   const itemsPerPage = 10
 
   // 构建查询参数
-  const queryParams = {
-    page: currentPage,
-    limit: itemsPerPage,
+  const filters = {
     search: searchTerm || undefined,
-    types: selectedType === 'all' ? getDefaultActivityTypes() : [selectedType],
+    type: selectedType === 'all' ? getDefaultActivityTypes() : [selectedType],
   }
 
-  // 使用真实的活动数据API
-  const { data, isLoading, error } = useActivities(queryParams)
+  // 使用真实的活动数据API - 修复参数传递
+  const { data, isLoading, error } = useActivities(filters, currentPage, itemsPerPage)
   const activities = data?.activities || []
   const pagination = data?.pagination
   const summary = data?.summary
