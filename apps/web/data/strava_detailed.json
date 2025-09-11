@@ -823,24 +823,24 @@
     "embed_token": "4ae5bdccfcc2f027b95b200ce3b44bf92f9ce8c3",
     "similar_activities": {
       "effort_count": 92,
-      "average_speed": 2.4967004307411997,
-      "min_average_speed": 2.0653034027068435,
-      "mid_average_speed": 2.4167780126178187,
-      "max_average_speed": 2.9124145153985506,
+      "average_speed": 2.496700133059151,
+      "min_average_speed": 2.0653115423901944,
+      "mid_average_speed": 2.41678058380552,
+      "max_average_speed": 2.912405797101449,
       "pr_rank": null,
       "frequency_milestone": null,
       "trend": {
         "speeds": [
-          2.4014082588503705,
-          2.381516267671486,
-          2.3472058005927656,
-          2.3579754834757414,
-          2.3479033393809434
+          2.4014082361479234,
+          2.3815162807467716,
+          2.3472058252204766,
+          2.357975508049252,
+          2.347903407791635
         ],
         "current_activity_index": 4,
-        "min_speed": 2.0653034027068435,
-        "mid_speed": 2.4167780126178187,
-        "max_speed": 2.9124145153985506,
+        "min_speed": 2.0653115423901944,
+        "mid_speed": 2.41678058380552,
+        "max_speed": 2.912405797101449,
         "direction": -1
       },
       "resource_state": 2
