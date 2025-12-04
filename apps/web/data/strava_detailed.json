@@ -1235,9 +1235,9 @@
         "hidden": false
       },
       {
-        "id": 3425858676999199158,
+        "id": 3425858676997375414,
         "resource_state": 2,
-        "name": "Bridle Path Mile from E94th Entrance",
+        "name": "HOKA Mach Speed Challenge",
         "activity": {
           "id": 16494684415,
           "visibility": "everyone",
@@ -1247,35 +1247,35 @@
           "id": 111184551,
           "resource_state": 1
         },
-        "elapsed_time": 831,
-        "moving_time": 662,
-        "start_date": "2025-11-18T12:52:16Z",
-        "start_date_local": "2025-11-18T07:52:16Z",
-        "distance": 1617.2,
-        "start_index": 2233,
-        "end_index": 3064,
-        "average_cadence": 64.1,
+        "elapsed_time": 714,
+        "moving_time": 561,
+        "start_date": "2025-11-18T12:50:42Z",
+        "start_date_local": "2025-11-18T07:50:42Z",
+        "distance": 1320.3,
+        "start_index": 2139,
+        "end_index": 2853,
+        "average_cadence": 63.0,
         "device_watts": true,
-        "average_watts": 146.8,
-        "average_heartrate": 150.0,
-        "max_heartrate": 175.0,
+        "average_watts": 143.4,
+        "average_heartrate": 148.0,
+        "max_heartrate": 180.0,
         "segment": {
-          "id": 37008811,
+          "id": 37541205,
           "resource_state": 2,
-          "name": "Bridle Path Mile from E94th Entrance",
+          "name": "HOKA Mach Speed Challenge",
           "activity_type": "Run",
-          "distance": 1617.2,
-          "average_grade": 0.1,
-          "maximum_grade": 4.1,
+          "distance": 1320.3,
+          "average_grade": 0.0,
+          "maximum_grade": 0.4,
           "elevation_high": 37.9,
-          "elevation_low": 32.5,
+          "elevation_low": 37.5,
           "start_latlng": [
-            40.787271,
-            -73.957467
+            40.785505,
+            -73.95849
           ],
           "end_latlng": [
-            40.78362,
-            -73.96414
+            40.786581,
+            -73.966452
           ],
           "elevation_profile": null,
           "elevation_profiles": null,
