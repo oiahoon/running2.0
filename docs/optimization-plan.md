@@ -67,10 +67,15 @@
 - Refactor `/api/data-sources` to use `data_source_settings` persistence (instead of in-memory registry)
 - Add baseline CI quality gate workflow for type-check + lint + build
 
+### Phase 8: Sync Runtime Consolidation
+
+- Remove `/api/sync` dependency on in-memory `DataSourceRegistry`
+- Use `data_source_settings` as source-of-truth for sync status and enabled source dispatch
+- Reuse a shared Strava sync executor to keep `/api/sync` and `/api/sync/strava` behavior consistent
+
 ## 4. Next Iteration Backlog
 
 - Add minimal API route smoke tests
-- Unify `/api/sync` runtime behavior with persisted source lifecycle (remove empty in-memory registry dependency)
 - Add integration tests for data source CRUD and sync logging paths
 - Gradually fix legacy TypeScript/Lint debt to turn CI type/lint checks from non-blocking to hard gate
 
@@ -87,3 +92,4 @@
 - [x] Phase 5 UI consistency documentation (`docs/ui-minimal-guidelines.md`)
 - [x] Phase 6 mobile and empty-state polish (shared layout cleanup)
 - [x] Phase 7 integration persistence and CI gate
+- [x] Phase 8 sync runtime consolidation
