@@ -97,14 +97,22 @@
 - Run `npm audit fix` to close remaining transitive advisories (0 vulnerabilities)
 - Define runtime baseline for native module stability (`.nvmrc` with Node 22 LTS, engines constrained to supported range)
 
+### Phase 13: UIUX Re-Architecture (Grande Minimal)
+
+- Redesign IA and workflows while preserving all existing capabilities
+- Rebuild global shell for stronger hierarchy and clearer navigation context
+- Refactor pages in batches (Dashboard/Sync first, then Activities/Stats, then Map/Data Sources)
+- Keep map and trajectory workflows intact, improve information architecture and task flow
+- Batch A complete:
+  - New IA/workflow plan document (`docs/uiux-rearchitecture-plan.md`)
+  - New global shell (sidebar grouping, command header, contextual actions)
+  - Dashboard and Sync workflow-first layout refactor
+
 ## 4. Next Iteration Backlog
 
 - Add integration tests for data source CRUD and sync logging paths
 - Gradually fix legacy TypeScript/Lint debt to turn CI type/lint checks from non-blocking to hard gate
-- Plan major-version dependency migration:
-  - `next` 14 -> 16 (with matching `eslint-config-next`)
-  - `react` 18 -> 19 ecosystem
-  - evaluate replacing/removing `sqlite3` dependency path that introduces high transitive advisories
+- UIUX re-architecture remaining batches after initial shell + core workflow rollout
 
 ## 5. Execution Log
 
@@ -124,3 +132,4 @@
 - [x] Phase 10 npm dependency debt reduction (non-major pass)
 - [x] Phase 11 framework major upgrade (Next 16 + React 19)
 - [x] Phase 12 runtime baseline and security closure
+- [ ] Phase 13 UIUX re-architecture batch B/C pending (`activities` + `stats` + `map` + `data-sources`)

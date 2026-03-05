@@ -14,6 +14,9 @@ This folder is the source-of-truth for current project status.
   - Progress tracking
 - `ui-minimal-guidelines.md`
   - Minimalist UI language and implementation checklist
+- `uiux-rearchitecture-plan.md`
+  - IA/workflow/layout redesign blueprint
+  - Phased execution and acceptance criteria
 - `deployment/`
   - Deployment setup and troubleshooting
 - `api/api-design.md`
