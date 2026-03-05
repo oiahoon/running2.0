@@ -41,16 +41,30 @@ interface StravaTokenResponse {
   expires_at: number
 }
 
+export interface StravaSyncExecutionResult {
+  success: boolean
+  message: string
+  activitiesProcessed: number
+  activitiesSaved: number
+  timestamp: string
+}
+
 async function getStoredTokens() {
   const db = getDatabase()
-  
+
   const settings = db.prepare(`
     SELECT access_token, refresh_token, token_expires_at
-    FROM data_source_settings 
+    FROM data_source_settings
     WHERE source = 'strava' AND is_active = 1
     ORDER BY updated_at DESC
     LIMIT 1
-  `).get() as any
+  `).get() as
+    | {
+        access_token: string
+        refresh_token: string
+        token_expires_at: string
+      }
+    | undefined
 
   if (!settings) {
     throw new Error('No Strava connection found. Please connect your Strava account first.')
@@ -59,7 +73,7 @@ async function getStoredTokens() {
   return {
     accessToken: settings.access_token,
     refreshToken: settings.refresh_token,
-    expiresAt: new Date(settings.token_expires_at).getTime() / 1000
+    expiresAt: new Date(settings.token_expires_at).getTime() / 1000,
   }
 }
 
@@ -86,9 +100,9 @@ async function refreshStravaToken(refreshToken: string): Promise<StravaTokenResp
 
 async function updateStoredTokens(tokenData: StravaTokenResponse) {
   const db = getDatabase()
-  
+
   const updateTokens = db.prepare(`
-    UPDATE data_source_settings 
+    UPDATE data_source_settings
     SET access_token = ?, refresh_token = ?, token_expires_at = ?, updated_at = ?
     WHERE source = 'strava' AND is_active = 1
   `)
@@ -96,12 +110,7 @@ async function updateStoredTokens(tokenData: StravaTokenResponse) {
   const expiresAt = new Date(tokenData.expires_at * 1000).toISOString()
   const now = new Date().toISOString()
 
-  updateTokens.run(
-    tokenData.access_token,
-    tokenData.refresh_token,
-    expiresAt,
-    now
-  )
+  updateTokens.run(tokenData.access_token, tokenData.refresh_token, expiresAt, now)
 }
 
 async function fetchStravaActivities(accessToken: string, page = 1, perPage = 200): Promise<StravaActivity[]> {
@@ -123,7 +132,7 @@ async function fetchStravaActivities(accessToken: string, page = 1, perPage = 20
 
 async function saveActivityToDatabase(activity: StravaActivity) {
   const db = getDatabase()
-  
+
   const insertActivity = db.prepare(`
     INSERT OR REPLACE INTO activities (
       external_id, source, name, description, type, sport_type,
@@ -140,12 +149,12 @@ async function saveActivityToDatabase(activity: StravaActivity) {
   `)
 
   const now = new Date().toISOString()
-  
+
   insertActivity.run(
     activity.id.toString(),
     'strava',
     activity.name,
-    '', // description
+    '',
     activity.type,
     activity.sport_type,
     activity.start_date,
@@ -180,7 +189,7 @@ async function saveActivityToDatabase(activity: StravaActivity) {
 
 async function logSync(status: string, activitiesProcessed: number, error?: string) {
   const db = getDatabase()
-  
+
   const insertLog = db.prepare(`
     INSERT INTO sync_logs (
       source, sync_type, status, activities_processed,
@@ -189,67 +198,48 @@ async function logSync(status: string, activitiesProcessed: number, error?: stri
   `)
 
   const now = new Date().toISOString()
-  
-  insertLog.run(
-    'strava',
-    'scheduled',
-    status,
-    activitiesProcessed,
-    error || null,
-    now,
-    now
-  )
+
+  insertLog.run('strava', 'scheduled', status, activitiesProcessed, error || null, now, now)
 }
 
-export async function GET(request: NextRequest) {
+export async function runStravaSync(): Promise<StravaSyncExecutionResult> {
   try {
     console.log('Starting Strava sync...')
-    
-    // Check if we have the required environment variables
+
     if (!process.env.STRAVA_CLIENT_ID || !process.env.STRAVA_CLIENT_SECRET) {
       throw new Error('Missing Strava API credentials')
     }
 
-    // Get stored tokens
-    console.log('Getting stored Strava tokens...')
     const storedTokens = await getStoredTokens()
-    
-    // Check if token needs refresh
+
     let accessToken = storedTokens.accessToken
     const now = Math.floor(Date.now() / 1000)
-    
-    if (storedTokens.expiresAt <= now + 300) { // Refresh if expires in 5 minutes
-      console.log('Refreshing Strava token...')
+
+    if (storedTokens.expiresAt <= now + 300) {
       const tokenData = await refreshStravaToken(storedTokens.refreshToken)
       await updateStoredTokens(tokenData)
       accessToken = tokenData.access_token
     }
-    
-    // Fetch activities
-    console.log('Fetching Strava activities...')
+
     let allActivities: StravaActivity[] = []
     let page = 1
     let hasMore = true
-    
-    while (hasMore && page <= 10) { // Limit to 10 pages (2000 activities) for safety
+
+    while (hasMore && page <= 10) {
       const activities = await fetchStravaActivities(accessToken, page)
-      
+
       if (activities.length === 0) {
         hasMore = false
       } else {
         allActivities = allActivities.concat(activities)
         page++
-        
-        // If we got less than 200 activities, we've reached the end
+
         if (activities.length < 200) {
           hasMore = false
         }
       }
     }
 
-    console.log(`Fetched ${allActivities.length} activities from Strava`)
-
-    // Save activities to database
     let savedCount = 0
     for (const activity of allActivities) {
       try {
@@ -260,25 +250,27 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log(`Saved ${savedCount} activities to database`)
-
-    // Log successful sync
     await logSync('success', savedCount)
 
-    return NextResponse.json({
+    return {
       success: true,
       message: `Successfully synced ${savedCount} activities from Strava`,
       activitiesProcessed: allActivities.length,
       activitiesSaved: savedCount,
       timestamp: new Date().toISOString(),
-    })
-
+    }
   } catch (error) {
-    console.error('Strava sync error:', error)
-    
-    // Log failed sync
-    await logSync('error', 0, error instanceof Error ? error.message : 'Unknown error')
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    await logSync('error', 0, message)
+    throw new Error(message)
+  }
+}
 
+export async function GET(_request: NextRequest) {
+  try {
+    const result = await runStravaSync()
+    return NextResponse.json(result)
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
@@ -290,7 +282,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Allow manual triggering via POST
 export async function POST(request: NextRequest) {
   return GET(request)
 }
