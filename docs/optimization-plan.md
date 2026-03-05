@@ -50,6 +50,11 @@
 - Unify layout and typography to clean, low-contrast, readable defaults
 - Batch 2 scope: `stats`, `map`, `sync-status`
 
+### Phase 5: UI Consistency Documentation
+
+- Define minimal UI language and checklist
+- Make it the baseline for future page/component updates
+
 ## 4. Next Iteration Backlog (Not completed in this round)
 
 - Integration layer hardening:
@@ -68,3 +73,5 @@
 - [x] Phase 4 UIUX minimal redesign (layout + dashboard + activities first batch)
 - [x] Phase 4 UIUX minimal redesign batch 2 (`stats` + `map` + `sync-status`)
 - [x] Phase 4 UIUX minimal redesign batch 3 (`sync` page table + controls simplification)
+- [x] Phase 4 UIUX minimal redesign batch 4 (`data-sources`)
+- [x] Phase 5 UI consistency documentation (`docs/ui-minimal-guidelines.md`)

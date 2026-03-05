@@ -12,6 +12,8 @@ This folder is the source-of-truth for current project status.
   - Strengths and weaknesses
   - Phased optimization roadmap
   - Progress tracking
+- `ui-minimal-guidelines.md`
+  - Minimalist UI language and implementation checklist
 - `deployment/`
   - Deployment setup and troubleshooting
 - `api/api-design.md`
