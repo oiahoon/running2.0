@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { DataSourceRegistry, DataSourceConfig } from '@/lib/integrations/base'
+import { getDatabase } from '@/lib/database/connection'
 import { NikeDataSource } from '@/lib/integrations/nike'
 
-// Global registry instance (in production, this would be properly managed)
-const registry = new DataSourceRegistry()
-
-// Available data source types
 const DATA_SOURCE_TYPES = {
   nike: {
     name: 'Nike Run Club',
@@ -55,6 +51,52 @@ const DATA_SOURCE_TYPES = {
       'Files will be automatically processed and imported'
     ]
   }
+} as const
+
+type SourceKey = keyof typeof DATA_SOURCE_TYPES
+
+type DataSourceRow = {
+  id: number
+  source: string
+  is_active: number
+  connection_status: string | null
+  last_sync_at: string | null
+  updated_at: string | null
+  created_at: string | null
+  access_token: string | null
+  refresh_token: string | null
+  token_expires_at: string | null
+  privacy_settings: string | null
+}
+
+function toConfiguredStatus(row: DataSourceRow): 'active' | 'inactive' | 'error' {
+  if (!row.is_active) return 'inactive'
+  if (row.connection_status === 'error') return 'error'
+  return 'active'
+}
+
+function getSourceMeta(source: string) {
+  return DATA_SOURCE_TYPES[source as SourceKey]
+}
+
+function extractSourceIdentifier(request: NextRequest, body?: unknown): string | null {
+  const normalize = (value: string) => {
+    if (DATA_SOURCE_TYPES[value as SourceKey]) return value
+    const prefix = value.split('_')[0]
+    return DATA_SOURCE_TYPES[prefix as SourceKey] ? prefix : value
+  }
+
+  const querySource = request.nextUrl.searchParams.get('source')
+  if (querySource) return normalize(querySource)
+
+  if (body && typeof body === 'object') {
+    const payload = body as Record<string, unknown>
+    if (typeof payload.source === 'string') return normalize(payload.source)
+    if (typeof payload.type === 'string') return normalize(payload.type)
+    if (typeof payload.id === 'string') return normalize(payload.id)
+  }
+
+  return null
 }
 
 /**
@@ -63,22 +105,51 @@ const DATA_SOURCE_TYPES = {
  */
 export async function GET() {
   try {
-    const configuredSources = registry.getAllSources()
+    const db = getDatabase()
+    const configuredRows = db.prepare(`
+      SELECT
+        id,
+        source,
+        is_active,
+        connection_status,
+        last_sync_at,
+        updated_at,
+        created_at,
+        access_token,
+        refresh_token,
+        token_expires_at,
+        privacy_settings
+      FROM data_source_settings
+      WHERE user_id = 1
+      ORDER BY updated_at DESC, id DESC
+    `).all() as DataSourceRow[]
+
+    const configuredSourceSet = new Set(configuredRows.map(row => row.source))
+
     const availableTypes = Object.entries(DATA_SOURCE_TYPES).map(([key, info]) => ({
       id: key,
       ...info,
-      configured: configuredSources.some(({ config }) => config.type === key)
+      configured: configuredSourceSet.has(key)
     }))
 
-    const syncStatus = await registry.getAllSyncStatus()
+    const configuredSources = configuredRows.map((row) => {
+      const meta = getSourceMeta(row.source)
+
+      return {
+        id: row.source,
+        name: meta?.name || row.source,
+        type: row.source,
+        enabled: Boolean(row.is_active),
+        status: toConfiguredStatus(row),
+        lastSync: row.last_sync_at || undefined,
+        errorMessage: row.connection_status === 'error' ? 'Connection error, please re-authenticate.' : undefined,
+        supportedActivities: meta?.supportedActivities || [],
+      }
+    })
 
     return NextResponse.json({
       availableTypes,
-      configuredSources: configuredSources.map(({ config, source }) => ({
-        ...config,
-        syncStatus: syncStatus[config.id],
-        supportedActivities: source.supportedActivityTypes
-      }))
+      configuredSources,
     })
   } catch (error) {
     console.error('Failed to get data sources:', error)
@@ -91,53 +162,35 @@ export async function GET() {
 
 /**
  * POST /api/data-sources
- * Add a new data source configuration
+ * Add or upsert a data source configuration
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { type, name, config: sourceConfig, enabled = true } = body
 
-    if (!type || !name || !sourceConfig) {
+    if (!type || !sourceConfig) {
       return NextResponse.json(
-        { error: 'Missing required fields: type, name, config' },
+        { error: 'Missing required fields: type, config' },
         { status: 400 }
       )
     }
 
-    if (!DATA_SOURCE_TYPES[type]) {
+    if (!DATA_SOURCE_TYPES[type as SourceKey]) {
       return NextResponse.json(
         { error: `Unsupported data source type: ${type}` },
         { status: 400 }
       )
     }
 
-    // Generate unique ID
-    const id = `${type}_${Date.now()}`
-
-    const dataSourceConfig: DataSourceConfig = {
-      id,
-      name,
-      type,
-      enabled,
-      config: sourceConfig,
-      status: 'inactive'
+    if (type !== 'nike') {
+      return NextResponse.json(
+        { error: `Data source type ${type} does not support manual configuration in this endpoint` },
+        { status: 400 }
+      )
     }
 
-    // Create and register the data source
-    let dataSource
-    switch (type) {
-      case 'nike':
-        dataSource = new NikeDataSource(sourceConfig)
-        break
-      default:
-        return NextResponse.json(
-          { error: `Data source type ${type} not yet implemented` },
-          { status: 501 }
-        )
-    }
-
-    // Test connection
+    const dataSource = new NikeDataSource(sourceConfig)
     const connectionTest = await dataSource.testConnection()
     if (!connectionTest) {
       return NextResponse.json(
@@ -146,15 +199,67 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    dataSourceConfig.status = 'active'
-    registry.register(dataSource, dataSourceConfig)
+    const authToken = await dataSource.authenticate()
 
-    // In production, save to database
-    // await saveDataSourceConfig(dataSourceConfig)
+    const db = getDatabase()
+    const now = new Date().toISOString()
+    const expiresAt = authToken.expiresAt.toISOString()
+
+    db.prepare(`
+      INSERT INTO data_source_settings (
+        user_id,
+        source,
+        access_token,
+        refresh_token,
+        token_expires_at,
+        auto_sync,
+        sync_frequency,
+        last_sync_at,
+        activity_types,
+        privacy_settings,
+        is_active,
+        connection_status,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id, source) DO UPDATE SET
+        access_token = excluded.access_token,
+        refresh_token = excluded.refresh_token,
+        token_expires_at = excluded.token_expires_at,
+        is_active = excluded.is_active,
+        connection_status = excluded.connection_status,
+        privacy_settings = excluded.privacy_settings,
+        updated_at = excluded.updated_at
+    `).run(
+      1,
+      type,
+      authToken.accessToken,
+      authToken.refreshToken || null,
+      expiresAt,
+      1,
+      'daily',
+      null,
+      JSON.stringify(DATA_SOURCE_TYPES[type as SourceKey].supportedActivities),
+      JSON.stringify({
+        displayName: name || DATA_SOURCE_TYPES[type as SourceKey].name,
+        authMethod: sourceConfig.authMethod,
+      }),
+      enabled ? 1 : 0,
+      'connected',
+      now,
+      now
+    )
 
     return NextResponse.json({
       message: 'Data source added successfully',
-      dataSource: dataSourceConfig
+      dataSource: {
+        id: type,
+        name: name || DATA_SOURCE_TYPES[type as SourceKey].name,
+        type,
+        enabled,
+        status: 'active',
+        lastSync: null,
+      }
     })
   } catch (error) {
     console.error('Failed to add data source:', error)
@@ -166,58 +271,51 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * PUT /api/data-sources/[id]
- * Update data source configuration
+ * PUT /api/data-sources
+ * Update data source enabled state or credentials
  */
 export async function PUT(request: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const id = url.pathname.split('/').pop()
-    
-    if (!id) {
+    const body = await request.json().catch(() => ({}))
+    const source = extractSourceIdentifier(request, body)
+
+    if (!source) {
       return NextResponse.json(
-        { error: 'Data source ID is required' },
+        { error: 'Data source identifier is required (source/type/id)' },
         { status: 400 }
       )
     }
 
-    const body = await request.json()
-    const { name, config: sourceConfig, enabled } = body
+    const db = getDatabase()
+    const existing = db.prepare(`
+      SELECT source, is_active
+      FROM data_source_settings
+      WHERE user_id = 1 AND source = ?
+      LIMIT 1
+    `).get(source) as { source: string; is_active: number } | undefined
 
-    const source = registry.getSource(id)
-    if (!source) {
+    if (!existing) {
       return NextResponse.json(
         { error: 'Data source not found' },
         { status: 404 }
       )
     }
 
-    // Update configuration
-    const updatedConfig: DataSourceConfig = {
-      id,
-      name: name || `Updated ${id}`,
-      type: id.split('_')[0],
-      enabled: enabled !== undefined ? enabled : true,
-      config: sourceConfig,
-      status: 'active'
-    }
+    const now = new Date().toISOString()
+    const enabled = typeof (body as Record<string, unknown>).enabled === 'boolean'
+      ? ((body as Record<string, unknown>).enabled as boolean)
+      : Boolean(existing.is_active)
 
-    // Test connection with new config if provided
-    if (sourceConfig) {
-      // Create new instance with updated config
-      let newDataSource
-      switch (updatedConfig.type) {
-        case 'nike':
-          newDataSource = new NikeDataSource(sourceConfig)
-          break
-        default:
-          return NextResponse.json(
-            { error: `Data source type ${updatedConfig.type} not yet implemented` },
-            { status: 501 }
-          )
-      }
+    const sourceConfig = (body as Record<string, unknown>).config
 
-      const connectionTest = await newDataSource.testConnection()
+    if (source === 'nike' && sourceConfig && typeof sourceConfig === 'object') {
+      const nikeDataSource = new NikeDataSource(sourceConfig as {
+        accessToken?: string
+        refreshToken?: string
+        authMethod: 'access_token' | 'refresh_token'
+      })
+
+      const connectionTest = await nikeDataSource.testConnection()
       if (!connectionTest) {
         return NextResponse.json(
           { error: 'Failed to connect with new configuration' },
@@ -225,16 +323,43 @@ export async function PUT(request: NextRequest) {
         )
       }
 
-      // Re-register with new config
-      registry.register(newDataSource, updatedConfig)
-    }
+      const token = await nikeDataSource.authenticate()
 
-    // In production, update in database
-    // await updateDataSourceConfig(id, updatedConfig)
+      db.prepare(`
+        UPDATE data_source_settings
+        SET
+          access_token = ?,
+          refresh_token = ?,
+          token_expires_at = ?,
+          is_active = ?,
+          connection_status = 'connected',
+          updated_at = ?
+        WHERE user_id = 1 AND source = ?
+      `).run(
+        token.accessToken,
+        token.refreshToken || null,
+        token.expiresAt.toISOString(),
+        enabled ? 1 : 0,
+        now,
+        source
+      )
+    } else {
+      db.prepare(`
+        UPDATE data_source_settings
+        SET
+          is_active = ?,
+          updated_at = ?
+        WHERE user_id = 1 AND source = ?
+      `).run(enabled ? 1 : 0, now, source)
+    }
 
     return NextResponse.json({
       message: 'Data source updated successfully',
-      dataSource: updatedConfig
+      dataSource: {
+        id: source,
+        type: source,
+        enabled,
+      }
     })
   } catch (error) {
     console.error('Failed to update data source:', error)
@@ -246,34 +371,33 @@ export async function PUT(request: NextRequest) {
 }
 
 /**
- * DELETE /api/data-sources/[id]
+ * DELETE /api/data-sources
  * Remove data source configuration
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const id = url.pathname.split('/').pop()
-    
-    if (!id) {
+    const body = await request.json().catch(() => ({}))
+    const source = extractSourceIdentifier(request, body)
+
+    if (!source) {
       return NextResponse.json(
-        { error: 'Data source ID is required' },
+        { error: 'Data source identifier is required (source/type/id)' },
         { status: 400 }
       )
     }
 
-    const source = registry.getSource(id)
-    if (!source) {
+    const db = getDatabase()
+    const result = db.prepare(`
+      DELETE FROM data_source_settings
+      WHERE user_id = 1 AND source = ?
+    `).run(source)
+
+    if (result.changes === 0) {
       return NextResponse.json(
         { error: 'Data source not found' },
         { status: 404 }
       )
     }
-
-    // Remove from registry
-    // registry.unregister(id) // Would need to implement this method
-
-    // In production, remove from database
-    // await deleteDataSourceConfig(id)
 
     return NextResponse.json({
       message: 'Data source removed successfully'
