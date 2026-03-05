@@ -36,3 +36,21 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: API smoke test
+        run: |
+          npm run start -- --port 4010 > /tmp/running2-start.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID' EXIT
+
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4010/api/debug >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          curl -fsS http://127.0.0.1:4010/api/debug >/dev/null
+          curl -fsS http://127.0.0.1:4010/api/stats >/dev/null
+          curl -fsS http://127.0.0.1:4010/api/sync/history >/dev/null
+          curl -fsS http://127.0.0.1:4010/api/data-sources >/dev/null
