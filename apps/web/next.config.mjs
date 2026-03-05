@@ -1,23 +1,26 @@
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
-  experimental: {
-    // Enable modern features
-    serverComponentsExternalPackages: ['better-sqlite3'],
-  },
-  // Optimize for production
-  swcMinify: true,
+  // Native module used by server routes/pages
+  serverExternalPackages: ['better-sqlite3'],
   // Disable TypeScript errors during build (temporary for deployment)
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Disable ESLint errors during build (temporary for deployment)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Image optimization
   images: {
-    domains: ['images.unsplash.com', 'via.placeholder.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+    ],
+  },
+  turbopack: {
+    root: projectRoot,
   },
   // API routes configuration
   async headers() {
