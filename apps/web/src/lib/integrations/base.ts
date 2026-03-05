@@ -2,6 +2,7 @@
  * Base Data Source Architecture
  * Unified interface for all data source integrations
  */
+import { getDatabase } from '@/lib/database/connection'
 
 export interface Activity {
   id: string
@@ -209,24 +210,198 @@ export abstract class BaseDataSource implements DataSource {
   }
 
   protected async findExistingActivity(externalId: string, source: string): Promise<{ id: number } | null> {
-    // Implementation would query database
-    // This is a placeholder - actual implementation would use your database layer
-    return null
+    const db = getDatabase()
+    const existing = db
+      .prepare(`
+        SELECT id
+        FROM activities
+        WHERE external_id = ? AND source = ?
+        LIMIT 1
+      `)
+      .get(externalId, source) as { id: number } | undefined
+
+    return existing || null
   }
 
   protected async createActivity(activity: Activity): Promise<void> {
-    // Implementation would insert into database
-    // This is a placeholder - actual implementation would use your database layer
+    const db = getDatabase()
+    const now = new Date().toISOString()
+    const insert = db.prepare(`
+      INSERT INTO activities (
+        external_id,
+        source,
+        name,
+        type,
+        sport_type,
+        start_date,
+        start_date_local,
+        timezone,
+        distance,
+        moving_time,
+        elapsed_time,
+        total_elevation_gain,
+        average_speed,
+        max_speed,
+        average_heartrate,
+        max_heartrate,
+        start_latitude,
+        start_longitude,
+        end_latitude,
+        end_longitude,
+        summary_polyline,
+        calories,
+        average_cadence,
+        average_power,
+        created_at,
+        updated_at,
+        synced_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    insert.run(
+      activity.externalId,
+      activity.source,
+      activity.name,
+      activity.type,
+      activity.sportType,
+      activity.startDate,
+      activity.startDateLocal,
+      activity.timezone ?? null,
+      activity.distance,
+      activity.movingTime,
+      activity.elapsedTime,
+      activity.totalElevationGain,
+      activity.averageSpeed,
+      activity.maxSpeed,
+      activity.averageHeartrate ?? null,
+      activity.maxHeartrate ?? null,
+      activity.startLatitude ?? null,
+      activity.startLongitude ?? null,
+      activity.endLatitude ?? null,
+      activity.endLongitude ?? null,
+      activity.summaryPolyline ?? null,
+      activity.calories ?? null,
+      activity.averageCadence ?? null,
+      activity.averagePower ?? null,
+      now,
+      now,
+      now
+    )
   }
 
   protected async updateActivity(id: number, activity: Activity): Promise<void> {
-    // Implementation would update database record
-    // This is a placeholder - actual implementation would use your database layer
+    const db = getDatabase()
+    const now = new Date().toISOString()
+    const update = db.prepare(`
+      UPDATE activities
+      SET
+        name = ?,
+        type = ?,
+        sport_type = ?,
+        start_date = ?,
+        start_date_local = ?,
+        timezone = ?,
+        distance = ?,
+        moving_time = ?,
+        elapsed_time = ?,
+        total_elevation_gain = ?,
+        average_speed = ?,
+        max_speed = ?,
+        average_heartrate = ?,
+        max_heartrate = ?,
+        start_latitude = ?,
+        start_longitude = ?,
+        end_latitude = ?,
+        end_longitude = ?,
+        summary_polyline = ?,
+        calories = ?,
+        average_cadence = ?,
+        average_power = ?,
+        updated_at = ?,
+        synced_at = ?
+      WHERE id = ?
+    `)
+
+    update.run(
+      activity.name,
+      activity.type,
+      activity.sportType,
+      activity.startDate,
+      activity.startDateLocal,
+      activity.timezone ?? null,
+      activity.distance,
+      activity.movingTime,
+      activity.elapsedTime,
+      activity.totalElevationGain,
+      activity.averageSpeed,
+      activity.maxSpeed,
+      activity.averageHeartrate ?? null,
+      activity.maxHeartrate ?? null,
+      activity.startLatitude ?? null,
+      activity.startLongitude ?? null,
+      activity.endLatitude ?? null,
+      activity.endLongitude ?? null,
+      activity.summaryPolyline ?? null,
+      activity.calories ?? null,
+      activity.averageCadence ?? null,
+      activity.averagePower ?? null,
+      now,
+      now,
+      id
+    )
   }
 
   protected async updateSyncStatus(result: SyncResult): Promise<void> {
-    // Implementation would update sync status in database
-    // This is a placeholder - actual implementation would use your database layer
+    const db = getDatabase()
+    const startedAt = result.startTime.toISOString()
+    const completedAt = result.endTime.toISOString()
+    const durationSeconds = Math.max(0, Math.round((result.endTime.getTime() - result.startTime.getTime()) / 1000))
+    const status = result.success ? (result.errors.length > 0 ? 'partial' : 'success') : 'error'
+    const source = this.config.type
+
+    db.prepare(`
+      INSERT INTO sync_logs (
+        user_id,
+        source,
+        sync_type,
+        status,
+        activities_processed,
+        activities_created,
+        activities_updated,
+        error_message,
+        started_at,
+        completed_at,
+        duration_seconds,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      1,
+      source,
+      'manual',
+      status,
+      result.activitiesProcessed,
+      result.activitiesAdded,
+      result.activitiesUpdated,
+      result.errors.length > 0 ? result.errors.join('\n') : null,
+      startedAt,
+      completedAt,
+      durationSeconds,
+      completedAt
+    )
+
+    db.prepare(`
+      UPDATE data_source_settings
+      SET
+        last_sync_at = ?,
+        connection_status = ?,
+        updated_at = ?
+      WHERE user_id = 1 AND source = ?
+    `).run(
+      completedAt,
+      result.success ? 'connected' : 'error',
+      completedAt,
+      source
+    )
   }
 }
 
