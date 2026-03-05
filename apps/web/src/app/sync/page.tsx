@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircleIcon, ExclamationCircleIcon, ClockIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 
 interface SyncRecord {
   id: string
@@ -32,114 +32,10 @@ interface SyncHistoryResponse {
   totalActivities: number
 }
 
-function StatusIcon({ status }: { status: string }) {
-  switch (status) {
-    case 'success':
-      return <CheckCircleIcon className="w-5 h-5 text-green-500" />
-    case 'failed':
-    case 'error':
-      return <ExclamationCircleIcon className="w-5 h-5 text-red-500" />
-    case 'running':
-      return <ArrowPathIcon className="w-5 h-5 text-blue-500 animate-spin" />
-    default:
-      return <ClockIcon className="w-5 h-5 text-gray-400" />
-  }
-}
-
-function DataSourceCard({ source }: { source: DataSource }) {
-  const statusColors = {
-    connected: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-    disconnected: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700',
-    error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-  }
-
-  const statusText = {
-    connected: 'Connected',
-    disconnected: 'Disconnected',
-    error: 'Connection Error'
-  }
-
-  return (
-    <div className={`p-6 rounded-lg border ${statusColors[source.status]}`}>
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-            S
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {source.name}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {statusText[source.status]}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Total Activities</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {source.totalActivities.toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Last Sync</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {source.lastSync
-              ? new Date(source.lastSync).toLocaleString()
-              : 'Never'
-            }
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SyncRecordRow({ record }: { record: SyncRecord }) {
-  return (
-    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-      <div className="flex items-center space-x-4">
-        <StatusIcon status={record.status} />
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="font-medium text-gray-900 dark:text-white">
-              {record.source}
-            </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date(record.timestamp).toLocaleString()}
-            </span>
-          </div>
-          {record.errorMessage ? (
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              {record.errorMessage}
-            </p>
-          ) : (
-            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
-              <span>Processed: {record.activitiesProcessed}</span>
-              <span>New: {record.activitiesCreated}</span>
-              <span>Updated: {record.activitiesUpdated}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="text-right">
-        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          record.status === 'success'
-            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-            : record.status === 'failed' || record.status === 'error'
-            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-        }`}>
-          {record.status === 'success' ? 'Success' :
-           (record.status === 'failed' || record.status === 'error') ? 'Failed' : 'Running'}
-        </div>
-      </div>
-    </div>
-  )
+function statusBadge(status: SyncRecord['status']) {
+  if (status === 'success') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+  if (status === 'failed' || status === 'error') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
 }
 
 export default function SyncPage() {
@@ -153,9 +49,7 @@ export default function SyncPage() {
     setError(null)
     try {
       const response = await fetch('/api/sync/history', { cache: 'no-store' })
-      if (!response.ok) {
-        throw new Error('Failed to fetch sync history')
-      }
+      if (!response.ok) throw new Error('Failed to fetch sync history')
 
       const data: SyncHistoryResponse = await response.json()
       setSyncRecords(data.logs || [])
@@ -167,7 +61,7 @@ export default function SyncPage() {
           status: stravaSource?.isActive ? 'connected' : 'disconnected',
           lastSync: stravaSource?.lastSync || undefined,
           totalActivities: data.totalActivities || 0,
-        }
+        },
       ])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -199,108 +93,118 @@ export default function SyncPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
+  return (
+    <div className="space-y-6">
+      <section className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Data Sync</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Loading synchronization data...
+          <h1 className="text-3xl font-semibold tracking-tight">Sync</h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            Source status and recent synchronization history.
           </p>
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Data Sync</h1>
-        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Monitor and trigger synchronization from fitness platforms.
-        </p>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Connected Data Sources
-        </h2>
-        <div className="grid grid-cols-1 gap-4">
-          {dataSources.map((source, index) => (
-            <DataSourceCard key={index} source={source} />
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start space-x-3">
-            <ClockIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Automatic Sync Schedule
-              </h3>
-              <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
-                GitHub Actions workflow runs every 6 hours. You can also trigger a manual Strava sync now.
-              </p>
-              {latestSync && (
-                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                  Latest sync: {new Date(latestSync.timestamp).toLocaleString()}
-                </p>
-              )}
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <button
+            onClick={fetchSyncData}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+          >
+            Refresh
+          </button>
           <button
             onClick={handleSyncNow}
             disabled={isSyncing}
-            className="inline-flex items-center px-3 py-2 border border-blue-300 dark:border-blue-700 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 dark:text-blue-300 bg-white dark:bg-blue-950/40 hover:bg-blue-50 dark:hover:bg-blue-900/40 disabled:opacity-60"
+            className="inline-flex items-center rounded-md border border-gray-900 bg-gray-900 px-3 py-2 text-sm text-white disabled:opacity-60 dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
           >
-            <ArrowPathIcon className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing...' : 'Sync Now'}
           </button>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Recent Sync History
-          </h2>
-          <button
-            onClick={fetchSyncData}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            <ArrowPathIcon className="w-4 h-4 mr-2" />
-            Refresh
-          </button>
-        </div>
+      {error && (
+        <section className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+          {error}
+        </section>
+      )}
 
-        <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700">
-          {syncRecords.length > 0 ? (
-            <div>
-              {syncRecords.map((record) => (
-                <SyncRecordRow key={record.id} record={record} />
-              ))}
+      {isLoading ? (
+        <section className="panel">
+          <div className="panel-body text-sm text-gray-500 dark:text-gray-400">Loading synchronization data...</div>
+        </section>
+      ) : (
+        <>
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {dataSources.map((source) => (
+              <div key={source.name} className="panel">
+                <div className="panel-header flex items-center justify-between">
+                  <h2 className="text-base font-semibold">{source.name}</h2>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${source.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                    {source.status}
+                  </span>
+                </div>
+                <div className="panel-body grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="metric-label">Total Activities</div>
+                    <div className="mt-1 font-semibold">{source.totalActivities.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="metric-label">Last Sync</div>
+                    <div className="mt-1 font-semibold">{source.lastSync ? new Date(source.lastSync).toLocaleString() : 'Never'}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="panel">
+            <div className="panel-header flex items-center justify-between">
+              <h2 className="text-base font-semibold">Sync History</h2>
+              {latestSync && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Latest: {new Date(latestSync.timestamp).toLocaleString()}
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="p-8 text-center">
-              <ClockIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No Sync Records
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Sync records will appear here after synchronization runs.
-              </p>
+            <div className="panel-body p-0">
+              {syncRecords.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">No sync records yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                        <th className="px-5 py-2 font-medium">Time</th>
+                        <th className="px-5 py-2 font-medium">Source</th>
+                        <th className="px-5 py-2 font-medium">Status</th>
+                        <th className="px-5 py-2 font-medium">Processed</th>
+                        <th className="px-5 py-2 font-medium">Created</th>
+                        <th className="px-5 py-2 font-medium">Updated</th>
+                        <th className="px-5 py-2 font-medium">Message</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {syncRecords.map((record) => (
+                        <tr key={record.id} className="border-b border-gray-50 dark:border-gray-800">
+                          <td className="px-5 py-2">{new Date(record.timestamp).toLocaleString()}</td>
+                          <td className="px-5 py-2">{record.source}</td>
+                          <td className="px-5 py-2">
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-2">{record.activitiesProcessed}</td>
+                          <td className="px-5 py-2">{record.activitiesCreated}</td>
+                          <td className="px-5 py-2">{record.activitiesUpdated}</td>
+                          <td className="px-5 py-2 text-gray-500 dark:text-gray-400">{record.errorMessage || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }

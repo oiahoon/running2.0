@@ -10,7 +10,7 @@
 
 ## 2. Weaknesses
 
-- Mock data remains in key user-facing pages (`/dashboard`, `/sync`)
+- Some UI pages are still in mixed transition between old cyber-style components and new minimalist patterns
 - “Multi-source integration” is mostly architectural, not fully implemented
 - Documentation had drift and conflicting claims
 - Some scripts and APIs overlap in responsibility and need consolidation
@@ -67,3 +67,4 @@
 - [x] Phase 3 build-warning cleanup
 - [x] Phase 4 UIUX minimal redesign (layout + dashboard + activities first batch)
 - [x] Phase 4 UIUX minimal redesign batch 2 (`stats` + `map` + `sync-status`)
+- [x] Phase 4 UIUX minimal redesign batch 3 (`sync` page table + controls simplification)
