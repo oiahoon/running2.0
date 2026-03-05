@@ -11,7 +11,6 @@ import {
   ArrowPathIcon,
   Bars3Icon,
   XMarkIcon,
-  MagnifyingGlassIcon,
   SunIcon,
   MoonIcon
 } from '@heroicons/react/24/outline'
@@ -182,37 +181,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </button>
           
           <div className="flex-1 px-4 flex justify-between items-center">
-            <div className="flex-1 flex max-w-lg">
-              <div className="w-full flex md:ml-0">
-                <label htmlFor="search-field" className="sr-only">
-                  Search
-                </label>
-                <div className="relative w-full text-gray-400 focus-within:text-gray-600">
-                  <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon className="h-5 w-5" />
-                  </div>
-                  <input
-                    id="search-field"
-                    className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent bg-transparent"
-                    placeholder="Search activities..."
-                    type="search"
-                  />
-                </div>
-              </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Running Page 2.0
             </div>
             <div className="ml-4 flex items-center md:ml-6">
               <ThemeToggle />
-              
-              {/* Profile dropdown placeholder */}
-              <div className="ml-3 relative">
-                <div className="max-w-xs bg-white dark:bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  <span className="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    <svg className="h-full w-full text-gray-300 dark:text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

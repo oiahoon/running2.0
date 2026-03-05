@@ -55,6 +55,12 @@
 - Define minimal UI language and checklist
 - Make it the baseline for future page/component updates
 
+### Phase 6: Mobile and Empty-State Polish
+
+- Simplify global top navigation for mobile-first clarity
+- Remove non-functional placeholder UI from shared layout
+- Keep empty/loading states concise and consistent
+
 ## 4. Next Iteration Backlog (Not completed in this round)
 
 - Integration layer hardening:
@@ -75,3 +81,4 @@
 - [x] Phase 4 UIUX minimal redesign batch 3 (`sync` page table + controls simplification)
 - [x] Phase 4 UIUX minimal redesign batch 4 (`data-sources`)
 - [x] Phase 5 UI consistency documentation (`docs/ui-minimal-guidelines.md`)
+- [x] Phase 6 mobile and empty-state polish (shared layout cleanup)
