@@ -78,10 +78,20 @@
 - Add CI smoke checks for core APIs after build/start (`/api/debug`, `/api/stats`, `/api/sync/history`, `/api/data-sources`)
 - Ensure quality workflow catches runtime API regressions beyond static build success
 
+### Phase 10: NPM Dependency Debt Reduction
+
+- Upgrade root/workspace dependencies to latest compatible non-major versions
+- Prioritize direct security-sensitive packages (`next@14.2.35`, `axios@1.13.6`, `js-yaml@4.1.1`)
+- Refresh lockfile and re-run `npm outdated` + `npm audit` to classify remaining debt
+
 ## 4. Next Iteration Backlog
 
 - Add integration tests for data source CRUD and sync logging paths
 - Gradually fix legacy TypeScript/Lint debt to turn CI type/lint checks from non-blocking to hard gate
+- Plan major-version dependency migration:
+  - `next` 14 -> 16 (with matching `eslint-config-next`)
+  - `react` 18 -> 19 ecosystem
+  - evaluate replacing/removing `sqlite3` dependency path that introduces high transitive advisories
 
 ## 5. Execution Log
 
@@ -98,3 +108,4 @@
 - [x] Phase 7 integration persistence and CI gate
 - [x] Phase 8 sync runtime consolidation
 - [x] Phase 9 API smoke guardrail
+- [x] Phase 10 npm dependency debt reduction (non-major pass)
