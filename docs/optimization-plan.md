@@ -48,6 +48,7 @@
 - Remove decorative visual noise (scan lines, glow-heavy cards, command-line themed UI)
 - Refactor core pages first: `dashboard`, `activities`, `sync`
 - Unify layout and typography to clean, low-contrast, readable defaults
+- Batch 2 scope: `stats`, `map`, `sync-status`
 
 ## 4. Next Iteration Backlog (Not completed in this round)
 
@@ -65,3 +66,4 @@
 - [x] Phase 2 sync page real-data convergence
 - [x] Phase 3 build-warning cleanup
 - [x] Phase 4 UIUX minimal redesign (layout + dashboard + activities first batch)
+- [x] Phase 4 UIUX minimal redesign batch 2 (`stats` + `map` + `sync-status`)
