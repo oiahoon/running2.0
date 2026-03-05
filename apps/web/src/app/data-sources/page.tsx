@@ -4,23 +4,12 @@ import { useState, useEffect } from 'react'
 import { 
   Button,
   Badge,
-  Input,
-  Textarea,
   Switch,
   Dialog,
   DialogActions,
   DialogBody,
   DialogDescription,
   DialogTitle,
-  Alert,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Field,
-  Label,
-  Fieldset
 } from '@/components/catalyst'
 
 // Simple SVG Icons
@@ -95,6 +84,7 @@ export default function DataSourcesPage() {
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [activeTab, setActiveTab] = useState<'configured' | 'available'>('configured')
 
   useEffect(() => {
     fetchDataSources()
@@ -199,57 +189,72 @@ export default function DataSourcesPage() {
           </div>
         </div>
 
-        <TabGroup>
-          <TabList>
-            <Tab>Configured Sources ({configuredSources.length})</Tab>
-            <Tab>Available Sources ({availableTypes.length})</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <div className="mt-6">
-                {configuredSources.length === 0 ? (
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-12 text-center border border-gray-200 dark:border-gray-700">
-                    <div className="text-gray-400 mb-4">
-                      <SettingsIcon />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      No data sources configured
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Add your first data source to start syncing activities
-                    </p>
-                    <Button onClick={() => setShowAddDialog(true)}>
-                      <PlusIcon />
-                      <span className="ml-2">Add Data Source</span>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {configuredSources.map(source => (
-                      <ConfiguredSourceCard
-                        key={source.id}
-                        source={source}
-                        syncing={syncing}
-                      />
-                    ))}
-                  </div>
-                )}
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('configured')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-md ${
+                activeTab === 'configured'
+                  ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 border-b-white dark:border-b-gray-800 text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Configured Sources ({configuredSources.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('available')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-md ${
+                activeTab === 'available'
+                  ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 border-b-white dark:border-b-gray-800 text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Available Sources ({availableTypes.length})
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'configured' ? (
+          <div className="mt-6">
+            {configuredSources.length === 0 ? (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-12 text-center border border-gray-200 dark:border-gray-700">
+                <div className="text-gray-400 mb-4">
+                  <SettingsIcon />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  No data sources configured
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Add your first data source to start syncing activities
+                </p>
+                <Button onClick={() => setShowAddDialog(true)}>
+                  <PlusIcon />
+                  <span className="ml-2">Add Data Source</span>
+                </Button>
               </div>
-            </TabPanel>
-            
-            <TabPanel>
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {availableTypes.map(type => (
-                  <AvailableSourceCard
-                    key={type.id}
-                    type={type}
-                    onAdd={() => setShowAddDialog(true)}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {configuredSources.map(source => (
+                  <ConfiguredSourceCard
+                    key={source.id}
+                    source={source}
+                    syncing={syncing}
                   />
                 ))}
               </div>
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {availableTypes.map(type => (
+              <AvailableSourceCard
+                key={type.id}
+                type={type}
+                onAdd={() => setShowAddDialog(true)}
+              />
+            ))}
+          </div>
+        )}
 
         <Dialog open={showAddDialog} onClose={setShowAddDialog}>
           <DialogTitle>Add Data Source</DialogTitle>

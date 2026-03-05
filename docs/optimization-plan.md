@@ -16,7 +16,7 @@
 - Some scripts and APIs overlap in responsibility and need consolidation
 - No strong automated quality gate visible in root workflow (lint/type/build/test)
 
-## 3. Phased Improvement Roadmap
+## 3. Current Iteration Roadmap
 
 ### Phase 0: Documentation Baseline (Done in this round)
 
@@ -36,20 +36,23 @@
 - Use `/api/sync` status data
 - Add manual sync trigger via `/api/sync/strava` or `/api/sync`
 
-### Phase 3: Integration Layer Hardening
+### Phase 3: Build-Warning Cleanup
 
-- Replace `integrations/base.ts` placeholder DB methods with repository-backed implementation
-- Clarify source lifecycle and persistence behavior for `/api/data-sources`
+- Remove non-exported `Tab*` component usage from `data-sources` page
+- Keep build output clean from avoidable UI import warnings
 
-### Phase 4: Quality Gate + Regression Safety
+## 4. Next Iteration Backlog (Not completed in this round)
 
-- Add CI workflow for lint + type-check + build
-- Add minimal API route smoke tests
+- Integration layer hardening:
+  - Replace `integrations/base.ts` placeholder DB methods with repository-backed implementation
+  - Clarify source lifecycle and persistence behavior for `/api/data-sources`
+- Quality gate and regression safety:
+  - Add CI workflow for lint + type-check + build
+  - Add minimal API route smoke tests
 
-## 4. Execution Log
+## 5. Execution Log
 
 - [x] Phase 0 documentation cleanup and alignment
 - [x] Phase 1 dashboard real-data convergence
 - [x] Phase 2 sync page real-data convergence
-- [ ] Phase 3 integration hardening
-- [ ] Phase 4 quality gate and tests
+- [x] Phase 3 build-warning cleanup
