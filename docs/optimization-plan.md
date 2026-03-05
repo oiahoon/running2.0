@@ -49,7 +49,7 @@
 ## 4. Execution Log
 
 - [x] Phase 0 documentation cleanup and alignment
-- [ ] Phase 1 dashboard real-data convergence
-- [ ] Phase 2 sync page real-data convergence
+- [x] Phase 1 dashboard real-data convergence
+- [x] Phase 2 sync page real-data convergence
 - [ ] Phase 3 integration hardening
 - [ ] Phase 4 quality gate and tests
