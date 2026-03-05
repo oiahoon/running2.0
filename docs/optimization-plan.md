@@ -84,6 +84,19 @@
 - Prioritize direct security-sensitive packages (`next@14.2.35`, `axios@1.13.6`, `js-yaml@4.1.1`)
 - Refresh lockfile and re-run `npm outdated` + `npm audit` to classify remaining debt
 
+### Phase 11: Framework Major Upgrade (Latest Stable)
+
+- Upgrade core framework stack to `next@16.1.6` + `react@19.2.x` + matching type packages
+- Align lint stack to Next 16 requirements (`eslint@9`, `eslint-config-next@16`)
+- Migrate `next.config` to Next 16 keys (`serverExternalPackages`, `images.remotePatterns`)
+- Pin build/dev to webpack mode for workspace stability while Turbopack monorepo resolution remains unstable
+
+### Phase 12: Runtime Baseline and Security Closure
+
+- Remove unused `sqlite3`/`@types/sqlite3` dependency path and keep `better-sqlite3` only
+- Run `npm audit fix` to close remaining transitive advisories (0 vulnerabilities)
+- Define runtime baseline for native module stability (`.nvmrc` with Node 22 LTS, engines constrained to supported range)
+
 ## 4. Next Iteration Backlog
 
 - Add integration tests for data source CRUD and sync logging paths
@@ -109,3 +122,5 @@
 - [x] Phase 8 sync runtime consolidation
 - [x] Phase 9 API smoke guardrail
 - [x] Phase 10 npm dependency debt reduction (non-major pass)
+- [x] Phase 11 framework major upgrade (Next 16 + React 19)
+- [x] Phase 12 runtime baseline and security closure
