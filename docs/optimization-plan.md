@@ -107,6 +107,9 @@
   - New IA/workflow plan document (`docs/uiux-rearchitecture-plan.md`)
   - New global shell (sidebar grouping, command header, contextual actions)
   - Dashboard and Sync workflow-first layout refactor
+- Batch B complete:
+  - Activities workflow redesign (filter-first command flow + KPI strip + ledger hierarchy)
+  - Statistics workflow redesign (analysis studio flow + trend sequence + stronger section rhythm)
 
 ## 4. Next Iteration Backlog
 
@@ -132,4 +135,4 @@
 - [x] Phase 10 npm dependency debt reduction (non-major pass)
 - [x] Phase 11 framework major upgrade (Next 16 + React 19)
 - [x] Phase 12 runtime baseline and security closure
-- [ ] Phase 13 UIUX re-architecture batch B/C pending (`activities` + `stats` + `map` + `data-sources`)
+- [ ] Phase 13 UIUX re-architecture batch C pending (`map` + `data-sources` + final mobile polish)

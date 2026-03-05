@@ -97,8 +97,8 @@ Phase F: QA and consistency closure
 ## 7. Progress Tracker
 
 - [x] Phase A
-- [ ] Phase B
-- [ ] Phase C
-- [ ] Phase D
+- [x] Phase B
+- [x] Phase C
+- [x] Phase D
 - [ ] Phase E
 - [ ] Phase F
