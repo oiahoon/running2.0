@@ -61,14 +61,18 @@
 - Remove non-functional placeholder UI from shared layout
 - Keep empty/loading states concise and consistent
 
-## 4. Next Iteration Backlog (Not completed in this round)
+### Phase 7: Integration Persistence and CI Gate
 
-- Integration layer hardening:
-  - Replace `integrations/base.ts` placeholder DB methods with repository-backed implementation
-  - Clarify source lifecycle and persistence behavior for `/api/data-sources`
-- Quality gate and regression safety:
-  - Add CI workflow for lint + type-check + build
-  - Add minimal API route smoke tests
+- Replace `integrations/base.ts` placeholder DB methods with real SQLite operations
+- Refactor `/api/data-sources` to use `data_source_settings` persistence (instead of in-memory registry)
+- Add baseline CI quality gate workflow for type-check + lint + build
+
+## 4. Next Iteration Backlog
+
+- Add minimal API route smoke tests
+- Unify `/api/sync` runtime behavior with persisted source lifecycle (remove empty in-memory registry dependency)
+- Add integration tests for data source CRUD and sync logging paths
+- Gradually fix legacy TypeScript/Lint debt to turn CI type/lint checks from non-blocking to hard gate
 
 ## 5. Execution Log
 
@@ -82,3 +86,4 @@
 - [x] Phase 4 UIUX minimal redesign batch 4 (`data-sources`)
 - [x] Phase 5 UI consistency documentation (`docs/ui-minimal-guidelines.md`)
 - [x] Phase 6 mobile and empty-state polish (shared layout cleanup)
+- [x] Phase 7 integration persistence and CI gate
