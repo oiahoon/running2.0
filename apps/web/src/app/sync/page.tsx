@@ -33,9 +33,9 @@ interface SyncHistoryResponse {
 }
 
 function statusBadge(status: SyncRecord['status']) {
-  if (status === 'success') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-  if (status === 'failed' || status === 'error') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+  if (status === 'success') return 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/35'
+  if (status === 'failed' || status === 'error') return 'bg-red-500/15 text-red-300 ring-1 ring-red-400/35'
+  return 'bg-gray-500/15 text-gray-300 ring-1 ring-gray-400/35'
 }
 
 export default function SyncPage() {
@@ -54,7 +54,7 @@ export default function SyncPage() {
       const data: SyncHistoryResponse = await response.json()
       setSyncRecords(data.logs || [])
 
-      const stravaSource = (data.sources || []).find(s => s.source === 'strava')
+      const stravaSource = (data.sources || []).find((s) => s.source === 'strava')
       setDataSources([
         {
           name: 'Strava',
@@ -95,83 +95,79 @@ export default function SyncPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Sync</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            Source status and recent synchronization history.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchSyncData}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            Refresh
-          </button>
-          <button
-            onClick={handleSyncNow}
-            disabled={isSyncing}
-            className="inline-flex items-center rounded-md border border-gray-900 bg-gray-900 px-3 py-2 text-sm text-white disabled:opacity-60 dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
-          >
-            <ArrowPathIcon className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
-          </button>
+      <section className="panel">
+        <div className="panel-body py-6 sm:py-7">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="section-title">Operations Console</h2>
+              <p className="section-subtitle">Monitor source health, trigger sync, and verify operation history.</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={fetchSyncData} className="action-secondary">Refresh</button>
+              <button onClick={handleSyncNow} disabled={isSyncing} className="action-primary disabled:opacity-60">
+                <ArrowPathIcon className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {error && (
-        <section className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+      {error ? (
+        <section className="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-sm text-red-200">
           {error}
         </section>
-      )}
+      ) : null}
 
       {isLoading ? (
         <section className="panel">
-          <div className="panel-body text-sm text-gray-500 dark:text-gray-400">Loading synchronization data...</div>
+          <div className="panel-body text-sm text-gray-400">Loading synchronization data...</div>
         </section>
       ) : (
         <>
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {dataSources.map((source) => (
-              <div key={source.name} className="panel">
+              <div key={source.name} className="panel lg:col-span-2">
                 <div className="panel-header flex items-center justify-between">
-                  <h2 className="text-base font-semibold">{source.name}</h2>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${source.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                  <h3 className="text-lg font-semibold text-white">{source.name} Source Health</h3>
+                  <span className={source.status === 'connected' ? 'rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-400/30' : 'rounded-full bg-gray-500/15 px-2 py-0.5 text-xs text-gray-300 ring-1 ring-gray-400/30'}>
                     {source.status}
                   </span>
                 </div>
-                <div className="panel-body grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="metric-label">Total Activities</div>
-                    <div className="mt-1 font-semibold">{source.totalActivities.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div className="metric-label">Last Sync</div>
-                    <div className="mt-1 font-semibold">{source.lastSync ? new Date(source.lastSync).toLocaleString() : 'Never'}</div>
-                  </div>
+                <div className="panel-body grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <MetricItem label="Total Activities" value={source.totalActivities.toLocaleString()} />
+                  <MetricItem label="Last Sync" value={source.lastSync ? new Date(source.lastSync).toLocaleString() : 'Never'} />
+                  <MetricItem label="Latest Status" value={latestSync ? latestSync.status : 'No records'} />
                 </div>
               </div>
             ))}
+
+            <div className="panel">
+              <div className="panel-header">
+                <h3 className="text-lg font-semibold text-white">Workflow</h3>
+              </div>
+              <div className="panel-body space-y-2 text-sm text-gray-300">
+                <div>1. Refresh latest source status</div>
+                <div>2. Trigger manual sync</div>
+                <div>3. Check latest log result</div>
+                <div>4. Investigate error message if needed</div>
+              </div>
+            </div>
           </section>
 
           <section className="panel">
             <div className="panel-header flex items-center justify-between">
-              <h2 className="text-base font-semibold">Sync History</h2>
-              {latestSync && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Latest: {new Date(latestSync.timestamp).toLocaleString()}
-                </span>
-              )}
+              <h3 className="text-lg font-semibold text-white">Sync History</h3>
+              {latestSync ? <span className="text-xs text-gray-400">Latest: {new Date(latestSync.timestamp).toLocaleString()}</span> : null}
             </div>
             <div className="panel-body p-0">
               {syncRecords.length === 0 ? (
-                <p className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">No sync records yet.</p>
+                <p className="px-5 py-4 text-sm text-gray-400">No sync records yet.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                      <tr className="border-b border-white/10 text-left text-gray-400">
                         <th className="px-5 py-2 font-medium">Time</th>
                         <th className="px-5 py-2 font-medium">Source</th>
                         <th className="px-5 py-2 font-medium">Status</th>
@@ -183,18 +179,16 @@ export default function SyncPage() {
                     </thead>
                     <tbody>
                       {syncRecords.map((record) => (
-                        <tr key={record.id} className="border-b border-gray-50 dark:border-gray-800">
-                          <td className="px-5 py-2">{new Date(record.timestamp).toLocaleString()}</td>
+                        <tr key={record.id} className="border-b border-white/5 text-gray-200">
+                          <td className="px-5 py-2 text-gray-300">{new Date(record.timestamp).toLocaleString()}</td>
                           <td className="px-5 py-2">{record.source}</td>
                           <td className="px-5 py-2">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>
-                              {record.status}
-                            </span>
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>{record.status}</span>
                           </td>
                           <td className="px-5 py-2">{record.activitiesProcessed}</td>
                           <td className="px-5 py-2">{record.activitiesCreated}</td>
                           <td className="px-5 py-2">{record.activitiesUpdated}</td>
-                          <td className="px-5 py-2 text-gray-500 dark:text-gray-400">{record.errorMessage || '-'}</td>
+                          <td className="px-5 py-2 text-gray-400">{record.errorMessage || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -205,6 +199,15 @@ export default function SyncPage() {
           </section>
         </>
       )}
+    </div>
+  )
+}
+
+function MetricItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="metric-label">{label}</div>
+      <div className="mt-2 text-base font-semibold text-white">{value}</div>
     </div>
   )
 }

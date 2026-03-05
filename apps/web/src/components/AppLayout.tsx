@@ -1,29 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  HomeIcon, 
-  ChartBarIcon, 
-  MapIcon, 
-  ListBulletIcon,
+import {
   ArrowPathIcon,
   Bars3Icon,
-  XMarkIcon,
+  ChartBarIcon,
+  CircleStackIcon,
+  HomeIcon,
+  ListBulletIcon,
+  MapIcon,
+  MoonIcon,
   SunIcon,
-  MoonIcon
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
-import { PageContainer } from './PageContainer'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Activities', href: '/activities', icon: ListBulletIcon },
-  { name: 'Statistics', href: '/stats', icon: ChartBarIcon },
-  { name: 'Map', href: '/map', icon: MapIcon },
-  { name: 'Sync', href: '/sync', icon: ArrowPathIcon },
+const navGroups = [
+  {
+    label: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+      { name: 'Statistics', href: '/stats', icon: ChartBarIcon },
+    ],
+  },
+  {
+    label: 'Training',
+    items: [
+      { name: 'Activities', href: '/activities', icon: ListBulletIcon },
+      { name: 'Map', href: '/map', icon: MapIcon },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { name: 'Sync', href: '/sync', icon: ArrowPathIcon },
+      { name: 'Data Sources', href: '/data-sources', icon: CircleStackIcon },
+    ],
+  },
 ]
+
+const pageCopy: Record<string, { title: string; subtitle: string }> = {
+  '/dashboard': { title: 'Dashboard', subtitle: 'Daily command center for your running system.' },
+  '/activities': { title: 'Activities', subtitle: 'Search, inspect, and compare training records.' },
+  '/stats': { title: 'Statistics', subtitle: 'Yearly analysis and long-term trend insight.' },
+  '/map': { title: 'Map', subtitle: 'Route exploration, trajectory context, and spatial review.' },
+  '/sync': { title: 'Sync', subtitle: 'Connection health, manual sync, and operation history.' },
+  '/data-sources': { title: 'Data Sources', subtitle: 'Integration lifecycle and source configuration.' },
+}
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -35,168 +60,125 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="rounded-md p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+      className="action-ghost"
+      aria-label="Toggle theme"
     >
-      <span className="sr-only">Toggle theme</span>
       <SunIcon className="h-5 w-5 dark:hidden" />
-      <MoonIcon className="h-5 w-5 hidden dark:block" />
+      <MoonIcon className="hidden h-5 w-5 dark:block" />
     </button>
   )
 }
 
-function MobileNavigation({ 
-  sidebarOpen, 
-  setSidebarOpen 
-}: { 
-  sidebarOpen: boolean
-  setSidebarOpen: (open: boolean) => void 
-}) {
-  const pathname = usePathname()
-
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <>
-      {/* Mobile menu overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white dark:bg-gray-900">
-            <div className="flex h-16 items-center justify-between px-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">
-                    🏃‍♂️ Running Page
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="rounded-md p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            <nav className="flex-1 space-y-1 px-2 py-4">
-              {navigation.map((item) => {
+    <div className="flex h-full flex-col">
+      <div className="px-5 pb-5 pt-6">
+        <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
+          <span className="text-lg">🏃</span>
+          <div>
+            <div className="text-lg font-semibold tracking-tight text-white">Running Page 2.0</div>
+            <div className="text-xs text-gray-400">Performance cockpit</div>
+          </div>
+        </Link>
+      </div>
+
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
+        {navGroups.map((group) => (
+          <div key={group.label}>
+            <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">{group.label}</div>
+            <div className="mt-2 space-y-1">
+              {group.items.map((item) => {
                 const isActive = pathname === item.href
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={onNavigate}
                     className={classNames(
+                      'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
                       isActive
-                        ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200'
-                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white',
-                      'group flex items-center px-3 py-2 text-sm font-medium border-l-4 rounded-r-md'
+                        ? 'bg-blue-500/15 text-white ring-1 ring-inset ring-blue-400/40'
+                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
                     )}
                   >
-                    <item.icon
-                      className={classNames(
-                        isActive
-                          ? 'text-blue-500 dark:text-blue-200'
-                          : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300',
-                        'mr-3 h-5 w-5'
-                      )}
-                    />
+                    <item.icon className={classNames('h-5 w-5', isActive ? 'text-blue-300' : 'text-gray-500 group-hover:text-gray-300')} />
                     {item.name}
                   </Link>
                 )
               })}
-            </nav>
+            </div>
           </div>
+        ))}
+      </nav>
+
+      <div className="border-t border-white/10 px-5 py-4">
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <span>System</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-emerald-300 ring-1 ring-emerald-400/30">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            Online
+          </span>
         </div>
-      )}
-    </>
-  )
-}
-
-function DesktopNavigation() {
-  const pathname = usePathname()
-
-  return (
-    <nav className="space-y-1">
-      {navigation.map((item) => {
-        const isActive = pathname === item.href
-        return (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={classNames(
-              isActive
-                ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200'
-                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white',
-              'group flex items-center px-3 py-2 text-sm font-medium border-l-4 rounded-r-md'
-            )}
-          >
-            <item.icon
-              className={classNames(
-                isActive
-                  ? 'text-blue-500 dark:text-blue-200'
-                  : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300',
-                'mr-3 h-5 w-5'
-              )}
-            />
-            {item.name}
-          </Link>
-        )
-      })}
-    </nav>
+      </div>
+    </div>
   )
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
+
+  const pageMeta = useMemo(() => {
+    return pageCopy[pathname] || { title: 'Running Page 2.0', subtitle: 'Training intelligence workspace.' }
+  }, [pathname])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile Navigation */}
-      <MobileNavigation sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 pt-5 pb-4 overflow-y-auto border-r border-gray-200 dark:border-gray-700">
-          <div className="flex items-center flex-shrink-0 px-4">
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              🏃‍♂️ Running Page 2.0
-            </span>
-          </div>
-          <div className="mt-8 flex-grow flex flex-col">
-            <div className="flex-grow px-3">
-              <DesktopNavigation />
+    <div className="app-shell">
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+          <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />
+          <aside className="relative h-full w-[86%] max-w-[320px] border-r border-white/10 bg-[#0b1221] shadow-2xl">
+            <div className="absolute right-3 top-3">
+              <button onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label="Close sidebar">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
-          </div>
+            <SidebarContent pathname={pathname} onNavigate={() => setSidebarOpen(false)} />
+          </aside>
         </div>
-      </div>
+      )}
 
-      {/* Main Content */}
-      <div className="lg:pl-64 flex flex-col min-h-screen">
-        {/* Top Navigation */}
-        <div className="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 shadow border-b border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
-          >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" />
-          </button>
-          
-          <div className="flex-1 px-4 flex justify-between items-center">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Running Page 2.0
-            </div>
-            <div className="ml-4 flex items-center md:ml-6">
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
+      <aside className="hidden border-r border-white/10 bg-[#0b1221] lg:block lg:w-[290px]">
+        <SidebarContent pathname={pathname} />
+      </aside>
 
-        {/* Page Content */}
-        <main className="flex-1 bg-gray-50 dark:bg-gray-900">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {children}
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a1327]/95 backdrop-blur">
+          <div className="mx-auto flex h-[84px] w-full max-w-[1360px] items-center gap-4 px-4 sm:px-6 lg:px-10">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="action-ghost lg:hidden"
+              aria-label="Open sidebar"
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[28px] font-semibold leading-none tracking-tight text-white">{pageMeta.title}</div>
+              <div className="mt-1 truncate text-sm text-gray-400">{pageMeta.subtitle}</div>
             </div>
+
+            <div className="hidden items-center gap-2 sm:flex">
+              <Link href="/sync" className="action-secondary">Sync</Link>
+              <Link href="/map" className="action-primary">Open Map</Link>
+            </div>
+
+            <ThemeToggle />
           </div>
+        </header>
+
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-[1360px] px-4 pb-8 pt-6 sm:px-6 lg:px-10">{children}</div>
         </main>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { type Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { JetBrains_Mono, Manrope } from 'next/font/google'
 import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
@@ -7,10 +7,16 @@ import { AppLayout } from '@/components/AppLayout'
 
 import '@/app/globals.css'
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-manrope',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
 })
 
 export const metadata: Metadata = {
@@ -19,7 +25,7 @@ export const metadata: Metadata = {
     default: 'Running Page 2.0',
   },
   description:
-    'A minimalist running data visualization platform with analytics, maps, and activity tracking.',
+    'A premium running intelligence workspace with analytics, maps, and training operations.',
 }
 
 export default function RootLayout({
@@ -30,10 +36,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={clsx('h-full antialiased', inter.variable)}
+      className={clsx('h-full antialiased', manrope.variable, jetbrainsMono.variable)}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <body className="min-h-full bg-[#070d1a] text-gray-100">
         <Providers>
           <AppLayout>{children}</AppLayout>
         </Providers>

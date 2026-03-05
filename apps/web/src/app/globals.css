@@ -2,19 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-0: #070d1a;
+  --bg-1: #0a1327;
+  --bg-2: #0f1a30;
+  --surface: #111f36;
+  --surface-2: #16273f;
+  --border: rgba(255, 255, 255, 0.12);
+  --text-strong: #f3f6ff;
+  --text-muted: #9aa8c7;
+  --accent: #5b8dff;
+  --accent-2: #8cb0ff;
+}
+
 @layer base {
   html {
-    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, sans-serif;
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100;
+    background:
+      radial-gradient(1200px 600px at 75% -20%, rgba(91, 141, 255, 0.16), transparent 60%),
+      radial-gradient(900px 500px at 5% 0%, rgba(43, 77, 150, 0.2), transparent 55%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 50%, #061021 100%);
+    color: var(--text-strong);
     min-height: 100vh;
   }
 
+  * {
+    border-color: var(--border);
+  }
+
   ::selection {
-    @apply bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900;
+    background: rgba(115, 153, 255, 0.35);
+    color: #fff;
   }
 
   ::-webkit-scrollbar {
@@ -23,52 +45,78 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full dark:bg-gray-600;
+    background: rgba(153, 177, 227, 0.32);
+    border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-500;
+    background: rgba(153, 177, 227, 0.48);
   }
 }
 
 @layer components {
+  .app-shell {
+    @apply flex min-h-screen;
+  }
+
   .panel {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800;
+    background: linear-gradient(180deg, rgba(25, 41, 66, 0.88) 0%, rgba(18, 32, 53, 0.92) 100%);
+    @apply rounded-2xl border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.2)];
   }
 
   .panel-header {
-    @apply border-b border-gray-100 px-5 py-4 dark:border-gray-700;
+    @apply border-b border-white/10 px-5 py-4;
   }
 
   .panel-body {
     @apply px-5 py-4;
   }
 
-  .metric-value {
-    @apply text-2xl font-semibold tracking-tight;
+  .metric-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400;
   }
 
-  .metric-label {
-    @apply text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400;
+  .metric-value {
+    @apply text-3xl font-semibold tracking-tight text-white;
+  }
+
+  .action-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-blue-500 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(64,118,255,0.3)] transition hover:bg-blue-400;
+  }
+
+  .action-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/5 px-3.5 py-2 text-sm font-medium text-gray-100 transition hover:bg-white/10;
+  }
+
+  .action-ghost {
+    @apply inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white;
+  }
+
+  .section-title {
+    @apply text-2xl font-semibold tracking-tight text-white;
+  }
+
+  .section-subtitle {
+    @apply mt-1 text-sm text-gray-300;
   }
 }
 
 .recharts-tooltip-content {
-  @apply rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800;
+  @apply rounded-xl border border-white/20 bg-[#12233b] shadow-lg;
 }
 
 .mapboxgl-popup-content {
-  @apply rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800;
+  @apply rounded-xl border border-white/20 bg-[#12233b] shadow-lg;
 }
 
 .mapboxgl-ctrl-group {
-  @apply border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800;
+  @apply border border-white/20 bg-[#12233b];
 }
 
 .mapboxgl-ctrl button {
-  @apply bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
+  @apply bg-[#12233b] text-gray-100 hover:bg-[#1a2f4f];
 }
