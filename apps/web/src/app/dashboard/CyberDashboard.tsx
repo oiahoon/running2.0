@@ -3,61 +3,41 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
+import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { CyberCard, CyberCardContent, CyberCardHeader, CyberStatsCard } from '@/components/ui/CyberCard'
 import { CyberButton, CyberPrimaryButton, CyberSecondaryButton } from '@/components/ui/CyberButton'
 import { CyberStatusBadge, CyberActivityBadge, CyberMetricBadge } from '@/components/ui/CyberBadge'
 
-// 模拟数据
-const mockStats = {
-  totalDistance: 1247.8,
-  totalActivities: 156,
-  avgPace: '4:32',
-  totalTime: '127:45',
-  thisWeekDistance: 42.1,
-  thisWeekActivities: 5,
-  personalBests: 8,
-  streakDays: 12
-}
-
-const mockRecentActivities = [
-  {
-    id: 1,
-    type: 'running',
-    name: 'Morning Run',
-    distance: 8.5,
-    duration: '38:24',
-    pace: '4:31',
-    date: '2025-07-19',
-    status: 'completed'
-  },
-  {
-    id: 2,
-    type: 'cycling',
-    name: 'Evening Ride',
-    distance: 25.2,
-    duration: '1:12:15',
-    pace: '20.8',
-    date: '2025-07-18',
-    status: 'completed'
-  },
-  {
-    id: 3,
-    type: 'running',
-    name: 'Interval Training',
-    distance: 6.0,
-    duration: '28:45',
-    pace: '4:47',
-    date: '2025-07-17',
-    status: 'completed'
-  }
-]
-
 export function CyberDashboard() {
   const router = useRouter()
+  const currentYear = new Date().getFullYear()
+  const { data: statsData, isLoading: statsLoading } = useActivityStats(currentYear)
+  const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(6)
+
+  const basicStats = statsData?.basicStats
+  const totalDistanceKm = Number(basicStats?.total_distance || 0)
+  const totalTimeSeconds = Number(basicStats?.total_time || 0)
+  const averageSpeedMps = totalTimeSeconds > 0 ? (totalDistanceKm * 1000) / totalTimeSeconds : 0
+  const avgPaceDisplay = averageSpeedMps > 0 ? formatPace(averageSpeedMps) : '--:--/km'
+
+  const now = new Date()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - 7)
+
+  const weeklyActivities = recentActivities.filter((activity: any) => {
+    const startDate = new Date(activity.start_date || activity.startDate || '')
+    return !Number.isNaN(startDate.getTime()) && startDate >= weekStart
+  })
+
+  const thisWeekDistanceKm = weeklyActivities.reduce((sum: number, activity: any) => {
+    const meters = Number(activity.distance || 0)
+    return sum + meters / 1000
+  }, 0)
+
+  const recentActivityRows = recentActivities.slice(0, 4)
 
   const handleSyncData = () => {
-    console.log('Syncing data...')
-    // 这里可以添加实际的数据同步逻辑
     router.push('/sync')
   }
 
@@ -98,38 +78,34 @@ export function CyberDashboard() {
       >
         <CyberStatsCard
           title="Total Distance"
-          value={mockStats.totalDistance}
+          value={statsLoading ? '...' : totalDistanceKm.toFixed(1)}
           subtitle="kilometers"
           icon="🏃"
           color="cyan"
-          trend={{ value: 12.5, isPositive: true }}
         />
         
         <CyberStatsCard
           title="Activities"
-          value={mockStats.totalActivities}
+          value={statsLoading ? '...' : Number(basicStats?.total_activities || 0)}
           subtitle="completed"
           icon="⚡"
           color="pink"
-          trend={{ value: 8.2, isPositive: true }}
         />
         
         <CyberStatsCard
           title="Avg Pace"
-          value={mockStats.avgPace}
+          value={statsLoading ? '...' : avgPaceDisplay}
           subtitle="min/km"
           icon="⏱️"
           color="green"
-          trend={{ value: 3.1, isPositive: false }}
         />
         
         <CyberStatsCard
           title="Total Time"
-          value={mockStats.totalTime}
+          value={statsLoading ? '...' : formatDuration(totalTimeSeconds)}
           subtitle="hours"
           icon="🕐"
           color="purple"
-          trend={{ value: 15.7, isPositive: true }}
         />
       </motion.div>
 
@@ -152,24 +128,23 @@ export function CyberDashboard() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <CyberMetricBadge
                   label="Distance"
-                  value={mockStats.thisWeekDistance}
+                  value={thisWeekDistanceKm.toFixed(1)}
                   unit="km"
                   variant="primary"
                 />
                 <CyberMetricBadge
                   label="Activities"
-                  value={mockStats.thisWeekActivities}
+                  value={weeklyActivities.length}
                   variant="success"
                 />
                 <CyberMetricBadge
                   label="PBs"
-                  value={mockStats.personalBests}
+                  value={statsData?.personalRecords ? Object.values(statsData.personalRecords).filter(Boolean).length : 0}
                   variant="warning"
                 />
                 <CyberMetricBadge
                   label="Streak"
-                  value={mockStats.streakDays}
-                  unit="days"
+                  value={weeklyActivities.length > 0 ? 'ON' : 'OFF'}
                   variant="info"
                 />
               </div>
@@ -179,12 +154,12 @@ export function CyberDashboard() {
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-neonCyan-400 font-mono">Weekly Goal</span>
-                    <span className="text-white">{mockStats.thisWeekDistance}/50 km</span>
+                    <span className="text-white">{thisWeekDistanceKm.toFixed(1)}/50 km</span>
                   </div>
                   <div className="cyber-progress h-2">
                     <div 
                       className="cyber-progress-bar"
-                      style={{ width: `${(mockStats.thisWeekDistance / 50) * 100}%` }}
+                      style={{ width: `${Math.min((thisWeekDistanceKm / 50) * 100, 100)}%` }}
                     />
                   </div>
                 </div>
@@ -237,7 +212,17 @@ export function CyberDashboard() {
           />
           <CyberCardContent>
             <div className="space-y-4">
-              {mockRecentActivities.map((activity, index) => (
+              {recentLoading && (
+                <div className="text-gray-400 font-mono text-sm">LOADING_RECENT_ACTIVITIES...</div>
+              )}
+              {!recentLoading && recentActivityRows.length === 0 && (
+                <div className="text-gray-400 font-mono text-sm">NO_RECENT_ACTIVITIES</div>
+              )}
+              {recentActivityRows.map((activity: any, index) => {
+                const date = new Date(activity.start_date || activity.startDate || '')
+                const type = String(activity.type || 'Other')
+                const speed = Number(activity.average_speed || activity.averageSpeed || 0)
+                return (
                 <motion.div
                   key={activity.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -246,29 +231,31 @@ export function CyberDashboard() {
                   className="flex items-center justify-between p-4 bg-cyber-800/50 rounded-lg border border-cyber-700 hover:border-neonCyan-400 transition-all duration-300"
                 >
                   <div className="flex items-center gap-4">
-                    <CyberActivityBadge type={activity.type as any} />
+                    <CyberActivityBadge type={type.toLowerCase()} />
                     <div>
                       <h4 className="text-white font-semibold">{activity.name}</h4>
-                      <p className="text-gray-400 text-sm font-mono">{activity.date}</p>
+                      <p className="text-gray-400 text-sm font-mono">
+                        {Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 text-sm font-mono">
                     <div className="text-center">
-                      <div className="text-neonCyan-400">{activity.distance} km</div>
+                      <div className="text-neonCyan-400">{((Number(activity.distance || 0)) / 1000).toFixed(1)} km</div>
                       <div className="text-gray-500">distance</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-neonGreen-500">{activity.duration}</div>
+                      <div className="text-neonGreen-500">{formatDuration(Number(activity.moving_time || 0))}</div>
                       <div className="text-gray-500">time</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-neonPink-500">{activity.pace}</div>
+                      <div className="text-neonPink-500">{speed > 0 ? formatPace(speed) : '--:--/km'}</div>
                       <div className="text-gray-500">pace</div>
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              )})}
             </div>
             
             <div className="mt-6 text-center">
@@ -292,7 +279,9 @@ export function CyberDashboard() {
             <div className="terminal-text">
               <div className="text-lg font-mono">SYSTEM.STATUS</div>
               <div className="mt-2">ALL_SYSTEMS_OPERATIONAL</div>
-              <div className="text-sm mt-2 opacity-80">LAST_SYNC: 2MIN_AGO</div>
+              <div className="text-sm mt-2 opacity-80">
+                LAST_SYNC: {statsData?.recentActivities?.[0]?.start_date ? new Date(statsData.recentActivities[0].start_date).toLocaleDateString() : 'N/A'}
+              </div>
             </div>
           </CyberCardContent>
         </CyberCard>
@@ -300,9 +289,11 @@ export function CyberDashboard() {
         <CyberCard variant="glow" className="text-center">
           <CyberCardContent>
             <div className="text-neonPink-500">
-              <div className="text-2xl font-bold font-mono">98.7%</div>
+              <div className="text-2xl font-bold font-mono">
+                {totalDistanceKm > 0 ? `${Math.min(Math.round((thisWeekDistanceKm / 50) * 100), 999)}%` : '0%'}
+              </div>
               <div className="text-sm mt-1">PERFORMANCE_INDEX</div>
-              <div className="text-xs mt-2 opacity-80">ABOVE_AVERAGE</div>
+              <div className="text-xs mt-2 opacity-80">WEEKLY_GOAL_PROGRESS</div>
             </div>
           </CyberCardContent>
         </CyberCard>
@@ -310,9 +301,9 @@ export function CyberDashboard() {
         <CyberCard variant="elevated" className="text-center">
           <CyberCardContent>
             <div className="text-neonOrange-500">
-              <div className="text-2xl font-bold font-mono">RANK #42</div>
-              <div className="text-sm mt-1">GLOBAL_LEADERBOARD</div>
-              <div className="text-xs mt-2 opacity-80">TOP_5%</div>
+              <div className="text-2xl font-bold font-mono">{Number(basicStats?.total_activities || 0)}</div>
+              <div className="text-sm mt-1">TOTAL_SESSIONS</div>
+              <div className="text-xs mt-2 opacity-80">DATA_DRIVEN</div>
             </div>
           </CyberCardContent>
         </CyberCard>
