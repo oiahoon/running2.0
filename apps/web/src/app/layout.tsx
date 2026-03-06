@@ -39,7 +39,7 @@ export default function RootLayout({
       className={clsx('h-full antialiased', manrope.variable, jetbrainsMono.variable)}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-[#070d1a] text-gray-100">
+      <body className="min-h-full">
         <Providers>
           <AppLayout>{children}</AppLayout>
         </Providers>

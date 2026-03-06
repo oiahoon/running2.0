@@ -55,11 +55,11 @@ function classNames(...classes: string[]) {
 }
 
 function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       className="action-ghost"
       aria-label="Toggle theme"
     >
@@ -76,8 +76,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
           <span className="text-lg">🏃</span>
           <div>
-            <div className="text-lg font-semibold tracking-tight text-white">Running Page 2.0</div>
-            <div className="text-xs text-gray-400">Performance cockpit</div>
+            <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">Running Page 2.0</div>
+            <div className="text-xs text-[var(--text-muted)]">Performance cockpit</div>
           </div>
         </Link>
       </div>
@@ -85,7 +85,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">{group.label}</div>
+            <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{group.label}</div>
             <div className="mt-2 space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href
@@ -97,11 +97,11 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                     className={classNames(
                       'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
                       isActive
-                        ? 'bg-blue-500/15 text-white ring-1 ring-inset ring-blue-400/40'
-                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                        ? 'bg-blue-500/15 text-[var(--text-strong)] ring-1 ring-inset ring-blue-400/40'
+                        : 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-strong)] dark:hover:bg-white/5'
                     )}
                   >
-                    <item.icon className={classNames('h-5 w-5', isActive ? 'text-blue-300' : 'text-gray-500 group-hover:text-gray-300')} />
+                    <item.icon className={classNames('h-5 w-5', isActive ? 'text-blue-400 dark:text-blue-300' : 'text-slate-400 group-hover:text-slate-600 dark:text-gray-500 dark:group-hover:text-gray-300')} />
                     {item.name}
                   </Link>
                 )
@@ -111,8 +111,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         ))}
       </nav>
 
-      <div className="border-t border-white/10 px-5 py-4">
-        <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="border-t border-slate-200 px-5 py-4 dark:border-white/10">
+        <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>System</span>
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-emerald-300 ring-1 ring-emerald-400/30">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
@@ -137,7 +137,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />
-          <aside className="relative h-full w-[86%] max-w-[320px] border-r border-white/10 bg-[#0b1221] shadow-2xl">
+          <aside className="relative h-full w-[86%] max-w-[320px] border-r border-slate-200 bg-[var(--sidebar-bg)] shadow-2xl dark:border-white/10">
             <div className="absolute right-3 top-3">
               <button onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label="Close sidebar">
                 <XMarkIcon className="h-5 w-5" />
@@ -148,12 +148,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <aside className="hidden border-r border-white/10 bg-[#0b1221] lg:block lg:w-[290px]">
+      <aside className="hidden border-r border-slate-200 bg-[var(--sidebar-bg)] dark:border-white/10 lg:block lg:w-[290px]">
         <SidebarContent pathname={pathname} />
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a1327]/95 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-[var(--header-bg)]/95 backdrop-blur dark:border-white/10">
           <div className="mx-auto flex h-[84px] w-full max-w-[1360px] items-center gap-4 px-4 sm:px-6 lg:px-10">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -164,8 +164,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
 
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[28px] font-semibold leading-none tracking-tight text-white">{pageMeta.title}</div>
-              <div className="mt-1 truncate text-sm text-gray-400">{pageMeta.subtitle}</div>
+              <div className="truncate text-[28px] font-semibold leading-none tracking-tight text-[var(--text-strong)]">{pageMeta.title}</div>
+              <div className="mt-1 truncate text-sm text-[var(--text-muted)]">{pageMeta.subtitle}</div>
             </div>
 
             <div className="hidden items-center gap-2 sm:flex">

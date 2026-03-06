@@ -106,15 +106,15 @@ function SearchField() {
 }
 
 function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
     <Button
       plain
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? '🌞' : '🌙'}
+      {resolvedTheme === 'dark' ? '🌞' : '🌙'}
     </Button>
   )
 }
