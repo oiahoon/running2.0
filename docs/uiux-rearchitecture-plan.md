@@ -100,5 +100,5 @@ Phase F: QA and consistency closure
 - [x] Phase B
 - [x] Phase C
 - [x] Phase D
-- [ ] Phase E
-- [ ] Phase F
+- [x] Phase E
+- [x] Phase F

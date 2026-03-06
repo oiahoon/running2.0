@@ -110,6 +110,12 @@
 - Batch B complete:
   - Activities workflow redesign (filter-first command flow + KPI strip + ledger hierarchy)
   - Statistics workflow redesign (analysis studio flow + trend sequence + stronger section rhythm)
+- Batch C complete:
+  - Map workflow redesign (exploration workflow panel + route intelligence hierarchy)
+  - Data Sources workflow redesign (integration hub + health summary + setup clarity)
+- Final closure complete:
+  - Mobile-safe shell and responsive table/card patterns retained across pages
+  - Build verification passed after full UIUX re-architecture
 
 ## 4. Next Iteration Backlog
 
@@ -135,4 +141,4 @@
 - [x] Phase 10 npm dependency debt reduction (non-major pass)
 - [x] Phase 11 framework major upgrade (Next 16 + React 19)
 - [x] Phase 12 runtime baseline and security closure
-- [ ] Phase 13 UIUX re-architecture batch C pending (`map` + `data-sources` + final mobile polish)
+- [x] Phase 13 UIUX re-architecture completed
