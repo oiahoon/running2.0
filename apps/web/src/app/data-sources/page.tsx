@@ -25,9 +25,9 @@ interface ConfiguredSource {
 }
 
 function statusTag(status: ConfiguredSource['status']) {
-  if (status === 'active') return 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/35'
-  if (status === 'error') return 'bg-red-500/15 text-red-300 ring-1 ring-red-400/35'
-  return 'bg-gray-500/15 text-gray-300 ring-1 ring-gray-400/35'
+  if (status === 'active') return 'bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-400/35 dark:text-emerald-300'
+  if (status === 'error') return 'bg-red-500/15 text-red-700 ring-1 ring-red-400/35 dark:text-red-300'
+  return 'bg-gray-500/15 text-gray-700 ring-1 ring-gray-400/35 dark:text-gray-300'
 }
 
 export default function DataSourcesPage() {
@@ -126,16 +126,16 @@ export default function DataSourcesPage() {
         <section className="space-y-4">
           {configuredSources.length === 0 ? (
             <div className="panel">
-              <div className="panel-body text-sm text-gray-400">No configured data sources.</div>
+              <div className="panel-body text-sm text-[var(--text-muted)]">No configured data sources.</div>
             </div>
           ) : (
             configuredSources.map((source) => (
               <div key={source.id} className="panel">
                 <div className="panel-header flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">{source.name}</h3>
+                  <h3 className="text-lg font-semibold text-[var(--text-strong)]">{source.name}</h3>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusTag(source.status)}`}>{source.status}</span>
                 </div>
-                <div className="panel-body grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm text-gray-200">
+                <div className="panel-body grid grid-cols-1 gap-4 text-sm text-[var(--text-strong)] sm:grid-cols-3">
                   <Info label="Type" value={source.type} />
                   <Info label="Enabled" value={source.enabled ? 'Yes' : 'No'} />
                   <Info label="Last Sync" value={source.lastSync ? new Date(source.lastSync).toLocaleString() : 'N/A'} />
@@ -143,7 +143,7 @@ export default function DataSourcesPage() {
                     <div className="metric-label mb-2">Supported Activities</div>
                     <div className="flex flex-wrap gap-2">
                       {source.supportedActivities.map((activity) => (
-                        <span key={activity} className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-200 ring-1 ring-white/15">{activity}</span>
+                        <span key={activity} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{activity}</span>
                       ))}
                     </div>
                   </div>
@@ -158,19 +158,19 @@ export default function DataSourcesPage() {
           {availableTypes.map((type) => (
             <div key={type.id} className="panel">
               <div className="panel-header flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">{type.name}</h3>
+                <h3 className="text-lg font-semibold text-[var(--text-strong)]">{type.name}</h3>
                 {type.configured ? (
-                  <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs text-blue-200 ring-1 ring-blue-400/35">configured</span>
+                  <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs text-blue-700 ring-1 ring-blue-400/35 dark:text-blue-200">configured</span>
                 ) : null}
               </div>
-              <div className="panel-body grid grid-cols-1 gap-4 text-sm text-gray-200">
-                <p className="text-gray-300">{type.description}</p>
+              <div className="panel-body grid grid-cols-1 gap-4 text-sm text-[var(--text-strong)]">
+                <p className="text-[var(--text-muted)]">{type.description}</p>
 
                 <div>
                   <div className="metric-label mb-2">Auth Methods</div>
                   <div className="flex flex-wrap gap-2">
                     {type.authMethods.map((method) => (
-                      <span key={method} className="rounded-full bg-white/10 px-2 py-0.5 text-xs ring-1 ring-white/15">{method}</span>
+                      <span key={method} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{method}</span>
                     ))}
                   </div>
                 </div>
@@ -179,14 +179,14 @@ export default function DataSourcesPage() {
                   <div className="metric-label mb-2">Supported Activities</div>
                   <div className="flex flex-wrap gap-2">
                     {type.supportedActivities.map((activity) => (
-                      <span key={activity} className="rounded-full bg-white/10 px-2 py-0.5 text-xs ring-1 ring-white/15">{activity}</span>
+                      <span key={activity} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{activity}</span>
                     ))}
                   </div>
                 </div>
 
-                <details className="rounded-lg border border-white/15 bg-white/5 px-3 py-2">
-                  <summary className="cursor-pointer text-sm font-medium text-white">Setup Instructions</summary>
-                  <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-gray-300">
+                <details className="rounded-lg border border-slate-300/70 bg-white px-3 py-2 dark:border-white/15 dark:bg-white/5">
+                  <summary className="cursor-pointer text-sm font-medium text-[var(--text-strong)]">Setup Instructions</summary>
+                  <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-[var(--text-muted)]">
                     {type.setupInstructions.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
@@ -205,8 +205,8 @@ function KPI({ label, value }: { label: string; value: string }) {
   return (
     <div className="panel">
       <div className="panel-body">
-        <div className="metric-label">{label}</div>
-        <div className="mt-2 text-xl font-semibold text-white">{value}</div>
+      <div className="metric-label">{label}</div>
+      <div className="mt-2 text-xl font-semibold text-[var(--text-strong)]">{value}</div>
       </div>
     </div>
   )
@@ -216,7 +216,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="metric-label">{label}</div>
-      <div className="mt-1 text-sm text-gray-100">{value}</div>
+      <div className="mt-1 text-sm text-[var(--text-strong)]">{value}</div>
     </div>
   )
 }

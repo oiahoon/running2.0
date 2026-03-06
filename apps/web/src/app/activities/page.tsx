@@ -10,9 +10,9 @@ const typeOptions = ['all', 'Run', 'Walk', 'Hike', 'Ride', 'Swim', 'WeightTraini
 function KPI({ label, value }: { label: string; value: string }) {
   return (
     <div className="panel">
-      <div className="panel-body">
-        <div className="metric-label">{label}</div>
-        <div className="mt-2 text-xl font-semibold text-white">{value}</div>
+        <div className="panel-body">
+          <div className="metric-label">{label}</div>
+        <div className="mt-2 text-xl font-semibold text-[var(--text-strong)]">{value}</div>
       </div>
     </div>
   )
@@ -51,7 +51,7 @@ export default function ActivitiesPage() {
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <div className="panel xl:col-span-3">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Filter Workflow</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Filter Workflow</h3>
           </div>
           <div className="panel-body grid grid-cols-1 gap-3 md:grid-cols-3">
             <input
@@ -61,7 +61,7 @@ export default function ActivitiesPage() {
                 setCurrentPage(1)
               }}
               placeholder="Search activity name or location"
-              className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-gray-400 focus:border-blue-300/60 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2.5 text-sm text-[var(--text-strong)] placeholder:text-slate-400 focus:border-blue-400/60 focus:outline-none dark:border-white/20 dark:bg-white/5 dark:text-white dark:placeholder:text-gray-400"
             />
 
             <select
@@ -70,7 +70,7 @@ export default function ActivitiesPage() {
                 setSelectedType(e.target.value)
                 setCurrentPage(1)
               }}
-              className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white focus:border-blue-300/60 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2.5 text-sm text-[var(--text-strong)] focus:border-blue-400/60 focus:outline-none dark:border-white/20 dark:bg-white/5 dark:text-white"
             >
               {typeOptions.map((type) => (
                 <option key={type} value={type}>
@@ -101,23 +101,23 @@ export default function ActivitiesPage() {
 
       <section className="panel">
         <div className="panel-header flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Activities Table</h3>
-          <span className="text-sm text-gray-300">{pagination ? `Total ${pagination.total} activities` : 'Loading...'}</span>
+          <h3 className="text-lg font-semibold text-[var(--text-strong)]">Activities Table</h3>
+          <span className="text-sm text-[var(--text-muted)]">{pagination ? `Total ${pagination.total} activities` : 'Loading...'}</span>
         </div>
 
         <div className="panel-body">
-          {isLoading ? <p className="text-sm text-gray-400">Loading activities...</p> : null}
+          {isLoading ? <p className="text-sm text-[var(--text-muted)]">Loading activities...</p> : null}
           {error ? <p className="text-sm text-red-300">{error.message}</p> : null}
 
           {!isLoading && !error && activities.length === 0 ? (
-            <p className="text-sm text-gray-400">No activities found for current filters.</p>
+            <p className="text-sm text-[var(--text-muted)]">No activities found for current filters.</p>
           ) : null}
 
           {!isLoading && !error && activities.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-gray-400">
+                  <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
                     <th className="py-2 pr-4 font-medium">Date</th>
                     <th className="py-2 pr-4 font-medium">Name</th>
                     <th className="py-2 pr-4 font-medium">Type</th>
@@ -131,14 +131,14 @@ export default function ActivitiesPage() {
                   {activities.map((activity: any) => {
                     const speed = Number(activity.average_speed || activity.averageSpeed || 0)
                     return (
-                      <tr key={activity.id} className="border-b border-white/5 text-gray-200">
-                        <td className="py-2 pr-4 text-gray-300">{new Date(activity.start_date || activity.startDate).toLocaleDateString()}</td>
+                      <tr key={activity.id} className="border-b border-slate-200 text-[var(--text-strong)] dark:border-white/5 dark:text-gray-200">
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{new Date(activity.start_date || activity.startDate).toLocaleDateString()}</td>
                         <td className="py-2 pr-4">{activity.name || '-'}</td>
-                        <td className="py-2 pr-4 text-gray-300">{activity.type || '-'}</td>
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{activity.type || '-'}</td>
                         <td className="py-2 pr-4">{(Number(activity.distance || 0) / 1000).toFixed(1)} km</td>
                         <td className="py-2 pr-4">{formatDuration(Number(activity.moving_time || activity.movingTime || 0))}</td>
                         <td className="py-2 pr-4">{speed > 0 ? formatPace(speed) : '--:--/km'}</td>
-                        <td className="py-2 text-gray-300">{activity.source || '-'}</td>
+                        <td className="py-2 text-[var(--text-muted)]">{activity.source || '-'}</td>
                       </tr>
                     )
                   })}
@@ -158,7 +158,7 @@ export default function ActivitiesPage() {
           >
             Previous
           </button>
-          <span className="text-sm text-gray-300">
+          <span className="text-sm text-[var(--text-muted)]">
             Page {pagination.page} / {pagination.totalPages}
           </span>
           <button

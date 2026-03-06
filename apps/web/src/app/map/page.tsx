@@ -26,7 +26,7 @@ function Metric({ label, value }: { label: string; value: string }) {
     <div className="panel">
       <div className="panel-body">
         <div className="metric-label">{label}</div>
-        <div className="mt-2 text-xl font-semibold text-white">{value}</div>
+        <div className="mt-2 text-xl font-semibold text-[var(--text-strong)]">{value}</div>
       </div>
     </div>
   )
@@ -79,7 +79,7 @@ export default function MapPage() {
         <section className="panel">
           <div className="panel-body py-6 sm:py-7">
             <h2 className="section-title">Route Intelligence</h2>
-            <p className="mt-2 text-sm text-red-300">Failed to load map data.</p>
+            <p className="mt-2 text-sm text-red-700 dark:text-red-300">Failed to load map data.</p>
           </div>
         </section>
       </div>
@@ -98,11 +98,11 @@ export default function MapPage() {
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <div className="panel xl:col-span-3">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Exploration Workflow</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Exploration Workflow</h3>
           </div>
           <div className="panel-body grid grid-cols-1 gap-4 lg:grid-cols-5">
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">View</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">View</label>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setViewMode('map')} className={viewMode === 'map' ? 'action-primary !py-2 !px-2' : 'action-secondary !py-2 !px-2'}>Map</button>
                 <button onClick={() => setViewMode('waterfall')} className={viewMode === 'waterfall' ? 'action-primary !py-2 !px-2' : 'action-secondary !py-2 !px-2'}>Gallery</button>
@@ -110,12 +110,12 @@ export default function MapPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">Activity Types</label>
-              <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-white/15 bg-white/5 p-2.5">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">Activity Types</label>
+              <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-slate-300/70 bg-white p-2.5 dark:border-white/15 dark:bg-white/5">
                 {availableTypes.map((type: ActivityType) => {
                   const config = getActivityConfig(type)
                   return (
-                    <label key={type} className="flex items-center gap-2 text-sm text-gray-200">
+                    <label key={type} className="flex items-center gap-2 text-sm text-[var(--text-strong)]">
                       <input
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
@@ -123,7 +123,7 @@ export default function MapPage() {
                           if (e.target.checked) setSelectedTypes([...selectedTypes, type])
                           else setSelectedTypes(selectedTypes.filter((t) => t !== type))
                         }}
-                        className="rounded border-white/20 bg-transparent"
+                        className="rounded border-slate-300 bg-transparent dark:border-white/20"
                       />
                       <span>
                         {config.icon} {config.displayName}
@@ -135,22 +135,22 @@ export default function MapPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">Start</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">Start</label>
               <input
                 type="date"
                 value={dateRange.start?.toISOString().split('T')[0] || ''}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value ? new Date(e.target.value) : undefined })}
-                className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2 text-sm text-[var(--text-strong)] dark:border-white/20 dark:bg-white/5 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-gray-400">End</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">End</label>
               <input
                 type="date"
                 value={dateRange.end?.toISOString().split('T')[0] || ''}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value ? new Date(e.target.value) : undefined })}
-                className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2 text-sm text-[var(--text-strong)] dark:border-white/20 dark:bg-white/5 dark:text-white"
               />
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function MapPage() {
       {viewMode === 'map' ? (
         <section className="panel overflow-hidden">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Spatial Review</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Spatial Review</h3>
           </div>
           <div className="panel-body">
             <RunningMap activities={activitiesWithLocation} height={620} showControls={true} defaultView="single" />
@@ -187,7 +187,7 @@ export default function MapPage() {
       ) : (
         <section className="panel overflow-hidden">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Route Gallery</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Route Gallery</h3>
           </div>
           <div className="panel-body">
             <WaterfallMapView

@@ -78,11 +78,11 @@ export default function StatsPage() {
               <p className="section-subtitle">Review yearly performance, distribution, progression, and record-level breakthroughs.</p>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-300">Year</label>
+              <label className="text-sm text-[var(--text-muted)]">Year</label>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-300/60 focus:outline-none"
+                className="rounded-lg border border-slate-300/70 bg-white px-3 py-2 text-sm text-[var(--text-strong)] focus:border-blue-400/60 focus:outline-none dark:border-white/20 dark:bg-white/5 dark:text-white"
               >
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>
@@ -107,7 +107,7 @@ export default function StatsPage() {
       {monthlyData.length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Distance Burn-up</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Distance Burn-up</h3>
           </div>
           <div className="panel-body">
             <BurnUpChart data={monthlyData} height={300} showTarget={true} targetDistance={1000} title="" />
@@ -118,7 +118,7 @@ export default function StatsPage() {
       {calendarData.length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Activity Distribution by Month</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Activity Distribution by Month</h3>
           </div>
           <div className="panel-body">
             <ActivityBarChart data={calendarData} height={300} showDistance={true} title="" />
@@ -129,7 +129,7 @@ export default function StatsPage() {
       {yearStats?.activityTypes && yearStats.activityTypes.length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Activity Type Mix</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Activity Type Mix</h3>
           </div>
           <div className="panel-body grid grid-cols-1 gap-6 xl:grid-cols-2">
             <ActivityTypeChart data={yearStats.activityTypes} height={260} chartType="pie" />
@@ -141,7 +141,7 @@ export default function StatsPage() {
       {yearStats?.weeklyStats && yearStats.weeklyStats.length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Weekly Progress Pattern</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Weekly Progress Pattern</h3>
           </div>
           <div className="panel-body">
             <WeeklyProgressChart data={yearStats.weeklyStats} />
@@ -152,7 +152,7 @@ export default function StatsPage() {
       {yearStats?.paceAnalysis && yearStats.paceAnalysis.length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Pace Pattern</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Pace Pattern</h3>
           </div>
           <div className="panel-body">
             <PaceAnalysisChart data={yearStats.paceAnalysis} />
@@ -163,7 +163,7 @@ export default function StatsPage() {
       {yearStats?.personalRecords && Object.keys(yearStats.personalRecords).length > 0 ? (
         <section className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Personal Records</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Personal Records</h3>
           </div>
           <div className="panel-body">
             <PersonalRecords records={yearStats.personalRecords} isLoading={false} />

@@ -33,9 +33,9 @@ interface SyncHistoryResponse {
 }
 
 function statusBadge(status: SyncRecord['status']) {
-  if (status === 'success') return 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/35'
-  if (status === 'failed' || status === 'error') return 'bg-red-500/15 text-red-300 ring-1 ring-red-400/35'
-  return 'bg-gray-500/15 text-gray-300 ring-1 ring-gray-400/35'
+  if (status === 'success') return 'bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-400/35 dark:text-emerald-300'
+  if (status === 'failed' || status === 'error') return 'bg-red-500/15 text-red-700 ring-1 ring-red-400/35 dark:text-red-300'
+  return 'bg-gray-500/15 text-gray-700 ring-1 ring-gray-400/35 dark:text-gray-300'
 }
 
 export default function SyncPage() {
@@ -114,14 +114,14 @@ export default function SyncPage() {
       </section>
 
       {error ? (
-        <section className="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <section className="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-200">
           {error}
         </section>
       ) : null}
 
       {isLoading ? (
         <section className="panel">
-          <div className="panel-body text-sm text-gray-400">Loading synchronization data...</div>
+          <div className="panel-body text-sm text-[var(--text-muted)]">Loading synchronization data...</div>
         </section>
       ) : (
         <>
@@ -129,8 +129,8 @@ export default function SyncPage() {
             {dataSources.map((source) => (
               <div key={source.name} className="panel lg:col-span-2">
                 <div className="panel-header flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">{source.name} Source Health</h3>
-                  <span className={source.status === 'connected' ? 'rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-400/30' : 'rounded-full bg-gray-500/15 px-2 py-0.5 text-xs text-gray-300 ring-1 ring-gray-400/30'}>
+                  <h3 className="text-lg font-semibold text-[var(--text-strong)]">{source.name} Source Health</h3>
+                  <span className={source.status === 'connected' ? 'rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-700 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'rounded-full bg-gray-500/15 px-2 py-0.5 text-xs text-gray-700 ring-1 ring-gray-400/30 dark:text-gray-300'}>
                     {source.status}
                   </span>
                 </div>
@@ -144,9 +144,9 @@ export default function SyncPage() {
 
             <div className="panel">
               <div className="panel-header">
-                <h3 className="text-lg font-semibold text-white">Workflow</h3>
+                <h3 className="text-lg font-semibold text-[var(--text-strong)]">Workflow</h3>
               </div>
-              <div className="panel-body space-y-2 text-sm text-gray-300">
+              <div className="panel-body space-y-2 text-sm text-[var(--text-muted)]">
                 <div>1. Refresh latest source status</div>
                 <div>2. Trigger manual sync</div>
                 <div>3. Check latest log result</div>
@@ -157,17 +157,17 @@ export default function SyncPage() {
 
           <section className="panel">
             <div className="panel-header flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Sync History</h3>
-              {latestSync ? <span className="text-xs text-gray-400">Latest: {new Date(latestSync.timestamp).toLocaleString()}</span> : null}
+              <h3 className="text-lg font-semibold text-[var(--text-strong)]">Sync History</h3>
+              {latestSync ? <span className="text-xs text-[var(--text-muted)]">Latest: {new Date(latestSync.timestamp).toLocaleString()}</span> : null}
             </div>
             <div className="panel-body p-0">
               {syncRecords.length === 0 ? (
-                <p className="px-5 py-4 text-sm text-gray-400">No sync records yet.</p>
+                <p className="px-5 py-4 text-sm text-[var(--text-muted)]">No sync records yet.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-white/10 text-left text-gray-400">
+                      <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
                         <th className="px-5 py-2 font-medium">Time</th>
                         <th className="px-5 py-2 font-medium">Source</th>
                         <th className="px-5 py-2 font-medium">Status</th>
@@ -179,8 +179,8 @@ export default function SyncPage() {
                     </thead>
                     <tbody>
                       {syncRecords.map((record) => (
-                        <tr key={record.id} className="border-b border-white/5 text-gray-200">
-                          <td className="px-5 py-2 text-gray-300">{new Date(record.timestamp).toLocaleString()}</td>
+                        <tr key={record.id} className="border-b border-slate-200 text-[var(--text-strong)] dark:border-white/5 dark:text-gray-200">
+                          <td className="px-5 py-2 text-[var(--text-muted)]">{new Date(record.timestamp).toLocaleString()}</td>
                           <td className="px-5 py-2">{record.source}</td>
                           <td className="px-5 py-2">
                             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>{record.status}</span>
@@ -188,7 +188,7 @@ export default function SyncPage() {
                           <td className="px-5 py-2">{record.activitiesProcessed}</td>
                           <td className="px-5 py-2">{record.activitiesCreated}</td>
                           <td className="px-5 py-2">{record.activitiesUpdated}</td>
-                          <td className="px-5 py-2 text-gray-400">{record.errorMessage || '-'}</td>
+                          <td className="px-5 py-2 text-[var(--text-muted)]">{record.errorMessage || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -207,7 +207,7 @@ function MetricItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="metric-label">{label}</div>
-      <div className="mt-2 text-base font-semibold text-white">{value}</div>
+      <div className="mt-2 text-base font-semibold text-[var(--text-strong)]">{value}</div>
     </div>
   )
 }

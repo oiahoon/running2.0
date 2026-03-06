@@ -10,7 +10,7 @@ function MetricCard({ title, value, subtitle }: { title: string; value: string |
       <div className="panel-body">
         <div className="metric-label">{title}</div>
         <div className="metric-value mt-2">{value}</div>
-        {subtitle ? <div className="mt-1 text-sm text-gray-400">{subtitle}</div> : null}
+        {subtitle ? <div className="mt-1 text-sm text-[var(--text-muted)]">{subtitle}</div> : null}
       </div>
     </div>
   )
@@ -70,7 +70,7 @@ export function CyberDashboard() {
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="panel xl:col-span-2">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">This Week Progress</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">This Week Progress</h3>
           </div>
           <div className="panel-body">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -83,7 +83,7 @@ export function CyberDashboard() {
 
         <div className="panel">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-white">Workflow Shortcuts</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Workflow Shortcuts</h3>
           </div>
           <div className="panel-body grid grid-cols-1 gap-2">
             <button onClick={() => router.push('/activities')} className="action-secondary justify-start">Review Activities</button>
@@ -96,19 +96,19 @@ export function CyberDashboard() {
 
       <section className="panel">
         <div className="panel-header flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Recent Activities</h3>
-          <button onClick={() => router.push('/activities')} className="text-sm text-gray-300 hover:text-white">View all</button>
+          <h3 className="text-lg font-semibold text-[var(--text-strong)]">Recent Activities</h3>
+          <button onClick={() => router.push('/activities')} className="text-sm text-[var(--text-muted)] hover:text-[var(--text-strong)]">View all</button>
         </div>
         <div className="panel-body">
           {recentLoading ? (
-            <p className="text-sm text-gray-400">Loading recent activities...</p>
+            <p className="text-sm text-[var(--text-muted)]">Loading recent activities...</p>
           ) : recentActivities.length === 0 ? (
-            <p className="text-sm text-gray-400">No activities yet.</p>
+            <p className="text-sm text-[var(--text-muted)]">No activities yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-gray-400">
+                  <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
                     <th className="py-2 pr-4 font-medium">Date</th>
                     <th className="py-2 pr-4 font-medium">Name</th>
                     <th className="py-2 pr-4 font-medium">Type</th>
@@ -121,10 +121,10 @@ export function CyberDashboard() {
                   {recentActivities.slice(0, 8).map((activity: any) => {
                     const speed = Number(activity.average_speed || 0)
                     return (
-                      <tr key={activity.id} className="border-b border-white/5 text-gray-200">
-                        <td className="py-2 pr-4 text-gray-300">{new Date(activity.start_date).toLocaleDateString()}</td>
+                      <tr key={activity.id} className="border-b border-slate-200 text-[var(--text-strong)] dark:border-white/5 dark:text-gray-200">
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{new Date(activity.start_date).toLocaleDateString()}</td>
                         <td className="py-2 pr-4">{activity.name || '-'}</td>
-                        <td className="py-2 pr-4 text-gray-300">{activity.type || '-'}</td>
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{activity.type || '-'}</td>
                         <td className="py-2 pr-4">{(Number(activity.distance || 0) / 1000).toFixed(1)} km</td>
                         <td className="py-2 pr-4">{formatDuration(Number(activity.moving_time || 0))}</td>
                         <td className="py-2">{speed > 0 ? formatPace(speed) : '--:--/km'}</td>
