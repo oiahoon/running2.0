@@ -19,35 +19,35 @@ import { useTheme } from 'next-themes'
 
 const navGroups = [
   {
-    label: 'Overview',
+    label: 'Atlas',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-      { name: 'Statistics', href: '/stats', icon: ChartBarIcon },
+      { name: 'Route Wall', href: '/dashboard', icon: HomeIcon },
+      { name: 'Stats Lab', href: '/stats', icon: ChartBarIcon },
     ],
   },
   {
     label: 'Training',
     items: [
-      { name: 'Activities', href: '/activities', icon: ListBulletIcon },
-      { name: 'Map', href: '/map', icon: MapIcon },
+      { name: 'Runs', href: '/activities', icon: ListBulletIcon },
+      { name: 'Route Map', href: '/map', icon: MapIcon },
     ],
   },
   {
-    label: 'Operations',
+    label: 'Sync',
     items: [
       { name: 'Sync', href: '/sync', icon: ArrowPathIcon },
-      { name: 'Data Sources', href: '/data-sources', icon: CircleStackIcon },
+      { name: 'Sync Sources', href: '/data-sources', icon: CircleStackIcon },
     ],
   },
 ]
 
 const pageCopy: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Dashboard', subtitle: 'Daily command center for your running system.' },
-  '/activities': { title: 'Activities', subtitle: 'Search, inspect, and compare training records.' },
-  '/stats': { title: 'Statistics', subtitle: 'Yearly analysis and long-term trend insight.' },
-  '/map': { title: 'Map', subtitle: 'Route exploration, trajectory context, and spatial review.' },
+  '/dashboard': { title: 'Route Wall', subtitle: 'A route-first atlas of shapes, effort, pace, and progress.' },
+  '/activities': { title: 'Runs', subtitle: 'Chronological training archive for search, scan, and comparison.' },
+  '/stats': { title: 'Stats Lab', subtitle: 'Designed fields, rhythms, records, and route-derived training insight.' },
+  '/map': { title: 'Route Map', subtitle: 'Spatial exploration, trajectory context, and route review.' },
   '/sync': { title: 'Sync', subtitle: 'Connection health, manual sync, and operation history.' },
-  '/data-sources': { title: 'Data Sources', subtitle: 'Integration lifecycle and source configuration.' },
+  '/data-sources': { title: 'Sync Sources', subtitle: 'Integration lifecycle and source configuration.' },
 }
 
 function classNames(...classes: string[]) {
@@ -74,10 +74,10 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
     <div className="flex h-full flex-col">
       <div className="px-5 pb-5 pt-6">
         <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
-          <span className="text-lg">🏃</span>
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface-raised)] text-sm font-black text-[var(--route-green)]">R2</span>
           <div>
-            <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">Running Page 2.0</div>
-            <div className="text-xs text-[var(--text-muted)]">Performance cockpit</div>
+            <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">RUN2 Atlas</div>
+            <div className="text-xs text-[var(--text-muted)]">Every run leaves a shape</div>
           </div>
         </Link>
       </div>
@@ -97,11 +97,11 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                     className={classNames(
                       'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
                       isActive
-                        ? 'bg-blue-500/15 text-[var(--text-strong)] ring-1 ring-inset ring-blue-400/40'
+                        ? 'bg-[var(--route-green)]/10 text-[var(--text-strong)] ring-1 ring-inset ring-[var(--route-green)]/35'
                         : 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-strong)] dark:hover:bg-white/5'
                     )}
                   >
-                    <item.icon className={classNames('h-5 w-5', isActive ? 'text-blue-400 dark:text-blue-300' : 'text-slate-400 group-hover:text-slate-600 dark:text-gray-500 dark:group-hover:text-gray-300')} />
+                    <item.icon className={classNames('h-5 w-5', isActive ? 'text-[var(--route-green)]' : 'text-slate-400 group-hover:text-slate-600 dark:text-gray-500 dark:group-hover:text-gray-300')} />
                     {item.name}
                   </Link>
                 )
@@ -170,7 +170,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             <div className="hidden items-center gap-2 sm:flex">
               <Link href="/sync" className="action-secondary">Sync</Link>
-              <Link href="/map" className="action-primary">Open Map</Link>
+              <Link href="/map" className="action-primary">Route Map</Link>
             </div>
 
             <ThemeToggle />

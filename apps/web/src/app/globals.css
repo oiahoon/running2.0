@@ -6,28 +6,52 @@
   --bg-0: #f4f7fb;
   --bg-1: #f9fbff;
   --bg-2: #edf2f8;
+  --bg: #f4f7fb;
   --surface: #ffffff;
   --surface-2: #f7fafe;
+  --surface-raised: #ffffff;
   --sidebar-bg: #f8fbff;
   --header-bg: #ffffff;
+  --line: rgba(15, 23, 42, 0.12);
   --border: rgba(15, 23, 42, 0.12);
+  --text: #0f172a;
   --text-strong: #0f172a;
   --text-muted: #64748b;
   --accent: #5b8dff;
   --accent-2: #8cb0ff;
+  --route-green: #1fa968;
+  --route-lime: #7cae1e;
+  --route-orange: #d96f2b;
+  --route-cyan: #1389ad;
+  --route-purple: #7b5fd6;
+  --route-red: #d84f4f;
+  --radius-lg: 16px;
+  --radius-md: 10px;
 }
 
 .dark {
-  --bg-0: #070d1a;
-  --bg-1: #0a1327;
-  --bg-2: #0f1a30;
-  --surface: #111f36;
-  --surface-2: #16273f;
-  --sidebar-bg: #0b1221;
-  --header-bg: #0a1327;
-  --border: rgba(255, 255, 255, 0.12);
-  --text-strong: #f3f6ff;
-  --text-muted: #9aa8c7;
+  --bg-0: #070a0c;
+  --bg-1: #091011;
+  --bg-2: #0d1415;
+  --bg: #070a0c;
+  --surface: #0d1415;
+  --surface-2: #111a1b;
+  --surface-raised: #132021;
+  --sidebar-bg: #080d0e;
+  --header-bg: #080d0e;
+  --line: #2c3c39;
+  --border: rgba(153, 184, 172, 0.16);
+  --text: #eef4e9;
+  --text-strong: #eef4e9;
+  --text-muted: #8b9a93;
+  --accent: #5dff9d;
+  --accent-2: #58d8ff;
+  --route-green: #5dff9d;
+  --route-lime: #b8ff70;
+  --route-orange: #ff8946;
+  --route-cyan: #58d8ff;
+  --route-purple: #aa7dff;
+  --route-red: #ff5c5c;
 }
 
 @layer base {
@@ -38,9 +62,12 @@
 
   body {
     background:
-      radial-gradient(1200px 600px at 75% -20%, rgba(91, 141, 255, 0.16), transparent 60%),
-      radial-gradient(900px 500px at 5% 0%, rgba(43, 77, 150, 0.2), transparent 55%),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 50%, #061021 100%);
+      linear-gradient(rgba(44, 60, 57, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(44, 60, 57, 0.08) 1px, transparent 1px),
+      radial-gradient(1000px 520px at 78% -10%, rgba(93, 255, 157, 0.1), transparent 58%),
+      radial-gradient(760px 440px at 3% 8%, rgba(88, 216, 255, 0.08), transparent 54%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 58%, var(--bg-2) 100%);
+    background-size: 40px 40px, 40px 40px, auto, auto, auto;
     color: var(--text-strong);
     min-height: 100vh;
   }
@@ -92,12 +119,13 @@
 
   .panel {
     background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
-    @apply rounded-2xl border shadow-[0_10px_30px_rgba(15,23,42,0.1)];
+    border-radius: var(--radius-lg);
+    @apply border shadow-[0_10px_30px_rgba(15,23,42,0.1)];
   }
 
   .dark .panel {
-    background: linear-gradient(180deg, rgba(25, 41, 66, 0.88) 0%, rgba(18, 32, 53, 0.92) 100%);
-    @apply border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.2)];
+    background: linear-gradient(180deg, rgba(17, 26, 27, 0.92) 0%, rgba(13, 20, 21, 0.96) 100%);
+    @apply shadow-[0_14px_40px_rgba(0,0,0,0.26)];
   }
 
   .panel-header {
@@ -119,7 +147,12 @@
   }
 
   .action-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-blue-500 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(64,118,255,0.3)] transition hover:bg-blue-400;
+    @apply inline-flex items-center justify-center rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(15,23,42,0.22)] transition hover:bg-slate-700;
+  }
+
+  .dark .action-primary {
+    background: linear-gradient(135deg, var(--route-green), var(--route-cyan));
+    @apply text-slate-950 shadow-[0_10px_26px_rgba(93,255,157,0.18)] hover:brightness-110;
   }
 
   .action-secondary {
@@ -146,6 +179,43 @@
   .section-subtitle {
     color: var(--text-muted);
     @apply mt-1 text-sm;
+  }
+
+  .route-atlas-label {
+    color: var(--text-muted);
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em];
+  }
+
+  .route-atlas-surface {
+    background:
+      linear-gradient(rgba(139, 154, 147, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 154, 147, 0.08) 1px, transparent 1px),
+      linear-gradient(180deg, var(--surface-raised), var(--surface));
+    background-size: 28px 28px, 28px 28px, auto;
+    border-color: var(--line);
+  }
+
+  .route-glyph-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-route 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+}
+
+@keyframes draw-route {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
