@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { RouteGlyph } from '@/components/routes'
-import { inferRouteEffort } from '@/lib/routes'
+import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 
 type ActivityDetail = {
   id: number
@@ -98,6 +98,36 @@ function ShareCard({ activity }: { activity: ActivityDetail }) {
   )
 }
 
+function FingerprintPanel({ activity }: { activity: ActivityDetail }) {
+  const fingerprint = calculateRouteFingerprint({ encodedPolyline: routePolyline(activity) })
+
+  if (!fingerprint) {
+    return (
+      <div className="rounded-2xl border border-dashed border-[var(--line)] p-5 text-sm text-[var(--text-muted)]">
+        No route fingerprint is available for this activity.
+      </div>
+    )
+  }
+
+  const metrics = [
+    { label: 'Shape', value: fingerprint.shapeLabel },
+    { label: 'Complexity', value: `${Math.round(fingerprint.complexity * 100)}` },
+    { label: 'Loop', value: `${Math.round(fingerprint.loopScore * 100)}` },
+    { label: 'Compact', value: `${Math.round(fingerprint.compactness * 100)}` },
+  ]
+
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {metrics.map((metric) => (
+        <div key={metric.label} className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
+          <div className="route-atlas-label">{metric.label}</div>
+          <div className="mt-2 text-2xl font-semibold text-[var(--text-strong)]">{metric.value}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ActivityPosterPage() {
   const params = useParams<{ id: string }>()
   const activityId = params.id
@@ -179,13 +209,11 @@ export default function ActivityPosterPage() {
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
         <div className="panel">
           <div className="panel-header">
-            <h2 className="text-lg font-semibold text-[var(--text-strong)]">Splits</h2>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">Split data is not available in the current synced SQLite snapshot, so this section stays intentionally quiet.</p>
+            <h2 className="text-lg font-semibold text-[var(--text-strong)]">Route Fingerprint</h2>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">A data-only read of route personality: shape, complexity, loop closure, and compactness.</p>
           </div>
           <div className="panel-body">
-            <div className="rounded-2xl border border-dashed border-[var(--line)] p-8 text-sm text-[var(--text-muted)]">
-              No split bars for this activity yet.
-            </div>
+            <FingerprintPanel activity={activity} />
           </div>
         </div>
         <ShareCard activity={activity} />

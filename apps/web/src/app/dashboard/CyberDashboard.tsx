@@ -231,6 +231,7 @@ export function CyberDashboard() {
           <div className="panel-body grid gap-2">
             <Link href="/activities" className="action-secondary justify-start">Browse Runs</Link>
             <Link href="/routes" className="action-secondary justify-start">Open Route Gallery</Link>
+            <Link href="/posters" className="action-secondary justify-start">Generate Posters</Link>
             <Link href="/stats" className="action-secondary justify-start">Open Stats Lab</Link>
             <Link href="/map" className="action-secondary justify-start">Inspect Route Map</Link>
             <Link href="/sync" className="action-primary justify-start">Sync Latest Data</Link>

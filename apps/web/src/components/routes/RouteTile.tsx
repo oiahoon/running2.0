@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { RouteData, RouteEffort, getEffortColor } from '@/lib/routes'
+import { RouteData, RouteEffort, calculateRouteFingerprint, getEffortColor } from '@/lib/routes'
 import { RouteGlyph } from './RouteGlyph'
 
 function classNames(...classes: Array<string | false | undefined>) {
@@ -28,6 +28,7 @@ function RouteTileContent({
 }: Omit<RouteTileProps, 'activityId' | 'href' | 'className'>) {
   const effortColor = getEffortColor(effort)
   const effortLabel = effort ? String(effort).toUpperCase() : 'UNKNOWN'
+  const fingerprint = calculateRouteFingerprint(route)
 
   return (
     <>
@@ -53,7 +54,14 @@ function RouteTileContent({
           </div>
         </div>
       </div>
-      {paceLabel && dateLabel ? <div className="mt-3 text-xs text-[var(--text-muted)]">{paceLabel}</div> : null}
+      <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+        <span>{paceLabel && dateLabel ? paceLabel : fingerprint?.shapeLabel || 'Route shape'}</span>
+        {fingerprint ? (
+          <span className="shrink-0 tabular-nums">
+            Shape {(fingerprint.complexity * 100).toFixed(0)}
+          </span>
+        ) : null}
+      </div>
     </>
   )
 }

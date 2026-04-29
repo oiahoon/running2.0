@@ -32,6 +32,18 @@ export interface RouteData {
   boundingBox?: RouteBoundingBox
 }
 
+export interface RouteFingerprint {
+  pointCount: number
+  distanceKm: number
+  directness: number
+  loopScore: number
+  compactness: number
+  complexity: number
+  turnDensity: number
+  aspectRatio: number
+  shapeLabel: 'Loop' | 'Wander' | 'Out-and-back' | 'Point-to-point' | 'Glyph'
+}
+
 export interface EffortInput {
   effort?: string
   type?: string
@@ -44,6 +56,7 @@ export interface EffortInput {
 }
 
 const MIN_ROUTE_RANGE = 0.000001
+const EARTH_RADIUS_KM = 6371
 
 export const effortColors: Record<RouteEffort, string> = {
   easy: 'var(--route-green, #5DFF9D)',
@@ -204,6 +217,57 @@ export function samplePoints<T>(points: T[], maxPoints = 300): T[] {
   return sampled
 }
 
+export function calculateRouteFingerprint(route?: RouteData | null): RouteFingerprint | null {
+  const points = samplePoints(resolveRoutePoints(route), 500)
+  if (points.length < 2) return null
+
+  let routeDistanceKm = 0
+  let turnSum = 0
+  let turnCount = 0
+
+  for (let index = 1; index < points.length; index += 1) {
+    routeDistanceKm += distanceBetweenPoints(points[index - 1], points[index])
+  }
+
+  for (let index = 2; index < points.length; index += 1) {
+    const bearingA = bearingBetweenPoints(points[index - 2], points[index - 1])
+    const bearingB = bearingBetweenPoints(points[index - 1], points[index])
+    const delta = Math.abs(shortestAngleDelta(bearingA, bearingB))
+    if (Number.isFinite(delta)) {
+      turnSum += delta
+      turnCount += 1
+    }
+  }
+
+  const startToEndKm = distanceBetweenPoints(points[0], points[points.length - 1])
+  const minLat = Math.min(...points.map((point) => point.lat))
+  const maxLat = Math.max(...points.map((point) => point.lat))
+  const minLng = Math.min(...points.map((point) => point.lng))
+  const maxLng = Math.max(...points.map((point) => point.lng))
+  const bboxDiagonalKm = distanceBetweenPoints({ lat: minLat, lng: minLng }, { lat: maxLat, lng: maxLng })
+  const latRange = Math.max(maxLat - minLat, MIN_ROUTE_RANGE)
+  const lngRange = Math.max(maxLng - minLng, MIN_ROUTE_RANGE)
+  const directness = clamp01(startToEndKm / Math.max(routeDistanceKm, 0.001))
+  const loopScore = clamp01(1 - startToEndKm / Math.max(routeDistanceKm * 0.35, 0.001))
+  const compactness = clamp01(1 - bboxDiagonalKm / Math.max(routeDistanceKm, 0.001))
+  const averageTurn = turnCount > 0 ? turnSum / turnCount : 0
+  const turnDensity = clamp01(turnSum / Math.max(routeDistanceKm * 360, 1))
+  const complexity = clamp01(averageTurn / 95 + turnDensity * 0.45 + Math.min(points.length / 500, 1) * 0.12)
+  const aspectRatio = lngRange / latRange
+
+  return {
+    pointCount: points.length,
+    distanceKm: routeDistanceKm,
+    directness,
+    loopScore,
+    compactness,
+    complexity,
+    turnDensity,
+    aspectRatio,
+    shapeLabel: classifyRouteShape({ directness, loopScore, compactness, complexity, aspectRatio }),
+  }
+}
+
 export function inferRouteEffort(input: EffortInput): RouteEffort {
   const explicitEffort = normalizeEffort(input.effort)
   if (explicitEffort !== 'unknown') return explicitEffort
@@ -236,4 +300,55 @@ export function inferRouteEffort(input: EffortInput): RouteEffort {
 
 function isValidRoutePoint(point: RoutePoint): boolean {
   return Number.isFinite(point.lat) && Number.isFinite(point.lng)
+}
+
+function clamp01(value: number): number {
+  if (!Number.isFinite(value)) return 0
+  return Math.max(0, Math.min(1, value))
+}
+
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180
+}
+
+function toDegrees(radians: number): number {
+  return (radians * 180) / Math.PI
+}
+
+function distanceBetweenPoints(a: RoutePoint, b: RoutePoint): number {
+  const dLat = toRadians(b.lat - a.lat)
+  const dLng = toRadians(b.lng - a.lng)
+  const latA = toRadians(a.lat)
+  const latB = toRadians(b.lat)
+  const h =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(latA) * Math.cos(latB) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(h)))
+}
+
+function bearingBetweenPoints(a: RoutePoint, b: RoutePoint): number {
+  const latA = toRadians(a.lat)
+  const latB = toRadians(b.lat)
+  const dLng = toRadians(b.lng - a.lng)
+  const y = Math.sin(dLng) * Math.cos(latB)
+  const x = Math.cos(latA) * Math.sin(latB) - Math.sin(latA) * Math.cos(latB) * Math.cos(dLng)
+  return (toDegrees(Math.atan2(y, x)) + 360) % 360
+}
+
+function shortestAngleDelta(a: number, b: number): number {
+  return ((b - a + 540) % 360) - 180
+}
+
+function classifyRouteShape(input: {
+  directness: number
+  loopScore: number
+  compactness: number
+  complexity: number
+  aspectRatio: number
+}): RouteFingerprint['shapeLabel'] {
+  if (input.loopScore > 0.72 && input.complexity > 0.55) return 'Glyph'
+  if (input.loopScore > 0.62) return 'Loop'
+  if (input.directness < 0.28 && input.complexity > 0.5) return 'Wander'
+  if (input.directness < 0.42) return 'Out-and-back'
+  return 'Point-to-point'
 }

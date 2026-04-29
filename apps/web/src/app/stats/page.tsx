@@ -196,6 +196,75 @@ function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
   )
 }
 
+function YearSpiral({ activities }: { activities: ActivityLike[] }) {
+  const points = activities
+    .map((activity) => {
+      const date = new Date(activity.start_date || activity.startDate || '')
+      if (Number.isNaN(date.getTime())) return null
+      const progress = dayOfYear(date) / 366
+      const angle = progress * Math.PI * 2 * 2.35 - Math.PI / 2
+      const radius = 22 + progress * 118
+      const distanceKm = Number(activity.distance || 0) / 1000
+      return {
+        id: activity.id,
+        x: 150 + Math.cos(angle) * radius,
+        y: 150 + Math.sin(angle) * radius,
+        distanceKm,
+        effort: effortForActivity(activity),
+        name: activity.name || activity.type || 'Activity',
+      }
+    })
+    .filter(Boolean) as Array<{ id: number; x: number; y: number; distanceKm: number; effort: string; name: string }>
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
+      <svg viewBox="0 0 300 300" className="aspect-square w-full rounded-2xl border border-[var(--line)] bg-[var(--bg)]">
+        <path
+          d={Array.from({ length: 180 }, (_, index) => {
+            const progress = index / 179
+            const angle = progress * Math.PI * 2 * 2.35 - Math.PI / 2
+            const radius = 22 + progress * 118
+            return `${index === 0 ? 'M' : 'L'} ${(150 + Math.cos(angle) * radius).toFixed(2)} ${(150 + Math.sin(angle) * radius).toFixed(2)}`
+          }).join(' ')}
+          fill="none"
+          stroke="rgba(139,154,147,0.22)"
+          strokeWidth="1"
+        />
+        {points.map((point) => (
+          <circle
+            key={point.id}
+            cx={point.x}
+            cy={point.y}
+            r={Math.max(3, Math.min(12, point.distanceKm * 0.65))}
+            fill={point.effort === 'hard' ? 'var(--route-red)' : point.effort === 'easy' ? 'var(--route-green)' : 'var(--route-lime)'}
+            opacity="0.82"
+          >
+            <title>{point.name}: {point.distanceKm.toFixed(1)} km</title>
+          </circle>
+        ))}
+      </svg>
+      <div className="grid content-center gap-3">
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
+          <div className="route-atlas-label">Constellation</div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{points.length}</div>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">Each dot is one activity placed by day-of-year. Size follows distance; color follows inferred effort.</p>
+        </div>
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
+          <div className="route-atlas-label">Orbit Distance</div>
+          <div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">
+            {points.reduce((sum, point) => sum + point.distanceKm, 0).toFixed(1)} km
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function dayOfYear(date: Date) {
+  const start = new Date(date.getFullYear(), 0, 0)
+  return Math.floor((date.getTime() - start.getTime()) / 86400000)
+}
+
 export default function StatsPage() {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
@@ -283,6 +352,10 @@ export default function StatsPage() {
           <WeekdayRhythm activities={activities} />
         </LabPanel>
       </section>
+
+      <LabPanel title="Year Spiral" copy="A constellation view of the training year, generated without map tiles or external geography.">
+        <YearSpiral activities={activities} />
+      </LabPanel>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1.1fr]">
         <LabPanel title="Route Diversity" copy="Representative route shapes keep spatial variety visible inside the statistics layer.">

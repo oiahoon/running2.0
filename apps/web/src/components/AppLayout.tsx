@@ -12,6 +12,7 @@ import {
   ListBulletIcon,
   MapIcon,
   MoonIcon,
+  SparklesIcon,
   SunIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
@@ -23,6 +24,7 @@ const navGroups = [
     items: [
       { name: 'Route Wall', href: '/dashboard', icon: HomeIcon },
       { name: 'Route Gallery', href: '/routes', icon: MapIcon },
+      { name: 'Posters', href: '/posters', icon: SparklesIcon },
       { name: 'Stats Lab', href: '/stats', icon: ChartBarIcon },
     ],
   },
@@ -45,6 +47,7 @@ const navGroups = [
 const pageCopy: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Route Wall', subtitle: 'A route-first atlas of shapes, effort, pace, and progress.' },
   '/routes': { title: 'Route Gallery', subtitle: 'Browse GPS route shapes by effort, year, and recency.' },
+  '/posters': { title: 'Posters', subtitle: 'Weekly and monthly route artifacts generated from GPS shape data.' },
   '/activities': { title: 'Runs', subtitle: 'Chronological training archive for search, scan, and comparison.' },
   '/stats': { title: 'Stats Lab', subtitle: 'Designed fields, rhythms, records, and route-derived training insight.' },
   '/map': { title: 'Route Map', subtitle: 'Spatial exploration, trajectory context, and route review.' },
