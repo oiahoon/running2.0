@@ -7,6 +7,7 @@ import WaterfallMapView from '@/components/maps/WaterfallMapView'
 import { formatDistance, formatDuration, ActivityType } from '@/lib/database/models/Activity'
 import { getActivityConfig } from '@/lib/config/activities'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
+import { ActivityIcon } from '@/components/icons/AtlasIcon'
 
 interface Activity {
   id: number
@@ -128,8 +129,9 @@ export default function MapPage() {
                         }}
                         className="rounded border-slate-300 bg-transparent dark:border-white/20"
                       />
-                      <span>
-                        {config.icon} {config.displayName}
+                      <span className="inline-flex items-center gap-1.5">
+                        <ActivityIcon type={type} className="h-4 w-4 text-[var(--route-green)]" />
+                        {config.displayName}
                       </span>
                     </label>
                   )

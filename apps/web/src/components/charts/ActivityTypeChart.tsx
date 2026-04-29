@@ -1,6 +1,7 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { ActivityIcon, AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface ActivityTypeData {
   type: string
@@ -25,17 +26,6 @@ const COLORS = {
   Other: '#6b7280',
 }
 
-const ACTIVITY_ICONS = {
-  Run: '🏃',
-  Walk: '🚶',
-  Ride: '🚴',
-  Swim: '🏊',
-  Hike: '🥾',
-  WeightTraining: '🏋️',
-  Yoga: '🧘',
-  Other: '⚡',
-}
-
 export default function ActivityTypeChart({ 
   data, 
   height = 300,
@@ -48,7 +38,7 @@ export default function ActivityTypeChart({
         style={{ height }}
       >
         <div className="text-center">
-          <div className="text-4xl mb-2">📊</div>
+          <AtlasIcon name="chart" className="mx-auto mb-2 h-10 w-10 text-[var(--route-green)]" />
           <p className="text-gray-500 dark:text-gray-400">No activity data available</p>
         </div>
       </div>
@@ -61,7 +51,7 @@ export default function ActivityTypeChart({
       return (
         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="font-medium text-gray-900 dark:text-white">
-            {ACTIVITY_ICONS[data.type as keyof typeof ACTIVITY_ICONS] || '⚡'} {data.type}
+            <ActivityIcon type={data.type} className="mr-1 inline h-4 w-4" /> {data.type}
           </p>
           <p className="text-gray-600 dark:text-gray-400">
             Count: {data.count}
@@ -108,7 +98,7 @@ export default function ActivityTypeChart({
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {ACTIVITY_ICONS[entry.value as keyof typeof ACTIVITY_ICONS] || '⚡'} {entry.value}
+              <ActivityIcon type={entry.value} className="mr-1 inline h-4 w-4" /> {entry.value}
             </span>
           </div>
         ))}

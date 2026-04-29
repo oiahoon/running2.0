@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface ActivityData {
   date: string
@@ -105,7 +106,7 @@ export default function ActivityBarChart({
         style={{ height }}
       >
         <div className="text-center">
-          <div className="text-4xl mb-2">📊</div>
+          <AtlasIcon name="chart" className="mx-auto mb-2 h-10 w-10 text-[var(--route-green)]" />
           <p className="text-gray-500 dark:text-gray-400">No activity data available</p>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useActivityStats } from '@/lib/hooks/useActivities'
 import GitHubHeatmap from './GitHubHeatmap'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface YearAwareHeatmapProps {
   initialYear?: number
@@ -32,7 +33,7 @@ export default function YearAwareHeatmap({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              🔥 Activity Heatmap
+              <AtlasIcon name="heatmap" className="mr-2 inline h-5 w-5 text-[var(--route-green)]" /> Activity Heatmap
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Loading activities for {selectedYear}...

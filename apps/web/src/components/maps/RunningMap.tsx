@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/config/activities'
 import { checkStaticMapExists } from '@/lib/utils/cdn'
 import ActivitySelector from '@/components/ActivitySelector'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface Activity {
   id: number
@@ -165,7 +166,7 @@ const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number)
                 image: img,
                 timestamp: Date.now()
               })
-              console.log('🚀 Preloaded adjacent map:', mapCheck.url)
+              console.log('Preloaded adjacent map:', mapCheck.url)
             }
             
             img.onerror = () => {
@@ -198,26 +199,26 @@ async function getStaticMapUrl(activity: Activity, width: number, height: number
   // Use externalId for static map filename (Strava activity ID)
   const activityId = getActivityId(activity)
   
-  console.log(`🔍 Checking static map for activity ${activityId}`)
+  console.log(`Checking static map for activity ${activityId}`)
   
   try {
     // Check if static map exists (tries CDN first, then local)
     const mapCheck = await checkStaticMapExists(activityId.toString())
     
-    console.log(`📊 Static map check result for ${activityId}:`, mapCheck)
+    console.log(`Static map check result for ${activityId}:`, mapCheck)
     
     if (mapCheck.exists) {
-      console.log(`✅ Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
+      console.log(`Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
       return mapCheck.url
     } else {
-      console.log(`❌ Static map not found for activity ${activityId}`)
+      console.log(`Static map not found for activity ${activityId}`)
     }
   } catch (error) {
     // Static map doesn't exist, will fallback to API
-    console.error(`⚠️ Static map check failed for activity ${activityId}:`, error)
+    console.error(`Static map check failed for activity ${activityId}:`, error)
   }
   
-  console.log(`🔄 Falling back to Mapbox API for activity ${activityId}`)
+  console.log(`Falling back to Mapbox API for activity ${activityId}`)
   return null
 }
 
@@ -229,17 +230,17 @@ async function createCachedMapboxUrl(
   height: number,
   token: string
 ): Promise<string> {
-  console.log(`🗺️ Creating map URL for ${activities.length} activities`)
+  console.log(`Creating map URL for ${activities.length} activities`)
   
   // For single activity, try static map first
   if (activities.length === 1) {
-    console.log(`🎯 Single activity detected, trying static map first`)
+    console.log(`Single activity detected, trying static map first`)
     const staticUrl = await getStaticMapUrl(activities[0], width, height)
     if (staticUrl) {
-      console.log(`✅ Static map found, returning: ${staticUrl}`)
+      console.log(`Static map found, returning: ${staticUrl}`)
       return staticUrl
     }
-    console.log(`❌ Static map not found, continuing to Mapbox API`)
+    console.log(`Static map not found, continuing to Mapbox API`)
   }
   
   // For single activity with polyline, try localStorage cache
@@ -247,7 +248,7 @@ async function createCachedMapboxUrl(
     const activity = activities[0]
     const activityId = getActivityId(activity)
     
-    console.log(`💾 Checking cache for activity ${activityId}`)
+    console.log(`Checking cache for activity ${activityId}`)
     
     // Check cache first (client-side, we'll use a simpler approach)
     const cacheKey = `map-${activityId}-${width}x${height}`
@@ -257,13 +258,13 @@ async function createCachedMapboxUrl(
       // Check if cached URL is still valid (not older than 1 day)
       const cacheTime = localStorage.getItem(`${cacheKey}-time`)
       if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
-        console.log(`📦 Using cached map URL for activity ${activityId}`)
+        console.log(`Using cached map URL for activity ${activityId}`)
         return cachedUrl
       }
     }
     
     // Generate new URL
-    console.log(`🌐 Generating new Mapbox URL for activity ${activityId}`)
+    console.log(`Generating new Mapbox URL for activity ${activityId}`)
     const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
     // Cache the URL (but don't cache static map paths)
@@ -276,7 +277,7 @@ async function createCachedMapboxUrl(
   }
   
   // For other cases, use regular URL generation
-  console.log(`🗺️ Using regular Mapbox URL for ${activities.length} activities`)
+  console.log(`Using regular Mapbox URL for ${activities.length} activities`)
   return createSafeMapboxUrl(activities, bounds, width, height, token)
 }
 
@@ -464,7 +465,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
     const cached = imagePreloadCache.get(staticMapUrl)
     if (cached) {
       if (cached.loaded) {
-        console.log('📦 Using cached map image:', staticMapUrl)
+        console.log('Using cached map image:', staticMapUrl)
         setIsLoadingMap(false)
         return
       } else if (cached.loading) {
@@ -483,7 +484,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
         checkLoaded()
         return
       } else if (cached.error) {
-        console.log('❌ Using cached error state for:', staticMapUrl)
+        console.log('Using cached error state for:', staticMapUrl)
         setIsLoadingMap(false)
         return
       }
@@ -503,7 +504,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
     
     const handleLoad = () => {
       if (!isCancelled) {
-        console.log('✅ Map image loaded and cached:', staticMapUrl)
+        console.log('Map image loaded and cached:', staticMapUrl)
         
         // Update cache
         imagePreloadCache.set(staticMapUrl, {
@@ -520,7 +521,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
     
     const handleError = () => {
       if (!isCancelled) {
-        console.error('❌ Map image load failed:', staticMapUrl)
+        console.error('Map image load failed:', staticMapUrl)
         
         // Update cache with error state
         imagePreloadCache.set(staticMapUrl, {
@@ -613,7 +614,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
           
           <div className="flex-1 p-4">
             <div className="text-center mb-4">
-              <div className="text-3xl mb-2">🗺️</div>
+              <AtlasIcon name="map" className="mx-auto mb-2 h-8 w-8 text-[var(--route-green)]" />
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Interactive map requires Mapbox token
               </p>
@@ -637,7 +638,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
                       {location.short && (
                         <div className="flex items-center mt-1">
                           <span className="text-xs text-gray-400 dark:text-gray-500 truncate" title={location.full}>
-                            📍 {location.short}
+                            <AtlasIcon name="pin" className="mr-1 inline h-3.5 w-3.5" /> {location.short}
                           </span>
                         </div>
                       )}
@@ -671,7 +672,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
         style={{ height }}
       >
         <div className="text-center p-8">
-          <div className="text-4xl mb-4">📍</div>
+          <AtlasIcon name="pin" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             No Location Data
           </h3>
@@ -713,7 +714,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
             alt="Activity route map"
             className="w-full h-full object-cover"
             onError={(e) => {
-              console.error('❌ Map display failed:', staticMapUrl)
+              console.error('Map display failed:', staticMapUrl)
               e.currentTarget.style.display = 'none'
               const fallback = e.currentTarget.nextElementSibling as HTMLElement
               if (fallback) fallback.classList.remove('hidden')
@@ -723,7 +724,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
       ) : (
         <div className="h-full flex items-center justify-center">
           <div className="text-center p-8">
-            <div className="text-4xl mb-4">🗺️</div>
+            <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No Map Available
             </h3>
@@ -736,7 +737,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
       
       <div className="hidden h-full flex items-center justify-center">
         <div className="text-center p-8">
-          <div className="text-4xl mb-4">🗺️</div>
+          <AtlasIcon name="warning" className="mx-auto mb-4 h-12 w-12 text-[var(--route-red)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             Map Loading Failed
           </h3>
@@ -791,7 +792,7 @@ export default function RunningMap({
         style={{ height }}
       >
         <div className="text-center p-8">
-          <div className="text-4xl mb-4">🗺️</div>
+          <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             No GPS Activities
           </h3>
@@ -836,7 +837,7 @@ export default function RunningMap({
       {showActivityInfo && selectedActivity && (
         <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-            📍 {selectedActivity.name}
+            <AtlasIcon name="pin" className="mr-2 inline h-4 w-4 text-[var(--route-green)]" /> {selectedActivity.name}
           </h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -865,7 +866,7 @@ export default function RunningMap({
                 <div className="col-span-2">
                   <span className="text-gray-500 dark:text-gray-400">Location:</span> 
                   <span className="ml-2 font-medium" title={location.full}>
-                    📍 {location.short}
+                    <AtlasIcon name="pin" className="mr-1 inline h-3.5 w-3.5 text-[var(--route-green)]" /> {location.short}
                   </span>
                 </div>
               ) : null

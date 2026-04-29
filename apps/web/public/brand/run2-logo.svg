@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 256" role="img" aria-label="RUN2 Atlas logo">
+  <rect width="980" height="256" rx="44" fill="#080d0e"/>
+  <g transform="translate(32 32)">
+    <rect width="192" height="192" rx="44" fill="#0d1415"/>
+    <rect x="4" y="4" width="184" height="184" rx="40" fill="none" stroke="#2c3c39" stroke-width="8"/>
+    <path d="M38 125c21-52 50 31 70-19 9-24 20-36 50-42" fill="none" stroke="#5dff9d" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="38" cy="125" r="11" fill="#58d8ff"/>
+    <circle cx="158" cy="64" r="11" fill="#5dff9d"/>
+    <path d="M54 55h40c25 0 39 13 39 32 0 22-16 34-41 34H73v34" fill="none" stroke="#eef4e9" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".82"/>
+  </g>
+  <text x="260" y="108" fill="#eef4e9" font-family="Manrope, Inter, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="0">RUN2 Atlas</text>
+  <text x="264" y="160" fill="#8b9a93" font-family="Manrope, Inter, Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="3">EVERY RUN LEAVES A SHAPE</text>
+  <path d="M265 198c115-35 196 36 302-9 92-38 166-27 280 12" fill="none" stroke="#5dff9d" stroke-width="6" stroke-linecap="round" opacity=".72"/>
+</svg>

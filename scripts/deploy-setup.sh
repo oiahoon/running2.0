@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🏃‍♂️ Running Page 2.0 - Deployment Setup"
+echo "RUN2 Running Page 2.0 - Deployment Setup"
 echo "========================================"
 
 # Colors for output
@@ -17,15 +17,15 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_status() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}OK $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}Warning  $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}Error $1${NC}"
 }
 
 print_info() {
@@ -132,20 +132,20 @@ fi
 kill $DEV_PID 2>/dev/null || true
 
 echo ""
-echo "🎉 Setup Complete!"
+echo "Done Setup Complete!"
 echo "=================="
 echo ""
 print_info "Next steps:"
-echo "1. 🚀 Deploy to Vercel:"
+echo "1. Deploy Deploy to Vercel:"
 echo "   - Connect your GitHub repo to Vercel"
 echo "   - Set environment variables in Vercel dashboard"
 echo "   - Deploy automatically"
 echo ""
-echo "2. 📊 Set up data sync:"
+echo "2. Stats Set up data sync:"
 echo "   - Add Strava API credentials to GitHub Secrets"
 echo "   - Run sync workflow to populate database"
 echo ""
-echo "3. 🗺️  Enable maps (optional):"
+echo "3. Map  Enable maps (optional):"
 echo "   - Get Mapbox token from mapbox.com"
 echo "   - Add NEXT_PUBLIC_MAPBOX_TOKEN to environment"
 echo ""
@@ -157,4 +157,4 @@ print_info "Useful URLs:"
 echo "   http://localhost:3000           # Main app"
 echo "   http://localhost:3000/test-fixes # Test all fixes"
 echo ""
-print_status "Your Running Page 2.0 is ready! 🏃‍♂️"
+print_status "Your Running Page 2.0 is ready! RUN2"

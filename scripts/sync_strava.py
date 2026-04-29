@@ -18,7 +18,7 @@ class StravaSync:
         self.refresh_token = os.getenv('STRAVA_REFRESH_TOKEN')
         
         if not all([self.client_id, self.client_secret, self.refresh_token]):
-            print("⚠️  Missing Strava credentials, skipping sync")
+            print("Warning  Missing Strava credentials, skipping sync")
             return
             
         self.access_token = None
@@ -40,10 +40,10 @@ class StravaSync:
             response.raise_for_status()
             token_data = response.json()
             self.access_token = token_data['access_token']
-            print("✅ Access token refreshed")
+            print("OK Access token refreshed")
             return True
         except Exception as e:
-            print(f"❌ Failed to refresh token: {e}")
+            print(f"Error Failed to refresh token: {e}")
             return False
     
     def get_activities(self, page=1, per_page=200):
@@ -63,7 +63,7 @@ class StravaSync:
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"❌ Failed to fetch activities: {e}")
+            print(f"Error Failed to fetch activities: {e}")
             return []
     
     def get_activity_detail(self, activity_id):
@@ -79,7 +79,7 @@ class StravaSync:
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print(f"❌ Failed to fetch activity {activity_id}: {e}")
+            print(f"Error Failed to fetch activity {activity_id}: {e}")
             return None
     
     def sync_all_activities(self):
@@ -87,13 +87,13 @@ class StravaSync:
         if not self.refresh_access_token():
             return False
             
-        print("🔄 Starting Strava data sync...")
+        print("Sync Starting Strava data sync...")
         
         all_activities = []
         page = 1
         
         while True:
-            print(f"📄 Fetching page {page}...")
+            print(f"File Fetching page {page}...")
             activities = self.get_activities(page=page)
             
             if not activities:
@@ -109,14 +109,14 @@ class StravaSync:
             if len(activities) < 200:
                 break
         
-        print(f"📊 Found {len(all_activities)} activities")
+        print(f"Stats Found {len(all_activities)} activities")
         
         # Save activities summary
         activities_file = self.data_dir / 'strava_activities.json'
         with open(activities_file, 'w') as f:
             json.dump(all_activities, f, indent=2)
         
-        print(f"💾 Saved activities to {activities_file}")
+        print(f"Save Saved activities to {activities_file}")
         
         # Fetch detailed data for recent activities (last 30 days)
         recent_activities = []
@@ -125,7 +125,7 @@ class StravaSync:
         for activity in all_activities:
             activity_date = datetime.fromisoformat(activity['start_date'].replace('Z', '+00:00'))
             if activity_date > cutoff_date:
-                print(f"📋 Fetching details for: {activity['name']}")
+                print(f"List Fetching details for: {activity['name']}")
                 detail = self.get_activity_detail(activity['id'])
                 if detail:
                     recent_activities.append(detail)
@@ -136,7 +136,7 @@ class StravaSync:
             detailed_file = self.data_dir / 'strava_detailed.json'
             with open(detailed_file, 'w') as f:
                 json.dump(recent_activities, f, indent=2)
-            print(f"💾 Saved {len(recent_activities)} detailed activities")
+            print(f"Save Saved {len(recent_activities)} detailed activities")
         
         return True
 
@@ -144,15 +144,15 @@ def main():
     sync = StravaSync()
     
     if not hasattr(sync, 'client_id') or not sync.client_id:
-        print("⚠️  Strava credentials not configured, skipping sync")
+        print("Warning  Strava credentials not configured, skipping sync")
         return
     
     success = sync.sync_all_activities()
     
     if success:
-        print("✅ Strava sync completed successfully")
+        print("OK Strava sync completed successfully")
     else:
-        print("❌ Strava sync failed")
+        print("Error Strava sync failed")
 
 if __name__ == '__main__':
     main()

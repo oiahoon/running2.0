@@ -25,7 +25,7 @@ async function loadEnvFile() {
       }
     })
   } catch (error) {
-    console.log('⚠️  Could not load .env.local file')
+    console.log('Warning  Could not load .env.local file')
   }
 }
 
@@ -203,7 +203,7 @@ function downloadImage(url, filePath) {
 
 async function generateMap(activity) {
   if (!MAPBOX_TOKEN) {
-    console.log('❌ No MAPBOX_TOKEN found in environment')
+    console.log('Error No MAPBOX_TOKEN found in environment')
     return false
   }
   
@@ -221,17 +221,17 @@ async function generateMap(activity) {
   // Generate map URL
   const mapUrl = generateMapUrl(activity)
   if (!mapUrl) {
-    console.log(`⚠️  Could not generate URL for activity ${activity.id}`)
+    console.log(`Warning  Could not generate URL for activity ${activity.id}`)
     return false
   }
   
   try {
-    console.log(`📥 Generating map for activity ${activity.id}...`)
+    console.log(`Download Generating map for activity ${activity.id}...`)
     await downloadImage(mapUrl, mapFile)
-    console.log(`✅ Generated: ${path.basename(mapFile)}`)
+    console.log(`OK Generated: ${path.basename(mapFile)}`)
     return true
   } catch (error) {
-    console.log(`❌ Error generating map for activity ${activity.id}:`, error.message)
+    console.log(`Error Error generating map for activity ${activity.id}:`, error.message)
     return false
   }
 }
@@ -248,12 +248,12 @@ async function main() {
     if (targetActivityId) {
       targetActivities = targetActivities.filter(a => a.id.toString() === targetActivityId)
       if (targetActivities.length === 0) {
-        console.log(`❌ Activity ${targetActivityId} not found or has no GPS data`)
+        console.log(`Error Activity ${targetActivityId} not found or has no GPS data`)
         return
       }
     }
     
-    console.log(`🗺️  Found ${targetActivities.length} activities with GPS data`)
+    console.log(`Map  Found ${targetActivities.length} activities with GPS data`)
     
     let generated = 0
     let skipped = 0
@@ -271,17 +271,17 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, 100))
     }
     
-    console.log(`\n📊 Generation Summary:`)
-    console.log(`✅ Generated: ${generated}`)
-    console.log(`❌ Errors: ${errors}`)
+    console.log(`\nStats Generation Summary:`)
+    console.log(`OK Generated: ${generated}`)
+    console.log(`Error Errors: ${errors}`)
     
     // List all map files
     const mapFiles = await fs.readdir(MAPS_DIR)
     const pngFiles = mapFiles.filter(f => f.endsWith('.png'))
-    console.log(`📁 Total map files: ${pngFiles.length}`)
+    console.log(`Directory Total map files: ${pngFiles.length}`)
     
   } catch (error) {
-    console.error('❌ Error:', error)
+    console.error('Error Error:', error)
   }
 }
 

@@ -15,7 +15,7 @@ class StaticMapGenerator:
     def __init__(self):
         self.mapbox_token = os.getenv('MAPBOX_TOKEN')
         if not self.mapbox_token:
-            print("⚠️  No MAPBOX_TOKEN found, skipping map generation")
+            print("Warning  No MAPBOX_TOKEN found, skipping map generation")
             return
             
         self.data_dir = Path('../apps/web/data')
@@ -32,13 +32,13 @@ class StaticMapGenerator:
         """Load activities from JSON file"""
         activities_file = self.data_dir / 'strava_activities.json'
         if not activities_file.exists():
-            print("❌ No activities file found")
+            print("Error No activities file found")
             return []
             
         with open(activities_file, 'r') as f:
             activities = json.load(f)
             
-        print(f"📊 Loaded {len(activities)} activities")
+        print(f"Stats Loaded {len(activities)} activities")
         return activities
     
     def has_gps_data(self, activity):
@@ -192,7 +192,7 @@ class StaticMapGenerator:
                 
             return True
         except Exception as e:
-            print(f"❌ Error downloading map: {e}")
+            print(f"Error Error downloading map: {e}")
             return False
     
     def generate_maps(self):
@@ -203,7 +203,7 @@ class StaticMapGenerator:
         activities = self.load_activities()
         gps_activities = [a for a in activities if self.has_gps_data(a)]
         
-        print(f"🗺️  Found {len(gps_activities)} activities with GPS data")
+        print(f"Map  Found {len(gps_activities)} activities with GPS data")
         
         for i, activity in enumerate(gps_activities):
             activity_id = activity['id']
@@ -218,15 +218,15 @@ class StaticMapGenerator:
             # Generate map URL
             map_url = self.generate_map_url(activity)
             if not map_url:
-                print(f"⚠️  Could not generate URL for activity {activity_id}")
+                print(f"Warning  Could not generate URL for activity {activity_id}")
                 self.error_count += 1
                 continue
             
             # Download map
-            print(f"📥 Generating map for activity {activity_id} ({i+1}/{len(gps_activities)})")
+            print(f"Download Generating map for activity {activity_id} ({i+1}/{len(gps_activities)})")
             if self.download_map(map_url, map_file):
                 self.generated_count += 1
-                print(f"✅ Generated: {map_file.name}")
+                print(f"OK Generated: {map_file.name}")
             else:
                 self.error_count += 1
             
@@ -234,11 +234,11 @@ class StaticMapGenerator:
             time.sleep(self.request_delay)
         
         # Summary
-        print(f"\n📊 Map Generation Summary:")
-        print(f"✅ Generated: {self.generated_count}")
+        print(f"\nStats Map Generation Summary:")
+        print(f"OK Generated: {self.generated_count}")
         print(f"⏭️  Skipped: {self.skipped_count}")
-        print(f"❌ Errors: {self.error_count}")
-        print(f"📁 Total files: {len(list(self.maps_dir.glob('*.png')))}")
+        print(f"Error Errors: {self.error_count}")
+        print(f"Directory Total files: {len(list(self.maps_dir.glob('*.png')))}")
     
     def cleanup_orphaned_maps(self):
         """Remove maps for activities that no longer exist"""
@@ -249,20 +249,20 @@ class StaticMapGenerator:
         for map_file in self.maps_dir.glob('*.png'):
             activity_id = map_file.stem
             if activity_id not in activity_ids:
-                print(f"🗑️  Removing orphaned map: {map_file.name}")
+                print(f"Remove  Removing orphaned map: {map_file.name}")
                 map_file.unlink()
                 removed_count += 1
         
         if removed_count > 0:
-            print(f"🧹 Cleaned up {removed_count} orphaned maps")
+            print(f"Cleanup Cleaned up {removed_count} orphaned maps")
 
 def main():
     generator = StaticMapGenerator()
     
-    print("🚀 Starting static map generation...")
+    print("Deploy Starting static map generation...")
     generator.generate_maps()
     generator.cleanup_orphaned_maps()
-    print("✅ Static map generation completed!")
+    print("OK Static map generation completed!")
 
 if __name__ == "__main__":
     main()

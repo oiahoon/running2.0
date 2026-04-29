@@ -24,7 +24,7 @@ async function loadEnvFile() {
       }
     })
   } catch (error) {
-    console.log('⚠️  Could not load .env.local file')
+    console.log('Warning  Could not load .env.local file')
   }
 }
 
@@ -34,12 +34,12 @@ async function testMapGeneration() {
   const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   
   if (!MAPBOX_TOKEN) {
-    console.log('❌ No MAPBOX_TOKEN found')
+    console.log('Error No MAPBOX_TOKEN found')
     console.log('Available env vars:', Object.keys(process.env).filter(k => k.includes('MAPBOX')))
     return
   }
   
-  console.log('✅ MAPBOX_TOKEN found:', MAPBOX_TOKEN.substring(0, 20) + '...')
+  console.log('OK MAPBOX_TOKEN found:', MAPBOX_TOKEN.substring(0, 20) + '...')
   
   // Create maps directory
   const mapsDir = path.join(__dirname, '../apps/web/public/maps')
@@ -47,25 +47,25 @@ async function testMapGeneration() {
     await fs.access(mapsDir)
   } catch {
     await fs.mkdir(mapsDir, { recursive: true })
-    console.log('📁 Created maps directory')
+    console.log('Directory Created maps directory')
   }
   
   // Test URL generation
   const testUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+ff0000(104.18,30.65)/104.18,30.65,12,0/400x300@2x?access_token=${MAPBOX_TOKEN}`
   
-  console.log('🧪 Testing with simple map URL...')
+  console.log('Test Testing with simple map URL...')
   
   try {
     const testFile = path.join(mapsDir, 'test-map.png')
     await downloadImage(testUrl, testFile)
-    console.log('✅ Test map generated successfully!')
+    console.log('OK Test map generated successfully!')
     
     // Check file size
     const stats = await fs.stat(testFile)
-    console.log(`📊 File size: ${(stats.size / 1024).toFixed(1)} KB`)
+    console.log(`Stats File size: ${(stats.size / 1024).toFixed(1)} KB`)
     
   } catch (error) {
-    console.log('❌ Test failed:', error.message)
+    console.log('Error Test failed:', error.message)
   }
 }
 

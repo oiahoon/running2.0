@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="RUN2 Atlas social card">
+  <rect width="1200" height="630" fill="#080d0e"/>
+  <path d="M0 0h1200v630H0z" fill="url(#bg)"/>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0d1415"/>
+      <stop offset=".58" stop-color="#080d0e"/>
+      <stop offset="1" stop-color="#111a1b"/>
+    </linearGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0v42" fill="none" stroke="#2c3c39" stroke-width="1" opacity=".55"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)" opacity=".6"/>
+  <g transform="translate(82 78)">
+    <rect width="154" height="154" rx="36" fill="#0d1415"/>
+    <rect x="4" y="4" width="146" height="146" rx="32" fill="none" stroke="#2c3c39" stroke-width="7"/>
+    <path d="M30 100c17-42 41 25 57-16 8-19 17-30 41-34" fill="none" stroke="#5dff9d" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="30" cy="100" r="9" fill="#58d8ff"/>
+    <circle cx="128" cy="50" r="9" fill="#5dff9d"/>
+    <path d="M44 45h32c20 0 32 11 32 26 0 18-13 28-33 28H59v27" fill="none" stroke="#eef4e9" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".82"/>
+  </g>
+  <text x="82" y="315" fill="#eef4e9" font-family="Manrope, Inter, Arial, sans-serif" font-size="86" font-weight="900" letter-spacing="0">RUN2 Atlas</text>
+  <text x="88" y="372" fill="#8b9a93" font-family="Manrope, Inter, Arial, sans-serif" font-size="28" font-weight="600" letter-spacing="3.5">ROUTES, EFFORT, PACE, AND TRAINING MEMORY</text>
+  <path d="M92 482c118-52 218 38 329-4 95-38 154 47 246 0 100-50 203-40 344 8" fill="none" stroke="#5dff9d" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M92 482c118-52 218 38 329-4 95-38 154 47 246 0 100-50 203-40 344 8" fill="none" stroke="#5dff9d" stroke-width="42" stroke-linecap="round" stroke-linejoin="round" opacity=".1"/>
+  <circle cx="92" cy="482" r="14" fill="#58d8ff"/>
+  <circle cx="1011" cy="486" r="14" fill="#5dff9d"/>
+  <text x="88" y="552" fill="#eef4e9" font-family="JetBrains Mono, Menlo, monospace" font-size="24" font-weight="700" opacity=".78">run2.miaowu.org</text>
+</svg>

@@ -49,14 +49,14 @@ export function getStaticMapUrl(activityId: string, options: {
   const branch = 'master'
   const mapPath = `apps/web/public/maps/${activityId}.png`
   
-  console.log(`🔧 CDN Config - User: ${githubUser}, Prefer: ${preferCDN}`)
+  console.log(`CDN Config - User: ${githubUser}, Prefer: ${preferCDN}`)
   
   // Try preferred CDN first
   switch (preferCDN) {
     case 'jsdelivr':
       if (CDN_CONFIG.jsdelivr.enabled) {
         const url = `${CDN_CONFIG.jsdelivr.baseUrl}/${githubUser}/${repoName}@${branch}/${mapPath}`
-        console.log(`🌐 Generated jsDelivr URL: ${url}`)
+        console.log(`Generated jsDelivr URL: ${url}`)
         return url
       }
       break
@@ -103,7 +103,7 @@ export async function checkStaticMapExists(activityId: string): Promise<{
   // Check cache first
   const cached = cdnCheckCache.get(activityId)
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    console.log(`📦 Using cached CDN check for activity ${activityId}`)
+    console.log(`Using cached CDN check for activity ${activityId}`)
     return cached.result
   }
   
@@ -148,12 +148,12 @@ async function performCdnCheck(activityId: string): Promise<{
   const preferLocal = process.env.NODE_ENV === 'development' && 
                      process.env.NEXT_PUBLIC_PREFER_LOCAL_MAPS === 'true'
   
-  console.log(`🔧 Environment: ${process.env.NODE_ENV}, preferCDN: ${preferCDN}, preferLocal: ${preferLocal}`)
+  console.log(`Environment: ${process.env.NODE_ENV}, preferCDN: ${preferCDN}, preferLocal: ${preferLocal}`)
   
   // Always try CDN first in production or when explicitly preferred
   if (preferCDN || isProduction) {
     const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
-    console.log(`🌐 Trying CDN first (production mode): ${cdnUrl}`)
+    console.log(`Trying CDN first (production mode): ${cdnUrl}`)
     
     try {
       const controller = new AbortController()
@@ -166,7 +166,7 @@ async function performCdnCheck(activityId: string): Promise<{
       
       clearTimeout(timeoutId)
       
-      console.log(`📡 CDN response: ${response.status} ${response.statusText}`)
+      console.log(`CDN response: ${response.status} ${response.statusText}`)
       
       if (response.ok) {
         return {
@@ -175,20 +175,20 @@ async function performCdnCheck(activityId: string): Promise<{
           source: 'cdn'
         }
       } else {
-        console.log(`❌ CDN returned ${response.status}, will try local fallback`)
+        console.log(`CDN returned ${response.status}, will try local fallback`)
       }
     } catch (error) {
       if (getErrorName(error) !== 'AbortError') {
-        console.log(`❌ CDN request failed for ${activityId}:`, getErrorMessage(error))
+        console.log(`CDN request failed for ${activityId}:`, getErrorMessage(error))
       } else {
-        console.log(`⏰ CDN request timeout for ${activityId}`)
+        console.log(`CDN request timeout for ${activityId}`)
       }
     }
     
     // In CDN-first mode, still try local as fallback
     if (!preferLocal) {
       const localUrl = `/maps/${activityId}.png`
-      console.log(`🏠 Trying local as CDN fallback: ${localUrl}`)
+      console.log(`Trying local as CDN fallback: ${localUrl}`)
       
       try {
         const controller = new AbortController()
@@ -201,7 +201,7 @@ async function performCdnCheck(activityId: string): Promise<{
         
         clearTimeout(timeoutId)
         
-        console.log(`🏠 Local fallback response: ${response.status} ${response.statusText}`)
+        console.log(`Local fallback response: ${response.status} ${response.statusText}`)
         
         if (response.ok) {
           return {
@@ -211,7 +211,7 @@ async function performCdnCheck(activityId: string): Promise<{
           }
         }
       } catch (error) {
-        console.log(`❌ Local fallback failed for ${activityId}:`, getErrorMessage(error))
+        console.log(`Local fallback failed for ${activityId}:`, getErrorMessage(error))
       }
     }
     
@@ -225,10 +225,10 @@ async function performCdnCheck(activityId: string): Promise<{
   
   // Development mode with local preference
   if (preferLocal) {
-    console.log(`🏠 Development mode: trying local first`)
+    console.log(`Development mode: trying local first`)
     
     const localUrl = `/maps/${activityId}.png`
-    console.log(`🏠 Testing local URL: ${localUrl}`)
+    console.log(`Testing local URL: ${localUrl}`)
     
     try {
       const controller = new AbortController()
@@ -241,7 +241,7 @@ async function performCdnCheck(activityId: string): Promise<{
       
       clearTimeout(timeoutId)
       
-      console.log(`🏠 Local response: ${response.status} ${response.statusText}`)
+      console.log(`Local response: ${response.status} ${response.statusText}`)
       
       if (response.ok) {
         return {
@@ -251,12 +251,12 @@ async function performCdnCheck(activityId: string): Promise<{
         }
       }
     } catch (error) {
-      console.log(`❌ Local check failed for ${activityId}:`, getErrorMessage(error))
+      console.log(`Local check failed for ${activityId}:`, getErrorMessage(error))
     }
     
     // Fallback to CDN in development
     const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
-    console.log(`🌐 Development fallback to CDN: ${cdnUrl}`)
+    console.log(`Development fallback to CDN: ${cdnUrl}`)
     
     try {
       const controller = new AbortController()
@@ -269,7 +269,7 @@ async function performCdnCheck(activityId: string): Promise<{
       
       clearTimeout(timeoutId)
       
-      console.log(`📡 CDN fallback response: ${response.status} ${response.statusText}`)
+      console.log(`CDN fallback response: ${response.status} ${response.statusText}`)
       
       return {
         exists: response.ok,
@@ -277,7 +277,7 @@ async function performCdnCheck(activityId: string): Promise<{
         source: response.ok ? 'cdn' : 'local'
       }
     } catch (error) {
-      console.log(`❌ CDN fallback failed for ${activityId}:`, getErrorMessage(error))
+      console.log(`CDN fallback failed for ${activityId}:`, getErrorMessage(error))
       return {
         exists: false,
         url: localUrl,
@@ -287,7 +287,7 @@ async function performCdnCheck(activityId: string): Promise<{
   }
   
   // Default fallback (shouldn't reach here in normal cases)
-  console.log(`⚠️ Unexpected code path reached for ${activityId}`)
+  console.log(`Unexpected code path reached for ${activityId}`)
   return {
     exists: false,
     url: `/maps/${activityId}.png`,
@@ -305,11 +305,11 @@ export function preloadStaticMaps(activityIds: string[], maxConcurrent = 3): Pro
     return new Promise<void>((resolve) => {
       const img = new Image()
       img.onload = () => {
-        console.log(`✅ Preloaded map for activity ${activityId}`)
+        console.log(`Preloaded map for activity ${activityId}`)
         resolve()
       }
       img.onerror = () => {
-        console.log(`⚠️ Failed to preload map for activity ${activityId}`)
+        console.log(`Failed to preload map for activity ${activityId}`)
         resolve() // Don't fail the whole batch
       }
       img.src = mapUrl

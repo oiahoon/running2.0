@@ -508,7 +508,7 @@ section {
 }
 
 .feature-list li::before {
-  content: '✓';
+  content: 'Done';
   position: absolute;
   left: 0;
   color: var(--success-color);

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface CalendarData {
   date: string
@@ -114,7 +115,7 @@ export default function CalendarHeatmap({
         style={{ height }}
       >
         <div className="text-center">
-          <div className="text-4xl mb-2">📅</div>
+          <AtlasIcon name="calendar" className="mx-auto mb-2 h-10 w-10 text-[var(--route-green)]" />
           <p className="text-gray-500 dark:text-gray-400">No activity data for {year}</p>
         </div>
       </div>

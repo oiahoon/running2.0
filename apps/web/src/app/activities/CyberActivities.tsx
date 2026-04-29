@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useActivities } from '@/lib/hooks/useActivities'
-import { formatDistance, formatDuration, formatPace, getActivityIcon, Activity } from '@/lib/database/models/Activity'
+import { formatDistance, formatDuration, formatPace, Activity } from '@/lib/database/models/Activity'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 import { CyberCard, CyberCardContent, CyberCardHeader } from '@/components/ui/CyberCard'
 import { CyberButton, CyberPrimaryButton } from '@/components/ui/CyberButton'
@@ -11,6 +11,7 @@ import { CyberInput, CyberSearchInput } from '@/components/ui/CyberInput'
 import { CyberActivityBadge, CyberMetricBadge, CyberStatusBadge } from '@/components/ui/CyberBadge'
 import { CyberBreadcrumb } from '@/components/ui/CyberNavigation'
 import { CyberLoading } from '@/components/ui/CyberLoading'
+import { ActivityIcon, AtlasIcon } from '@/components/icons/AtlasIcon'
 
 function ActivityCard({ activity, index }: { activity: Activity; index: number }) {
   return (
@@ -36,7 +37,7 @@ function ActivityCard({ activity, index }: { activity: Activity; index: number }
                   <span>{new Date(activity.start_date).toLocaleDateString()}</span>
                   <span>{new Date(activity.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   {activity.location_city && (
-                    <span>📍 {activity.location_city}</span>
+                    <span><AtlasIcon name="pin" className="mr-1 inline h-3.5 w-3.5" />{activity.location_city}</span>
                   )}
                 </div>
               </div>
@@ -103,7 +104,7 @@ function ActivityCard({ activity, index }: { activity: Activity; index: number }
               )}
             </div>
             <div className="text-xs text-gray-500 font-mono">
-              {getActivityIcon(activity.type)} {activity.type.toUpperCase()}
+              <ActivityIcon type={activity.type} className="mr-1 inline h-3.5 w-3.5" /> {activity.type.toUpperCase()}
             </div>
           </div>
         </CyberCardContent>
@@ -169,7 +170,7 @@ export function CyberActivities() {
         <CyberCard variant="terminal" className="text-center py-12">
           <CyberCardContent>
             <div className="terminal-text">
-              <div className="text-2xl mb-4">⚠️</div>
+              <AtlasIcon name="warning" className="mx-auto mb-4 h-8 w-8 text-red-400" />
               <div className="text-lg font-mono text-red-400">SYSTEM_ERROR</div>
               <div className="text-sm mt-2 opacity-80">
                 {error.message}
@@ -223,7 +224,7 @@ export function CyberActivities() {
           <CyberCardHeader
             title="Control Panel"
             subtitle="Filter & Search Operations"
-            icon="🔍"
+            icon={<AtlasIcon name="search" className="h-5 w-5" />}
           />
           <CyberCardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -345,7 +346,7 @@ export function CyberActivities() {
           <CyberCard variant="terminal" className="text-center py-12">
             <CyberCardContent>
               <div className="terminal-text">
-                <div className="text-2xl mb-4">⚠️</div>
+                <AtlasIcon name="warning" className="mx-auto mb-4 h-8 w-8" />
                 <div className="text-lg font-mono">NO_ACTIVITIES_FOUND</div>
                 <div className="text-sm mt-2 opacity-80">
                   ADJUST_SEARCH_PARAMETERS_OR_SYNC_NEW_DATA

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ActivityIcon, AtlasIcon, type AtlasIconName } from '@/components/icons/AtlasIcon'
 
 interface MapControlsProps {
   mapStyle: string
@@ -15,12 +16,12 @@ interface MapControlsProps {
 }
 
 const MAP_STYLES = [
-  { id: 'streets', name: 'Streets', icon: '🗺️' },
-  { id: 'satellite', name: 'Satellite', icon: '🛰️' },
-  { id: 'outdoors', name: 'Outdoors', icon: '🏔️' },
-  { id: 'dark', name: 'Dark', icon: '🌙' },
-  { id: 'light', name: 'Light', icon: '☀️' },
-]
+  { id: 'streets', name: 'Streets', icon: 'map' },
+  { id: 'satellite', name: 'Satellite', icon: 'satellite' },
+  { id: 'outdoors', name: 'Outdoors', icon: 'elevation' },
+  { id: 'dark', name: 'Dark', icon: 'moon' },
+  { id: 'light', name: 'Light', icon: 'sun' },
+] satisfies Array<{ id: string; name: string; icon: AtlasIconName }>
 
 export default function MapControls({
   mapStyle,
@@ -90,7 +91,7 @@ export default function MapControls({
                       : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                   }`}
                 >
-                  <span className="text-lg mb-1">{style.icon}</span>
+                  <AtlasIcon name={style.icon} className="mb-1 h-5 w-5" />
                   <span className="text-xs text-gray-600 dark:text-gray-400">{style.name}</span>
                 </button>
               ))}
@@ -111,7 +112,7 @@ export default function MapControls({
                   className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  🔥 Show Heatmap
+                  <AtlasIcon name="heatmap" className="mr-1 inline h-4 w-4" /> Show Heatmap
                 </span>
               </label>
               <label className="flex items-center">
@@ -122,7 +123,7 @@ export default function MapControls({
                   className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  📍 Cluster Markers
+                  <AtlasIcon name="pin" className="mr-1 inline h-4 w-4" /> Cluster Markers
                 </span>
               </label>
             </div>
@@ -159,7 +160,7 @@ export default function MapControls({
                     className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                   />
                   <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    {getActivityIcon(type)} {type}
+                    <ActivityIcon type={type} className="mr-1 inline h-4 w-4" /> {type}
                   </span>
                 </label>
               ))}
@@ -173,27 +174,13 @@ export default function MapControls({
             onClick={() => window.location.reload()} // Temporary - will be replaced with proper fit bounds
             className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            🎯 Center Map
+            <AtlasIcon name="center" className="mr-2 h-4 w-4" /> Center Map
           </button>
           <button className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-            📤 Export
+            <AtlasIcon name="export" className="mr-2 h-4 w-4" /> Export
           </button>
         </div>
       </div>
     </div>
   )
-}
-
-function getActivityIcon(type: string): string {
-  const icons: Record<string, string> = {
-    Run: '🏃',
-    Walk: '🚶',
-    Ride: '🚴',
-    Swim: '🏊',
-    Hike: '🥾',
-    WeightTraining: '🏋️',
-    Yoga: '🧘',
-    Other: '⚡',
-  }
-  return icons[type] || '⚡'
 }

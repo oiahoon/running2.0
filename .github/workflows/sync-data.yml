@@ -145,7 +145,7 @@ jobs:
         git diff --staged --name-only
         
         # Commit with detailed message
-        COMMIT_MSG="🔄 Auto-sync Strava data with static maps - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        COMMIT_MSG="Sync Auto-sync Strava data with static maps - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         
         if [ -f "apps/web/data/sync-report.md" ]; then
           echo "$COMMIT_MSG" > commit_body.txt
@@ -160,16 +160,16 @@ jobs:
         
     - name: Summary
       run: |
-        echo "✅ Strava data sync completed successfully"
+        echo "OK Strava data sync completed successfully"
         if [ -f "apps/web/data/sync-report.md" ]; then
-          echo "📊 Sync Report:"
+          echo "Stats Sync Report:"
           cat apps/web/data/sync-report.md
         fi
         
         # Add to GitHub Actions summary
         echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Date**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-        echo "- **Status**: ✅ Completed" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: OK Completed" >> $GITHUB_STEP_SUMMARY
         
         if [ -f "apps/web/data/sync-report.md" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY

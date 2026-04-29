@@ -173,9 +173,9 @@ function migrateStravaData() {
     try {
       const data = JSON.parse(fs.readFileSync(activitiesFile, 'utf8'));
       activities = activities.concat(data);
-      console.log(`📄 Loaded ${data.length} basic activities`);
+      console.log(`File Loaded ${data.length} basic activities`);
     } catch (error) {
-      console.error('❌ Error loading basic activities:', error.message);
+      console.error('Error Error loading basic activities:', error.message);
     }
   }
   
@@ -196,14 +196,14 @@ function migrateStravaData() {
         return detailed || activity;
       });
       
-      console.log(`📋 Enhanced with ${data.length} detailed activities`);
+      console.log(`List Enhanced with ${data.length} detailed activities`);
     } catch (error) {
-      console.error('❌ Error loading detailed activities:', error.message);
+      console.error('Error Error loading detailed activities:', error.message);
     }
   }
   
   if (activities.length === 0) {
-    console.log('⚠️  No Strava data found to migrate');
+    console.log('Warning  No Strava data found to migrate');
     return;
   }
   
@@ -254,23 +254,23 @@ function migrateStravaData() {
           }
         }
       } catch (error) {
-        console.error(`❌ Error processing activity ${activity.id}:`, error.message);
+        console.error(`Error Error processing activity ${activity.id}:`, error.message);
       }
     }
     
     return { inserted, updated };
   });
   
-  console.log('🔄 Migrating Strava activities to database...');
+  console.log('Sync Migrating Strava activities to database...');
   const result = insertMany(activities);
   
-  console.log(`✅ Migration completed:`);
+  console.log(`OK Migration completed:`);
   console.log(`   - Inserted: ${result.inserted} new activities`);
   console.log(`   - Updated: ${result.updated} existing activities`);
   
   // Show final stats
   const totalCount = db.prepare('SELECT COUNT(*) as count FROM activities').get();
-  console.log(`📊 Total activities in database: ${totalCount.count}`);
+  console.log(`Stats Total activities in database: ${totalCount.count}`);
 
   const now = new Date().toISOString();
   db.prepare(`
@@ -322,11 +322,11 @@ function migrateStravaData() {
 
 function main() {
   try {
-    console.log('🚀 Starting Strava data migration...');
+    console.log('Deploy Starting Strava data migration...');
     migrateStravaData();
-    console.log('✅ Migration completed successfully');
+    console.log('OK Migration completed successfully');
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Error Migration failed:', error);
     process.exit(1);
   } finally {
     db.close();

@@ -17,6 +17,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
+import { Run2Logo } from '@/components/icons/Run2Logo'
 
 const navGroups = [
   {
@@ -78,13 +79,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pb-5 pt-6">
-        <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface-raised)] text-sm font-black text-[var(--route-green)]">R2</span>
-          <div>
-            <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">RUN2 Atlas</div>
-            <div className="text-xs text-[var(--text-muted)]">Every run leaves a shape</div>
-          </div>
-        </Link>
+        <Run2Logo onClick={onNavigate} />
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">

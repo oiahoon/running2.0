@@ -20,12 +20,41 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://run2.miaowu.org'),
   title: {
-    template: '%s - Running Page 2.0',
-    default: 'Running Page 2.0',
+    template: '%s - RUN2 Atlas',
+    default: 'RUN2 Atlas',
   },
   description:
-    'A premium running intelligence workspace with analytics, maps, and training operations.',
+    'A route-first running intelligence workspace with analytics, maps, sync operations, and share-ready training artifacts.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  openGraph: {
+    title: 'RUN2 Atlas',
+    description: 'Routes, effort, pace, and training memory in one data-first running atlas.',
+    url: 'https://run2.miaowu.org',
+    siteName: 'RUN2 Atlas',
+    images: [
+      {
+        url: '/brand/run2-social-card.png',
+        width: 1200,
+        height: 630,
+        alt: 'RUN2 Atlas route intelligence social card',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RUN2 Atlas',
+    description: 'Routes, effort, pace, and training memory in one data-first running atlas.',
+    images: ['/brand/run2-social-card.png'],
+  },
 }
 
 export default function RootLayout({

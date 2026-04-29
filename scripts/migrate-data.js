@@ -43,14 +43,14 @@ This script will:
     process.exit(1);
   }
   
-  console.log('🚀 Starting Running Page 2.0 data migration...');
-  console.log(`📂 Original database: ${originalDbPath}`);
+  console.log('Deploy Starting Running Page 2.0 data migration...');
+  console.log(`Original database: ${originalDbPath}`);
   
   try {
     // Run the migration
     await migrateFromOriginalDatabase(originalDbPath);
     
-    console.log('✅ Migration completed successfully!');
+    console.log('OK Migration completed successfully!');
     console.log('');
     console.log('Next steps:');
     console.log('1. Start the development server: npm run dev');
@@ -58,7 +58,7 @@ This script will:
     console.log('3. Set up Strava integration for new data sync');
     
   } catch (error) {
-    console.error('❌ Migration failed:', error.message);
+    console.error('Error Migration failed:', error.message);
     console.error('');
     console.error('Please check the error above and try again.');
     console.error('If the issue persists, please report it on GitHub.');

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { clsx } from 'clsx'
+import { ActivityIcon } from '@/components/icons/AtlasIcon'
 
 export interface CyberBadgeProps {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
@@ -113,38 +114,38 @@ export function CyberActivityBadge({
 }: Omit<CyberBadgeProps, 'variant'> & {
   type: string // 支持所有活动类型
 }) {
-  const typeConfig: Record<string, { variant: CyberBadgeProps['variant'], icon: string, color: string }> = {
+  const typeConfig: Record<string, { variant: CyberBadgeProps['variant'], color: string }> = {
     // 跑步相关
-    run: { variant: 'success', icon: '🏃', color: 'text-neonGreen-500' },
-    running: { variant: 'success', icon: '🏃', color: 'text-neonGreen-500' },
+    run: { variant: 'success', color: 'text-neonGreen-500' },
+    running: { variant: 'success', color: 'text-neonGreen-500' },
     
     // 骑行相关
-    ride: { variant: 'primary', icon: '🚴', color: 'text-neonCyan-400' },
-    cycling: { variant: 'primary', icon: '🚴', color: 'text-neonCyan-400' },
+    ride: { variant: 'primary', color: 'text-neonCyan-400' },
+    cycling: { variant: 'primary', color: 'text-neonCyan-400' },
     
     // 游泳相关
-    swim: { variant: 'info', icon: '🏊', color: 'text-neonPurple-500' },
-    swimming: { variant: 'info', icon: '🏊', color: 'text-neonPurple-500' },
+    swim: { variant: 'info', color: 'text-neonPurple-500' },
+    swimming: { variant: 'info', color: 'text-neonPurple-500' },
     
     // 步行相关
-    walk: { variant: 'warning', icon: '🚶', color: 'text-neonOrange-500' },
-    walking: { variant: 'warning', icon: '🚶', color: 'text-neonOrange-500' },
+    walk: { variant: 'warning', color: 'text-neonOrange-500' },
+    walking: { variant: 'warning', color: 'text-neonOrange-500' },
     
     // 徒步相关
-    hike: { variant: 'success', icon: '🥾', color: 'text-neonGreen-500' },
-    hiking: { variant: 'success', icon: '🥾', color: 'text-neonGreen-500' },
+    hike: { variant: 'success', color: 'text-neonGreen-500' },
+    hiking: { variant: 'success', color: 'text-neonGreen-500' },
     
     // 健身相关
-    workout: { variant: 'danger', icon: '💪', color: 'text-red-400' },
-    weighttraining: { variant: 'danger', icon: '🏋️', color: 'text-red-400' },
+    workout: { variant: 'danger', color: 'text-red-400' },
+    weighttraining: { variant: 'danger', color: 'text-red-400' },
     
     // 其他运动
-    elliptical: { variant: 'secondary', icon: '🏃‍♀️', color: 'text-neonPink-500' },
-    rowing: { variant: 'info', icon: '🚣', color: 'text-neonPurple-500' },
-    standuppaddling: { variant: 'primary', icon: '🏄', color: 'text-neonCyan-400' },
+    elliptical: { variant: 'secondary', color: 'text-neonPink-500' },
+    rowing: { variant: 'info', color: 'text-neonPurple-500' },
+    standuppaddling: { variant: 'primary', color: 'text-neonCyan-400' },
     
     // 默认
-    other: { variant: 'secondary', icon: '⚡', color: 'text-neonPink-500' }
+    other: { variant: 'secondary', color: 'text-neonPink-500' }
   }
 
   // 将类型转换为小写以匹配配置
@@ -159,7 +160,7 @@ export function CyberActivityBadge({
       className={clsx('gap-1', className)}
       {...props}
     >
-      <span className={config.color}>{config.icon}</span>
+      <ActivityIcon type={type} className={clsx('h-3.5 w-3.5', config.color)} />
       {type.charAt(0).toUpperCase() + type.slice(1)}
     </CyberBadge>
   )

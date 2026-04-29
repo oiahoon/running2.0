@@ -6,11 +6,12 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import { CyberStatusBadge } from './CyberBadge'
+import { AtlasIcon, type AtlasIconName } from '@/components/icons/AtlasIcon'
 
 interface NavItem {
   name: string
   href: string
-  icon: string
+  icon: AtlasIconName
   description?: string
   badge?: string
 }
@@ -19,37 +20,37 @@ const navItems: NavItem[] = [
   {
     name: 'Dashboard',
     href: '/dashboard',
-    icon: '🏠',
+    icon: 'chart',
     description: 'System Overview'
   },
   {
     name: 'Activities',
     href: '/activities',
-    icon: '🏃',
+    icon: 'run',
     description: 'Training Log'
   },
   {
     name: 'Statistics',
     href: '/stats',
-    icon: '📊',
+    icon: 'records',
     description: 'Data Analysis'
   },
   {
     name: 'Map',
     href: '/map',
-    icon: '🗺️',
+    icon: 'map',
     description: 'Route Visualization'
   },
   {
     name: 'Sync',
     href: '/sync',
-    icon: '🔄',
+    icon: 'sync',
     description: 'Data Synchronization'
   },
   {
     name: 'Debug',
     href: '/debug',
-    icon: '🔧',
+    icon: 'warning',
     description: 'System Diagnostics'
   }
 ]
@@ -138,10 +139,10 @@ export function CyberSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     
                     {/* 图标 */}
                     <div className={clsx(
-                      'text-xl transition-all duration-300',
+                      'transition-all duration-300',
                       isActive ? 'scale-110' : 'group-hover:scale-105'
                     )}>
-                      {item.icon}
+                      <AtlasIcon name={item.icon} className="h-5 w-5" />
                     </div>
                     
                     {/* 文本 */}

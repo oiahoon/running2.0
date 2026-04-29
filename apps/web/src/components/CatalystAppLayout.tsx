@@ -3,6 +3,8 @@
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useUserInfo } from '@/lib/hooks/useUserInfo'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
+import { Run2Mark } from '@/components/icons/Run2Logo'
 import MobileNavigation from './MobileNavigation'
 import {
   SidebarLayout,
@@ -114,7 +116,7 @@ function ThemeToggle() {
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       aria-label="Toggle theme"
     >
-      {resolvedTheme === 'dark' ? '🌞' : '🌙'}
+      <AtlasIcon name={resolvedTheme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
     </Button>
   )
 }
@@ -155,7 +157,7 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
                       <DropdownLabel>Sync Data</DropdownLabel>
                     </DropdownItem>
                     <DropdownItem href="https://github.com/oiahoon/running2.0" target="_blank">
-                      <DropdownLabel>🔗 GitHub Repository</DropdownLabel>
+                      <DropdownLabel>GitHub Repository</DropdownLabel>
                     </DropdownItem>
                     <DropdownDivider />
                     <DropdownItem href="/logout">
@@ -170,10 +172,8 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
             <Sidebar>
               <SidebarHeader>
                 <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 text-white">
-                    🏃‍♂️
-                  </div>
-                  <SidebarLabel>Running Page 2.0</SidebarLabel>
+                  <Run2Mark className="size-8" />
+                  <SidebarLabel>RUN2 Atlas</SidebarLabel>
                 </div>
               </SidebarHeader>
 
@@ -259,7 +259,7 @@ export function CatalystAppLayout({ children }: { children: React.ReactNode }) {
                       <DropdownLabel>Sync Data</DropdownLabel>
                     </DropdownItem>
                     <DropdownItem href="https://github.com/oiahoon/running2.0" target="_blank">
-                      <DropdownLabel>🔗 GitHub Repository</DropdownLabel>
+                      <DropdownLabel>GitHub Repository</DropdownLabel>
                     </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>

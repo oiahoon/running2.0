@@ -17,6 +17,7 @@ Read this file first. It is the routing layer, not the full context.
 Use the smallest set that matches the task:
 
 - Product/UI work: [product-ui.md](product-ui.md)
+- Iconography and brand symbols: [iconography.md](iconography.md)
 - API, database, hooks, models: [data-api.md](data-api.md)
 - Sync scripts, maps, Strava, GitHub Actions: [sync-ops.md](sync-ops.md)
 - Deployment, Vercel, CI, runtime: [deployment-ci.md](deployment-ci.md)
@@ -52,4 +53,3 @@ Notes:
 - `apps/web/public/maps/`
 - SQLite database binaries in `apps/web/data/` or `apps/web/public/`
 - Template/doc-site components unless the task touches them.
-

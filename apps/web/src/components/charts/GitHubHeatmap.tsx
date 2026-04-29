@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ActivityIcon, AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface HeatmapData {
   date: string
@@ -180,7 +181,7 @@ export default function GitHubHeatmap({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            🔥 Activity Heatmap
+            <AtlasIcon name="heatmap" className="mr-2 inline h-5 w-5 text-[var(--route-green)]" /> Activity Heatmap
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {totalActivities} activities • {(totalDistance / 1000).toFixed(0)}km in {selectedYear}
@@ -315,10 +316,10 @@ export default function GitHubHeatmap({
                     {(hoveredCell.distance / 1000).toFixed(1)}km
                   </div>
                   <div className="text-gray-300 text-xs">
-                    🏃‍♂️ {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
+                    <ActivityIcon type="Run" className="mr-1 inline h-3.5 w-3.5" /> {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
                   </div>
                   <div className="text-gray-400 text-xs mt-1 border-t border-gray-600 pt-1">
-                    💡 Intensity based on distance
+                    Distance-based intensity
                   </div>
                 </>
               ) : (
@@ -327,7 +328,7 @@ export default function GitHubHeatmap({
                     {hoveredCell.count} {hoveredCell.count === 1 ? 'activity' : 'activities'}
                   </div>
                   <div className="text-gray-400 text-xs mt-1 border-t border-gray-600 pt-1">
-                    💡 Non-distance activity
+                    Non-distance activity
                   </div>
                 </>
               )}

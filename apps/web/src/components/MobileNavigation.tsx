@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useUserInfo } from '@/lib/hooks/useUserInfo'
+import { Run2Mark } from '@/components/icons/Run2Logo'
 import { Avatar } from './catalyst'
 
 // Icons
@@ -119,11 +120,9 @@ export default function MobileNavigation({ className = '' }: MobileNavigationPro
 
           {/* Logo/Title - Center */}
           <div className="flex items-center space-x-3">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 text-white">
-              🏃‍♂️
-            </div>
+            <Run2Mark className="size-8" />
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Running Page 2.0
+              RUN2 Atlas
             </h1>
           </div>
 
@@ -142,11 +141,9 @@ export default function MobileNavigation({ className = '' }: MobileNavigationPro
             {/* Menu Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 text-white">
-                  🏃‍♂️
-                </div>
+                <Run2Mark className="size-8" />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Running Page 2.0
+                  RUN2 Atlas
                 </h2>
               </div>
               <button

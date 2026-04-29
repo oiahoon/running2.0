@@ -26,8 +26,8 @@ Example:
     process.exit(1);
   }
   
-  console.log('🚀 Starting Running Page 2.0 data migration...');
-  console.log(`📂 Original database: ${originalDbPath}`);
+  console.log('Deploy Starting Running Page 2.0 data migration...');
+  console.log(`Original database: ${originalDbPath}`);
   
   try {
     // Create new database
@@ -49,7 +49,7 @@ Example:
     newDb.pragma('journal_mode = WAL');
     newDb.exec(schema);
     
-    console.log('✅ New database initialized');
+    console.log('OK New database initialized');
     
     // Open original database
     const originalDb = new Database(originalDbPath, { readonly: true });
@@ -59,7 +59,7 @@ Example:
       SELECT * FROM activities ORDER BY start_date
     `).all();
     
-    console.log(`📊 Found ${originalActivities.length} activities to migrate`);
+    console.log(`Stats Found ${originalActivities.length} activities to migrate`);
     
     // Prepare insert statement for new database
     const insertActivity = newDb.prepare(`
@@ -138,23 +138,23 @@ Example:
       const batch = originalActivities.slice(i, i + batchSize);
       transaction(batch);
       migrated += batch.length;
-      console.log(`📈 Migrated ${migrated}/${originalActivities.length} activities`);
+      console.log(`Trend Migrated ${migrated}/${originalActivities.length} activities`);
     }
     
     // Close databases
     originalDb.close();
     newDb.close();
     
-    console.log('✅ Migration completed successfully!');
-    console.log(`📊 Migrated ${migrated} activities`);
-    console.log(`💾 New database: ${newDbPath}`);
+    console.log('OK Migration completed successfully!');
+    console.log(`Stats Migrated ${migrated} activities`);
+    console.log(`Save New database: ${newDbPath}`);
     console.log('');
     console.log('Next steps:');
     console.log('1. Start the development server: npm run dev');
     console.log('2. Visit http://localhost:3000 to see your migrated data');
     
   } catch (error) {
-    console.error('❌ Migration failed:', error.message);
+    console.error('Error Migration failed:', error.message);
     console.error(error.stack);
     process.exit(1);
   }

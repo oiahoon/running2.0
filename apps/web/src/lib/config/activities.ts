@@ -14,7 +14,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Run': {
     type: 'Run',
     displayName: 'Running',
-    icon: '🏃‍♂️',
+    icon: 'run',
     color: '#ef4444', // red-500
     showOnMap: true,
     showTrack: true,
@@ -23,7 +23,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Walk': {
     type: 'Walk',
     displayName: 'Walking',
-    icon: '🚶‍♂️',
+    icon: 'walk',
     color: '#10b981', // emerald-500
     showOnMap: true,
     showTrack: true,
@@ -32,7 +32,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Hike': {
     type: 'Hike',
     displayName: 'Hiking',
-    icon: '🥾',
+    icon: 'hike',
     color: '#f59e0b', // amber-500
     showOnMap: true,
     showTrack: true,
@@ -41,7 +41,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Ride': {
     type: 'Ride',
     displayName: 'Cycling',
-    icon: '🚴‍♂️',
+    icon: 'ride',
     color: '#3b82f6', // blue-500
     showOnMap: true,
     showTrack: true,
@@ -50,7 +50,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Swim': {
     type: 'Swim',
     displayName: 'Swimming',
-    icon: '🏊‍♂️',
+    icon: 'swim',
     color: '#06b6d4', // cyan-500
     showOnMap: false,
     showTrack: false,
@@ -59,7 +59,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'WeightTraining': {
     type: 'WeightTraining',
     displayName: 'Weight Training',
-    icon: '🏋️‍♂️',
+    icon: 'strength',
     color: '#8b5cf6', // violet-500
     showOnMap: false,
     showTrack: false,
@@ -68,7 +68,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Yoga': {
     type: 'Yoga',
     displayName: 'Yoga',
-    icon: '🧘‍♀️',
+    icon: 'yoga',
     color: '#ec4899', // pink-500
     showOnMap: false,
     showTrack: false,
@@ -77,7 +77,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
   'Workout': {
     type: 'Workout',
     displayName: 'Workout',
-    icon: '💪',
+    icon: 'workout',
     color: '#f97316', // orange-500
     showOnMap: false,
     showTrack: false,
@@ -104,7 +104,7 @@ export function getActivityConfig(type: string): ActivityConfig {
   return ACTIVITY_CONFIGS[type] || {
     type,
     displayName: type,
-    icon: '🏃‍♂️',
+    icon: 'other',
     color: '#6b7280', // gray-500
     showOnMap: false,
     showTrack: false,

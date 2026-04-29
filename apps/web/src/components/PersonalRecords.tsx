@@ -1,6 +1,7 @@
 'use client'
 
 import { formatDistance, formatDuration, formatPace } from '@/lib/database/models/Activity'
+import { AtlasIcon, type AtlasIconName } from '@/components/icons/AtlasIcon'
 
 interface PersonalRecord {
   longestRun?: {
@@ -40,7 +41,7 @@ function RecordCard({
   title: string
   value: string
   subtitle: string
-  icon: string
+  icon: AtlasIconName
   activityName?: string
   date?: string
   isLoading?: boolean
@@ -67,7 +68,7 @@ function RecordCard({
       <div className="flex items-center">
         <div className="flex-shrink-0">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl">
-            {icon}
+            <AtlasIcon name={icon} className="h-6 w-6" />
           </div>
         </div>
         <div className="ml-4 flex-1">
@@ -97,12 +98,19 @@ function RecordCard({
 }
 
 export default function PersonalRecords({ records, isLoading = false }: PersonalRecordsProps) {
-  const recordsData = [
+  const recordsData: Array<{
+    title: string
+    value: string
+    subtitle: string
+    icon: AtlasIconName
+    activityName?: string
+    date?: string
+  }> = [
     {
       title: 'Longest Distance',
       value: records.longestRun ? formatDistance(records.longestRun.distance) : 'No data',
       subtitle: 'Single activity',
-      icon: '🏃‍♂️',
+      icon: 'distance',
       activityName: records.longestRun?.name,
       date: records.longestRun?.start_date,
     },
@@ -110,7 +118,7 @@ export default function PersonalRecords({ records, isLoading = false }: Personal
       title: 'Fastest Pace',
       value: records.fastestPace ? formatPace(records.fastestPace.pace_per_km) : 'No data',
       subtitle: 'Per kilometer',
-      icon: '⚡',
+      icon: 'pace',
       activityName: records.fastestPace?.name,
       date: records.fastestPace?.start_date,
     },
@@ -118,7 +126,7 @@ export default function PersonalRecords({ records, isLoading = false }: Personal
       title: 'Most Elevation',
       value: records.mostElevation ? `${Math.round(records.mostElevation.total_elevation_gain)}m` : 'No data',
       subtitle: 'Single activity',
-      icon: '⛰️',
+      icon: 'elevation',
       activityName: records.mostElevation?.name,
       date: records.mostElevation?.start_date,
     },
@@ -128,7 +136,7 @@ export default function PersonalRecords({ records, isLoading = false }: Personal
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-          🏆 Personal Records
+          <AtlasIcon name="records" className="mr-2 inline h-5 w-5 text-[var(--route-green)]" /> Personal Records
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recordsData.map((record, index) => (
@@ -149,7 +157,7 @@ export default function PersonalRecords({ records, isLoading = false }: Personal
       {/* Additional Records */}
       <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
-          📊 More Records
+          <AtlasIcon name="chart" className="mr-2 inline h-4 w-4 text-[var(--route-green)]" /> More Records
         </h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="space-y-2">

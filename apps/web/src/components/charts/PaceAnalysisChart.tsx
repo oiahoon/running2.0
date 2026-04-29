@@ -1,6 +1,7 @@
 'use client'
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface PaceData {
   date: string
@@ -19,7 +20,7 @@ export default function PaceAnalysisChart({ data, height = 300 }: PaceAnalysisCh
     return (
       <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-2">⚡</div>
+          <AtlasIcon name="pace" className="mx-auto mb-2 h-10 w-10 text-[var(--route-green)]" />
           <p className="text-gray-500 dark:text-gray-400">No pace data available</p>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
             Pace analysis will show after running activities

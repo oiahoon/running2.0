@@ -17,10 +17,10 @@ def test_strava_connection():
     refresh_token = os.getenv('STRAVA_REFRESH_TOKEN') or input("Enter your Strava Refresh Token: ")
     
     if not all([client_id, client_secret, refresh_token]):
-        print("❌ Missing required credentials")
+        print("Error Missing required credentials")
         return False
     
-    print("🔄 Testing Strava API connection...")
+    print("Sync Testing Strava API connection...")
     
     # Step 1: Refresh access token
     print("1. Refreshing access token...")
@@ -37,7 +37,7 @@ def test_strava_connection():
         token_response.raise_for_status()
         token_info = token_response.json()
         access_token = token_info['access_token']
-        print("✅ Access token refreshed successfully")
+        print("OK Access token refreshed successfully")
         
         # Print token info (without sensitive data)
         print(f"   - Token type: {token_info.get('token_type', 'N/A')}")
@@ -45,7 +45,7 @@ def test_strava_connection():
         print(f"   - Scope: {token_info.get('scope', 'N/A')}")
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to refresh token: {e}")
+        print(f"Error Failed to refresh token: {e}")
         if hasattr(e, 'response') and e.response is not None:
             print(f"   Response: {e.response.text}")
         return False
@@ -59,13 +59,13 @@ def test_strava_connection():
         api_response = requests.get(api_url, headers=headers)
         api_response.raise_for_status()
         athlete_info = api_response.json()
-        print("✅ API access successful")
+        print("OK API access successful")
         print(f"   - Athlete: {athlete_info.get('firstname', '')} {athlete_info.get('lastname', '')}")
         print(f"   - ID: {athlete_info.get('id', 'N/A')}")
         print(f"   - Country: {athlete_info.get('country', 'N/A')}")
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to access API: {e}")
+        print(f"Error Failed to access API: {e}")
         if hasattr(e, 'response') and e.response is not None:
             print(f"   Response: {e.response.text}")
         return False
@@ -79,7 +79,7 @@ def test_strava_connection():
         activities_response = requests.get(activities_url, headers=headers, params=params)
         activities_response.raise_for_status()
         activities = activities_response.json()
-        print(f"✅ Activities endpoint accessible")
+        print(f"OK Activities endpoint accessible")
         print(f"   - Found {len(activities)} recent activities")
         
         if activities:
@@ -88,12 +88,12 @@ def test_strava_connection():
             print(f"   - Date: {latest.get('start_date', 'N/A')}")
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to access activities: {e}")
+        print(f"Error Failed to access activities: {e}")
         if hasattr(e, 'response') and e.response is not None:
             print(f"   Response: {e.response.text}")
         return False
     
-    print("\n🎉 All tests passed! Your Strava API configuration is working correctly.")
+    print("\nDone All tests passed! Your Strava API configuration is working correctly.")
     print("\nNext steps:")
     print("1. Add these credentials to your GitHub repository secrets:")
     print(f"   - STRAVA_CLIENT_ID: {client_id}")

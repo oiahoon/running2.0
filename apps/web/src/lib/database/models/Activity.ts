@@ -265,18 +265,18 @@ export function calculatePace(distance?: number, time?: number): number | undefi
 
 export function getActivityIcon(type: ActivityType): string {
   const icons: Record<ActivityType, string> = {
-    Run: '🏃',
-    Walk: '🚶',
-    Ride: '🚴',
-    Swim: '🏊',
-    Hike: '🥾',
-    WeightTraining: '🏋️',
-    Yoga: '🧘',
-    CrossTraining: '💪',
-    Rowing: '🚣',
-    Other: '⚡',
+    Run: 'run',
+    Walk: 'walk',
+    Ride: 'ride',
+    Swim: 'swim',
+    Hike: 'hike',
+    WeightTraining: 'strength',
+    Yoga: 'yoga',
+    CrossTraining: 'workout',
+    Rowing: 'rowing',
+    Other: 'other',
   };
-  return icons[type] || '⚡';
+  return icons[type] || 'other';
 }
 
 export function getActivityColor(type: ActivityType): string {

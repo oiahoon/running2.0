@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts'
+import { AtlasIcon } from '@/components/icons/AtlasIcon'
 
 interface MonthlyData {
   month: string
@@ -98,7 +99,7 @@ export default function BurnUpChart({
         style={{ height }}
       >
         <div className="text-center">
-          <div className="text-4xl mb-2">📈</div>
+          <AtlasIcon name="trend" className="mx-auto mb-2 h-10 w-10 text-[var(--route-green)]" />
           <p className="text-gray-500 dark:text-gray-400">No progress data available</p>
         </div>
       </div>

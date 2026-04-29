@@ -15,10 +15,10 @@ def check_strava_permissions():
     refresh_token = os.getenv('STRAVA_REFRESH_TOKEN')
     
     if not all([client_id, client_secret, refresh_token]):
-        print("❌ Missing Strava credentials")
+        print("Error Missing Strava credentials")
         return False
     
-    print("🔍 Checking Strava API permissions...")
+    print("Search Checking Strava API permissions...")
     
     # Step 1: Refresh access token
     print("\n1. Refreshing access token...")
@@ -36,7 +36,7 @@ def check_strava_permissions():
         token_info = token_response.json()
         access_token = token_info['access_token']
         
-        print("✅ Access token refreshed successfully")
+        print("OK Access token refreshed successfully")
         print(f"   - Token type: {token_info.get('token_type', 'N/A')}")
         print(f"   - Expires at: {token_info.get('expires_at', 'N/A')}")
         
@@ -45,7 +45,7 @@ def check_strava_permissions():
         print(f"   - Scope: {scope if scope else 'NOT PRESENT (will test API directly)'}")
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to refresh token: {e}")
+        print(f"Error Failed to refresh token: {e}")
         if hasattr(e, 'response') and e.response is not None:
             print(f"   Response: {e.response.text}")
         return False
@@ -60,12 +60,12 @@ def check_strava_permissions():
         athlete_response.raise_for_status()
         athlete_info = athlete_response.json()
         
-        print("✅ Athlete endpoint accessible")
+        print("OK Athlete endpoint accessible")
         print(f"   - Name: {athlete_info.get('firstname', '')} {athlete_info.get('lastname', '')}")
         print(f"   - ID: {athlete_info.get('id', 'N/A')}")
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to access athlete endpoint: {e}")
+        print(f"Error Failed to access athlete endpoint: {e}")
         return False
     
     # Step 3: Test activities endpoint (THE REAL TEST)
@@ -79,7 +79,7 @@ def check_strava_permissions():
         
         if activities_response.status_code == 200:
             activities = activities_response.json()
-            print(f"   ✅ SUCCESS! Activities endpoint accessible")
+            print(f"   OK SUCCESS! Activities endpoint accessible")
             print(f"   - Found {len(activities)} activities")
             
             if activities:
@@ -88,26 +88,26 @@ def check_strava_permissions():
                 print(f"   - Type: {latest.get('type', 'Unknown')}")
                 print(f"   - Date: {latest.get('start_date', 'N/A')}")
             
-            print("\n🎉 CONCLUSION: Your token HAS activity:read_all permissions!")
+            print("\nDone CONCLUSION: Your token HAS activity:read_all permissions!")
             print("   The API test confirms the token works correctly.")
             return True
             
         elif activities_response.status_code == 401:
-            print("   ❌ FAILED: 401 Unauthorized")
+            print("   Error FAILED: 401 Unauthorized")
             print("   Your token does NOT have activity:read_all permissions")
             print(f"   Response: {activities_response.text}")
             
-            print("\n🔧 SOLUTION:")
+            print("\nConfig SOLUTION:")
             print("   You need to re-authorize your app with the 'activity:read_all' scope.")
             print("   Follow the setup guide in scripts/setup-strava-secrets.md")
             return False
         else:
-            print(f"   ❌ Unexpected status code: {activities_response.status_code}")
+            print(f"   Error Unexpected status code: {activities_response.status_code}")
             print(f"   Response: {activities_response.text}")
             return False
             
     except requests.exceptions.RequestException as e:
-        print(f"   ❌ Failed to access activities endpoint: {e}")
+        print(f"   Error Failed to access activities endpoint: {e}")
         return False
 
 if __name__ == '__main__':

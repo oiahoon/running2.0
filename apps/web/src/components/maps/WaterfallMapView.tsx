@@ -5,6 +5,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
 import RunningMap from './RunningMap'
+import { ActivityIcon, AtlasIcon } from '@/components/icons/AtlasIcon'
 
 // Lazy loading component for maps
 function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height?: number }) {
@@ -51,7 +52,7 @@ function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height
       ) : (
         <div className="h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
           <div className="text-gray-400 dark:text-gray-500">
-            <div className="text-2xl mb-2">🗺️</div>
+            <AtlasIcon name="map" className="mx-auto mb-2 h-7 w-7" />
             <div className="text-sm">Loading map...</div>
           </div>
         </div>
@@ -183,7 +184,7 @@ export default function WaterfallMapView({
     return (
       <div className={`bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 ${className}`}>
         <div className="text-center">
-          <div className="text-4xl mb-2">⚠️</div>
+          <AtlasIcon name="warning" className="mx-auto mb-2 h-10 w-10" />
           <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
             Failed to Load Activities
           </h3>
@@ -225,7 +226,7 @@ export default function WaterfallMapView({
   if (allActivities.length === 0 && !isLoading && isInitialized) {
     return (
       <div className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center ${className}`}>
-        <div className="text-4xl mb-4">🗺️</div>
+        <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
           No GPS Routes Found
         </h3>
@@ -282,7 +283,7 @@ export default function WaterfallMapView({
                     className="px-2 py-1 rounded-full text-xs font-medium text-white shadow-lg"
                     style={{ backgroundColor: config.color }}
                   >
-                    {config.icon} {config.displayName}
+                    <ActivityIcon type={config.type} className="h-3.5 w-3.5" /> {config.displayName}
                   </div>
                 </div>
                 
@@ -362,7 +363,7 @@ export default function WaterfallMapView({
       {!hasMore && allActivities.length > 0 && (
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-            <span>🏁</span>
+            <AtlasIcon name="finish" className="h-4 w-4" />
             <span>You have seen all {allActivities.length} routes!</span>
           </div>
         </div>

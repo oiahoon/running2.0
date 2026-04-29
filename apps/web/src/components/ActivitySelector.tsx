@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { ActivityIcon } from '@/components/icons/AtlasIcon'
 
 // Custom hook for debounced value
 function useDebounce<T>(value: T, delay: number): T {
@@ -87,7 +88,7 @@ export default function ActivitySelector({
         <span className="block truncate">
           {selectedActivity ? (
             <span className="flex items-center">
-              <span className="mr-2">{getActivityConfig(selectedActivity.type).icon}</span>
+              <ActivityIcon type={selectedActivity.type} className="mr-2 h-4 w-4 text-[var(--route-green)]" />
               {selectedActivity.name} ({(selectedActivity.distance / 1000).toFixed(1)}km)
             </span>
           ) : (
@@ -149,7 +150,7 @@ export default function ActivitySelector({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 flex-1 min-w-0">
-                          <span>{config.icon}</span>
+                          <ActivityIcon type={config.type} className="h-4 w-4 text-[var(--route-green)]" />
                           <span className="truncate">{activity.name}</span>
                         </div>
                         <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">

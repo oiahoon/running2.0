@@ -60,12 +60,12 @@ jobs:
             if response.status_code == 200:
                 with open('../apps/web/public/maps/test-map.png', 'wb') as f:
                     f.write(response.content)
-                print(f"✅ Test map generated successfully ({len(response.content)} bytes)")
+                print(f"OK Test map generated successfully ({len(response.content)} bytes)")
             else:
-                print(f"❌ Failed to generate test map: {response.status_code}")
+                print(f"Error Failed to generate test map: {response.status_code}")
                 print(response.text)
         else:
-            print("❌ No MAPBOX_TOKEN found")
+            print("Error No MAPBOX_TOKEN found")
         EOF
         
         python test-single-map.py
@@ -85,9 +85,9 @@ jobs:
         echo "- **Test Type**: ${{ github.event.inputs.test_type }}" >> $GITHUB_STEP_SUMMARY
         
         if [ -f "apps/web/public/maps/test-map.png" ]; then
-          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: OK Success" >> $GITHUB_STEP_SUMMARY
           echo "- **Test Map**: Generated successfully" >> $GITHUB_STEP_SUMMARY
         else
-          echo "- **Status**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Error Failed" >> $GITHUB_STEP_SUMMARY
           echo "- **Issue**: Could not generate test map" >> $GITHUB_STEP_SUMMARY
         fi
