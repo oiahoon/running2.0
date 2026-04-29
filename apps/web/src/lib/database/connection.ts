@@ -55,6 +55,7 @@ export function getDatabase(): Database.Database {
     
     // Initialize database if needed
     initializeDatabase(db);
+    ensureOperationalTables(db);
   }
   
   return db;
@@ -88,6 +89,70 @@ function initializeDatabase(database: Database.Database) {
       seedSampleData(database);
     }
   }
+}
+
+function ensureOperationalTables(database: Database.Database) {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email VARCHAR(255) UNIQUE,
+        name VARCHAR(255),
+        timezone VARCHAR(50) DEFAULT 'UTC',
+        preferences JSON,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS sync_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        source VARCHAR(50) NOT NULL,
+        sync_type VARCHAR(50),
+        status VARCHAR(20) NOT NULL,
+        activities_processed INTEGER DEFAULT 0,
+        activities_created INTEGER DEFAULT 0,
+        activities_updated INTEGER DEFAULT 0,
+        activities_skipped INTEGER DEFAULT 0,
+        error_message TEXT,
+        error_details JSON,
+        started_at DATETIME NOT NULL,
+        completed_at DATETIME,
+        duration_seconds INTEGER,
+        sync_params JSON,
+        api_calls_made INTEGER DEFAULT 0,
+        rate_limit_remaining INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS data_source_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        source VARCHAR(50) NOT NULL,
+        access_token TEXT,
+        refresh_token TEXT,
+        token_expires_at DATETIME,
+        auto_sync BOOLEAN DEFAULT true,
+        sync_frequency VARCHAR(20) DEFAULT 'daily',
+        last_sync_at DATETIME,
+        activity_types JSON,
+        privacy_settings JSON,
+        is_active BOOLEAN DEFAULT true,
+        connection_status VARCHAR(20) DEFAULT 'connected',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, source)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sync_logs_user_source ON sync_logs(user_id, source);
+    CREATE INDEX IF NOT EXISTS idx_sync_logs_date ON sync_logs(started_at DESC);
+  `);
+
+  database.prepare(`
+    INSERT OR IGNORE INTO users (id, email, name, timezone)
+    VALUES (1, 'user@example.com', 'Runner', 'UTC')
+  `).run();
 }
 
 // Fallback schema for environments where file system access is limited

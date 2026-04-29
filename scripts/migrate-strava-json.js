@@ -26,6 +26,16 @@ db.pragma('journal_mode = WAL');
 
 // Create tables if they don't exist
 const createTablesSQL = `
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE,
+  name TEXT,
+  timezone TEXT DEFAULT 'UTC',
+  preferences TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS activities (
   id INTEGER PRIMARY KEY,
   external_id TEXT UNIQUE NOT NULL,
@@ -63,12 +73,58 @@ CREATE TABLE IF NOT EXISTS activities (
   synced_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS sync_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER DEFAULT 1,
+  source TEXT NOT NULL,
+  sync_type TEXT,
+  status TEXT NOT NULL,
+  activities_processed INTEGER DEFAULT 0,
+  activities_created INTEGER DEFAULT 0,
+  activities_updated INTEGER DEFAULT 0,
+  activities_skipped INTEGER DEFAULT 0,
+  error_message TEXT,
+  error_details TEXT,
+  started_at TEXT NOT NULL,
+  completed_at TEXT,
+  duration_seconds INTEGER,
+  sync_params TEXT,
+  api_calls_made INTEGER DEFAULT 0,
+  rate_limit_remaining INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS data_source_settings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER DEFAULT 1,
+  source TEXT NOT NULL,
+  access_token TEXT,
+  refresh_token TEXT,
+  token_expires_at TEXT,
+  auto_sync INTEGER DEFAULT 1,
+  sync_frequency TEXT DEFAULT 'daily',
+  last_sync_at TEXT,
+  activity_types TEXT,
+  privacy_settings TEXT,
+  is_active INTEGER DEFAULT 1,
+  connection_status TEXT DEFAULT 'connected',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, source)
+);
+
 CREATE INDEX IF NOT EXISTS idx_activities_start_date ON activities(start_date);
 CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(type);
 CREATE INDEX IF NOT EXISTS idx_activities_external_id ON activities(external_id);
+CREATE INDEX IF NOT EXISTS idx_sync_logs_user_source ON sync_logs(user_id, source);
+CREATE INDEX IF NOT EXISTS idx_sync_logs_date ON sync_logs(started_at DESC);
 `;
 
 db.exec(createTablesSQL);
+db.prepare(`
+  INSERT OR IGNORE INTO users (id, email, name, timezone)
+  VALUES (1, 'user@example.com', 'Runner', 'UTC')
+`).run();
 
 function convertStravaActivity(activity) {
   return {
@@ -215,6 +271,53 @@ function migrateStravaData() {
   // Show final stats
   const totalCount = db.prepare('SELECT COUNT(*) as count FROM activities').get();
   console.log(`📊 Total activities in database: ${totalCount.count}`);
+
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO sync_logs (
+      user_id, source, sync_type, status, activities_processed,
+      activities_created, activities_updated, started_at, completed_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    1,
+    'strava',
+    process.env.FORCE_FULL_SYNC === 'true' ? 'full' : 'scheduled',
+    'success',
+    activities.length,
+    result.inserted,
+    result.updated,
+    now,
+    now
+  );
+
+  db.prepare(`
+    INSERT INTO data_source_settings (
+      user_id, source, auto_sync, sync_frequency, last_sync_at,
+      activity_types, privacy_settings, is_active, connection_status,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id, source) DO UPDATE SET
+      auto_sync = excluded.auto_sync,
+      sync_frequency = excluded.sync_frequency,
+      last_sync_at = excluded.last_sync_at,
+      activity_types = excluded.activity_types,
+      privacy_settings = excluded.privacy_settings,
+      is_active = excluded.is_active,
+      connection_status = excluded.connection_status,
+      updated_at = excluded.updated_at
+  `).run(
+    1,
+    'strava',
+    1,
+    'daily',
+    now,
+    JSON.stringify(['Run', 'Walk', 'Ride', 'Swim', 'Hike']),
+    JSON.stringify({ credentialStorage: 'github-actions-secrets' }),
+    1,
+    'connected',
+    now,
+    now
+  );
 }
 
 function main() {

@@ -2,7 +2,7 @@ name: Sync Strava Data
 
 on:
   schedule:
-    # Run every 6 hours
+    # Run daily; manual sync is available from the app through workflow_dispatch.
     - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
@@ -48,13 +48,12 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '22'
         cache: 'npm'
-        cache-dependency-path: 'apps/web/package-lock.json'
+        cache-dependency-path: 'package-lock.json'
         
     - name: Install Node.js dependencies
       run: |
-        cd apps/web
         npm ci
         
     - name: Create data directories

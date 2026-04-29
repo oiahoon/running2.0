@@ -12,6 +12,8 @@ Read this for Strava sync, static maps, data import scripts, and scheduled data 
 6. Workflow commits data/map/public changes back to `master`.
 7. Vercel deploys `run2` from `master`.
 
+Manual sync from the app should dispatch `.github/workflows/sync-data.yml`; it should not run Strava import inside a Vercel function. Vercel only has a `/tmp` copy of the SQLite database, so runtime writes are not durable and will not update the committed data file.
+
 ## Runtime Sync
 
 - Direct Strava executor: `apps/web/src/app/api/sync/strava/route.ts`
@@ -55,13 +57,18 @@ Vercel/runtime:
 - `STRAVA_CLIENT_ID`
 - `STRAVA_CLIENT_SECRET`
 - `STRAVA_REFRESH_TOKEN` if required by route/script context
+- `GITHUB_ACTIONS_TRIGGER_TOKEN` for `/api/sync` manual workflow dispatch
+- `GITHUB_SYNC_REPOSITORY` optional, defaults to `oiahoon/running2.0`
+- `GITHUB_SYNC_WORKFLOW_ID` optional, defaults to `sync-data.yml`
+- `GITHUB_SYNC_REF` optional, defaults to `master`
 - `NEXT_PUBLIC_MAPBOX_TOKEN`
 - `DATABASE_PATH`
 - `NEXT_PUBLIC_APP_URL`
+
+`GITHUB_ACTIONS_TRIGGER_TOKEN` should be a narrowly scoped GitHub fine-grained token that can dispatch Actions for this repository. Do not store Strava access or refresh tokens in the committed SQLite database.
 
 ## Generated Assets
 
 - Do not scan all of `apps/web/public/maps/` unless map asset integrity is the task.
 - DB binaries under `apps/web/public/` and `apps/web/data/` are generated/deployment data.
 - Use forced git add only when intentionally committing generated sync outputs.
-

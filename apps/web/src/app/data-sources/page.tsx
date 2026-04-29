@@ -35,6 +35,8 @@ export default function DataSourcesPage() {
   const [configuredSources, setConfiguredSources] = useState<ConfiguredSource[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'configured' | 'available'>('configured')
 
   useEffect(() => {
@@ -56,15 +58,24 @@ export default function DataSourcesPage() {
 
   const handleSync = async () => {
     setSyncing(true)
+    setMessage(null)
+    setError(null)
     try {
-      await fetch('/api/sync', {
+      const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sources: ['strava'] }),
       })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data?.error || 'Sync failed')
+      }
+      const data = await response.json().catch(() => ({}))
+      setMessage(data?.message || 'Sync workflow queued')
       await fetchDataSources()
     } catch (error) {
       console.error('Sync failed:', error)
+      setError(error instanceof Error ? error.message : 'Sync failed')
     } finally {
       setSyncing(false)
     }
@@ -99,11 +110,23 @@ export default function DataSourcesPage() {
               <p className="section-subtitle">Manage source lifecycle, validate health, and keep sync operations reliable.</p>
             </div>
             <button onClick={handleSync} disabled={syncing} className="action-primary disabled:opacity-60">
-              {syncing ? 'Syncing...' : 'Run Sync'}
+              {syncing ? 'Queueing...' : 'Run Sync'}
             </button>
           </div>
         </div>
       </section>
+
+      {error ? (
+        <section className="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-200">
+          {error}
+        </section>
+      ) : null}
+
+      {message ? (
+        <section className="rounded-xl border border-emerald-400/35 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-200">
+          {message}
+        </section>
+      ) : null}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KPI label="Configured" value={String(summary.total)} />

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/database/connection'
-import { runStravaSync } from '@/app/api/sync/strava/route'
 
 type SourceSetting = {
   source: string
@@ -20,6 +19,55 @@ function normalizeSourceId(sourceId: string): string {
   if (sourceId === 'strava') return sourceId
   const prefix = sourceId.split('_')[0]
   return prefix || sourceId
+}
+
+function getGitHubRepo() {
+  return process.env.GITHUB_SYNC_REPOSITORY || process.env.GITHUB_REPOSITORY || 'oiahoon/running2.0'
+}
+
+function toWorkflowBoolean(value: unknown) {
+  return value === true || value === 'true' ? 'true' : 'false'
+}
+
+async function triggerSyncWorkflow(body: Record<string, unknown>) {
+  const token = process.env.GITHUB_ACTIONS_TRIGGER_TOKEN
+  if (!token) {
+    throw new Error('Manual sync trigger is not configured. Set GITHUB_ACTIONS_TRIGGER_TOKEN in Vercel.')
+  }
+
+  const repository = getGitHubRepo()
+  const workflowId = process.env.GITHUB_SYNC_WORKFLOW_ID || 'sync-data.yml'
+  const ref = process.env.GITHUB_SYNC_REF || 'master'
+  const workflowUrl = `https://github.com/${repository}/actions/workflows/${workflowId}`
+
+  const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows/${workflowId}/dispatches`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body: JSON.stringify({
+      ref,
+      inputs: {
+        force_full_sync: toWorkflowBoolean(body.forceFullSync ?? body.force_full_sync),
+        regenerate_maps: toWorkflowBoolean(body.regenerateMaps ?? body.regenerate_maps),
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '')
+    throw new Error(`GitHub workflow dispatch failed (${response.status}): ${detail || response.statusText}`)
+  }
+
+  return {
+    repository,
+    workflowId,
+    ref,
+    workflowUrl,
+  }
 }
 
 /**
@@ -83,131 +131,46 @@ export async function GET() {
 
 /**
  * POST /api/sync
- * Trigger sync for requested sources or all enabled sources
+ * Trigger repository-backed sync through GitHub Actions.
+ *
+ * The production data store is a committed SQLite file, so Vercel runtime sync
+ * must not write to /tmp. Manual sync queues the same workflow as scheduled
+ * sync; GitHub Actions writes the database file, commits it, and Vercel redeploys.
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => ({}))
+    const body = await request.json().catch(() => ({})) as Record<string, unknown>
     const requestedSources = Array.isArray(body?.sources)
       ? (body.sources as unknown[])
           .filter((item): item is string => typeof item === 'string' && item.length > 0)
           .map(normalizeSourceId)
       : null
 
-    const db = getDatabase()
-    const settings = db.prepare(`
-      SELECT source, is_active, connection_status, last_sync_at
-      FROM data_source_settings
-      WHERE user_id = 1
-    `).all() as SourceSetting[]
-
-    const settingMap = new Map(settings.map((item) => [item.source, item]))
-
-    const targetSources = requestedSources && requestedSources.length > 0
-      ? [...new Set(requestedSources)]
-      : settings.filter((item) => Boolean(item.is_active)).map((item) => item.source)
-
-    const results: Array<{
-      source: string
-      success: boolean
-      activitiesProcessed: number
-      activitiesAdded: number
-      activitiesUpdated: number
-      errors: string[]
-      startTime: Date
-      endTime: Date
-    }> = []
-
-    for (const sourceId of targetSources) {
-      const startTime = new Date()
-
-      if (!settingMap.has(sourceId)) {
-        results.push({
-          source: sourceId,
-          success: false,
-          activitiesProcessed: 0,
-          activitiesAdded: 0,
-          activitiesUpdated: 0,
-          errors: [`Data source not configured: ${sourceId}`],
-          startTime,
-          endTime: new Date(),
-        })
-        continue
-      }
-
-      const sourceSetting = settingMap.get(sourceId)
-      if (!sourceSetting?.is_active) {
-        results.push({
-          source: sourceId,
-          success: false,
-          activitiesProcessed: 0,
-          activitiesAdded: 0,
-          activitiesUpdated: 0,
-          errors: [`Data source is disabled: ${sourceId}`],
-          startTime,
-          endTime: new Date(),
-        })
-        continue
-      }
-
-      if (sourceId === 'strava') {
-        try {
-          const syncResult = await runStravaSync()
-          results.push({
-            source: 'strava',
-            success: true,
-            activitiesProcessed: syncResult.activitiesProcessed,
-            activitiesAdded: syncResult.activitiesSaved,
-            activitiesUpdated: 0,
-            errors: [],
-            startTime,
-            endTime: new Date(),
-          })
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'Unknown error'
-          results.push({
-            source: 'strava',
-            success: false,
-            activitiesProcessed: 0,
-            activitiesAdded: 0,
-            activitiesUpdated: 0,
-            errors: [message],
-            startTime,
-            endTime: new Date(),
-          })
-        }
-        continue
-      }
-
-      results.push({
-        source: sourceId,
-        success: false,
-        activitiesProcessed: 0,
-        activitiesAdded: 0,
-        activitiesUpdated: 0,
-        errors: [`Source sync executor not implemented: ${sourceId}`],
-        startTime,
-        endTime: new Date(),
-      })
+    const targetSources = requestedSources && requestedSources.length > 0 ? [...new Set(requestedSources)] : ['strava']
+    const unsupportedSource = targetSources.find((source) => source !== 'strava')
+    if (unsupportedSource) {
+      return NextResponse.json(
+        { error: `Manual workflow sync is only configured for Strava. Unsupported source: ${unsupportedSource}` },
+        { status: 400 }
+      )
     }
 
-    const summary = {
-      totalSources: results.length,
-      successfulSources: results.filter((r) => r.success).length,
-      failedSources: results.filter((r) => !r.success).length,
-      totalActivitiesProcessed: results.reduce((sum, r) => sum + r.activitiesProcessed, 0),
-      totalActivitiesAdded: results.reduce((sum, r) => sum + r.activitiesAdded, 0),
-      totalActivitiesUpdated: results.reduce((sum, r) => sum + r.activitiesUpdated, 0),
-      totalErrors: results.reduce((sum, r) => sum + r.errors.length, 0),
-    }
+    const workflow = await triggerSyncWorkflow(body)
 
-    return NextResponse.json({
-      message: 'Sync completed',
-      results,
-      summary,
-    })
+    return NextResponse.json(
+      {
+        message: 'Sync workflow queued',
+        source: 'strava',
+        status: 'queued',
+        workflow,
+      },
+      { status: 202 }
+    )
   } catch (error) {
     console.error('Failed to sync data sources:', error)
-    return NextResponse.json({ error: 'Failed to sync data sources' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to sync data sources' },
+      { status: 500 }
+    )
   }
 }

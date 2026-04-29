@@ -44,6 +44,7 @@ export default function SyncPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const fetchSyncData = useCallback(async () => {
     setError(null)
@@ -79,12 +80,19 @@ export default function SyncPage() {
   const handleSyncNow = async () => {
     setIsSyncing(true)
     setError(null)
+    setNotice(null)
     try {
-      const response = await fetch('/api/sync/strava', { method: 'POST' })
+      const response = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sources: ['strava'] }),
+      })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
         throw new Error(data?.error || 'Manual sync failed')
       }
+      const data = await response.json().catch(() => ({}))
+      setNotice(data?.message ? `${data.message}. Data will refresh after GitHub Actions commits and Vercel redeploys.` : 'Sync workflow queued.')
       await fetchSyncData()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Manual sync failed')
@@ -106,7 +114,7 @@ export default function SyncPage() {
               <button onClick={fetchSyncData} className="action-secondary">Refresh</button>
               <button onClick={handleSyncNow} disabled={isSyncing} className="action-primary disabled:opacity-60">
                 <ArrowPathIcon className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Syncing...' : 'Sync Now'}
+                {isSyncing ? 'Queueing...' : 'Sync Now'}
               </button>
             </div>
           </div>
@@ -116,6 +124,12 @@ export default function SyncPage() {
       {error ? (
         <section className="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-200">
           {error}
+        </section>
+      ) : null}
+
+      {notice ? (
+        <section className="rounded-xl border border-emerald-400/35 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-200">
+          {notice}
         </section>
       ) : null}
 
@@ -148,9 +162,9 @@ export default function SyncPage() {
               </div>
               <div className="panel-body space-y-2 text-sm text-[var(--text-muted)]">
                 <div>1. Refresh latest source status</div>
-                <div>2. Trigger manual sync</div>
-                <div>3. Check latest log result</div>
-                <div>4. Investigate error message if needed</div>
+                <div>2. Queue GitHub Actions sync</div>
+                <div>3. Wait for data commit and deploy</div>
+                <div>4. Refresh latest log result</div>
               </div>
             </div>
           </section>

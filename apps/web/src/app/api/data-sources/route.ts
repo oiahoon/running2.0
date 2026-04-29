@@ -25,7 +25,7 @@ const DATA_SOURCE_TYPES = {
     supportedActivities: ['Run', 'Walk', 'Ride', 'Swim', 'Hike'],
     setupInstructions: [
       'Already configured in your environment variables',
-      'Activities sync automatically every 6 hours'
+      'Activities sync daily and can be queued manually from Sync'
     ]
   },
   garmin: {
