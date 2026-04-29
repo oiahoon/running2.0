@@ -50,3 +50,24 @@ Source brief: `/Users/huangyuyao/Downloads/running_page_cool_route_data_concept_
 - Data truthfulness: no fake demo route appears when real data is available.
 - Runner appeal: routes and poster pages invite browsing.
 - Performance: SVG rendering remains bounded and animations avoid layout shift.
+
+## Sprint 5 Acceptance Log
+
+Date: 2026-04-29
+
+- Build gate: `npm run build --workspace apps/web` passed.
+- Data baseline: 803 activities, 453 activities with `summary_polyline`, 2897.73 km total distance, latest activity `2026-02-17T00:43:05Z`.
+- API smoke passed:
+  - `GET /api/debug`
+  - `GET /api/activities?limit=1`
+  - `GET /api/stats?year=2026`
+  - `GET /api/activities/308689`
+- Page smoke passed with HTTP 200:
+  - `/dashboard`
+  - `/routes`
+  - `/activities/308689`
+  - `/stats`
+- Known release blockers outside this UI sprint:
+  - `GET /api/sync/history` and `GET /api/data-sources` return 500 against the current local SQLite snapshot because it only contains `activities`, while those APIs expect `sync_logs` and `data_source_settings`.
+  - `npm run lint --workspace apps/web` fails because `next lint` is no longer valid in the current Next.js setup.
+  - `npm run type-check --workspace apps/web` still fails on pre-existing type debt across generated Next route types, legacy cyber/template components, Catalyst primitives, map model casing, and missing dependency typings.
