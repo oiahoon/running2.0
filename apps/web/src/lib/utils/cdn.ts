@@ -24,6 +24,14 @@ const CDN_CONFIG = {
   }
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
+function getErrorName(error: unknown): string {
+  return error instanceof Error ? error.name : ''
+}
+
 /**
  * Get the optimal CDN URL for static map images
  */
@@ -170,8 +178,8 @@ async function performCdnCheck(activityId: string): Promise<{
         console.log(`❌ CDN returned ${response.status}, will try local fallback`)
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.log(`❌ CDN request failed for ${activityId}:`, error.message)
+      if (getErrorName(error) !== 'AbortError') {
+        console.log(`❌ CDN request failed for ${activityId}:`, getErrorMessage(error))
       } else {
         console.log(`⏰ CDN request timeout for ${activityId}`)
       }
@@ -203,7 +211,7 @@ async function performCdnCheck(activityId: string): Promise<{
           }
         }
       } catch (error) {
-        console.log(`❌ Local fallback failed for ${activityId}:`, error.message)
+        console.log(`❌ Local fallback failed for ${activityId}:`, getErrorMessage(error))
       }
     }
     
@@ -243,7 +251,7 @@ async function performCdnCheck(activityId: string): Promise<{
         }
       }
     } catch (error) {
-      console.log(`❌ Local check failed for ${activityId}:`, error.message)
+      console.log(`❌ Local check failed for ${activityId}:`, getErrorMessage(error))
     }
     
     // Fallback to CDN in development
@@ -269,7 +277,7 @@ async function performCdnCheck(activityId: string): Promise<{
         source: response.ok ? 'cdn' : 'local'
       }
     } catch (error) {
-      console.log(`❌ CDN fallback failed for ${activityId}:`, error.message)
+      console.log(`❌ CDN fallback failed for ${activityId}:`, getErrorMessage(error))
       return {
         exists: false,
         url: localUrl,

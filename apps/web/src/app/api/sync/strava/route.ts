@@ -41,7 +41,7 @@ interface StravaTokenResponse {
   expires_at: number
 }
 
-export interface StravaSyncExecutionResult {
+interface StravaSyncExecutionResult {
   success: boolean
   message: string
   activitiesProcessed: number
@@ -202,7 +202,7 @@ async function logSync(status: string, activitiesProcessed: number, error?: stri
   insertLog.run('strava', 'scheduled', status, activitiesProcessed, error || null, now, now)
 }
 
-export async function runStravaSync(): Promise<StravaSyncExecutionResult> {
+async function runStravaSync(): Promise<StravaSyncExecutionResult> {
   try {
     console.log('Starting Strava sync...')
 

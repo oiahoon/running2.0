@@ -47,9 +47,12 @@ export default function MapPage() {
     500
   )
 
-  const activities: Activity[] = data?.activities || []
-  const activitiesWithLocation = activities.filter((activity: Activity) => activity.start_latitude && activity.start_longitude)
-  const availableTypes = [...new Set(activities.map((a: Activity) => a.type))].sort()
+  const activities = useMemo<Activity[]>(() => data?.activities || [], [data?.activities])
+  const activitiesWithLocation = useMemo(
+    () => activities.filter((activity: Activity) => activity.start_latitude && activity.start_longitude),
+    [activities]
+  )
+  const availableTypes = useMemo(() => [...new Set(activities.map((a: Activity) => a.type))].sort(), [activities])
 
   const sourceSummary = useMemo(() => {
     const totalDistanceMeters = activities.reduce((sum: number, a: Activity) => sum + (a.distance || 0), 0)

@@ -4,6 +4,10 @@
  */
 import { getDatabase } from '@/lib/database/connection'
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 export interface Activity {
   id: string
   externalId: string
@@ -173,7 +177,7 @@ export abstract class BaseDataSource implements DataSource {
             result.activitiesAdded++
           }
         } catch (error) {
-          result.errors.push(`Failed to process activity ${activity.externalId}: ${error.message}`)
+          result.errors.push(`Failed to process activity ${activity.externalId}: ${getErrorMessage(error)}`)
         }
       }
 
@@ -185,7 +189,7 @@ export abstract class BaseDataSource implements DataSource {
 
       return result
     } catch (error) {
-      result.errors.push(`Sync failed: ${error.message}`)
+      result.errors.push(`Sync failed: ${getErrorMessage(error)}`)
       result.endTime = new Date()
       return result
     }
@@ -463,7 +467,7 @@ export class DataSourceRegistry {
           activitiesProcessed: 0,
           activitiesAdded: 0,
           activitiesUpdated: 0,
-          errors: [`Sync failed: ${error.message}`],
+          errors: [`Sync failed: ${getErrorMessage(error)}`],
           startTime: new Date(),
           endTime: new Date()
         })
@@ -500,7 +504,7 @@ export class DataSourceRegistry {
       try {
         results[id] = await source.getSyncStatus()
       } catch (error) {
-        results[id] = { error: error.message }
+        results[id] = { error: getErrorMessage(error) }
       }
     }
 

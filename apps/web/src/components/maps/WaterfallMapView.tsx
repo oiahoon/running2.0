@@ -26,13 +26,15 @@ function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height
       }
     )
 
-    if (elementRef.current) {
-      observer.observe(elementRef.current)
+    const element = elementRef.current
+
+    if (element) {
+      observer.observe(element)
     }
 
     return () => {
-      if (elementRef.current) {
-        observer.unobserve(elementRef.current)
+      if (element) {
+        observer.unobserve(element)
       }
     }
   }, [hasLoaded])
@@ -105,6 +107,8 @@ export default function WaterfallMapView({
   useEffect(() => {
     if (filterKey !== prevFilterKeyRef.current) {
       console.log('Filters changed, resetting state')
+      // Filter changes intentionally reset the paged gallery state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentPage(1)
       setAllActivities([])
       setHasMore(true)
@@ -130,13 +134,15 @@ export default function WaterfallMapView({
       console.log(`Filtered to ${gpsActivities.length} GPS activities`)
       
       if (currentPage === 1) {
+        // Accumulate server pages into a bounded client-side gallery.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setAllActivities(gpsActivities)
         setIsInitialized(true)
       } else {
         setAllActivities(prev => {
           // Avoid duplicates and limit total activities to prevent performance issues
           const existingIds = new Set(prev.map(a => a.id))
-          const newActivities = gpsActivities.filter(a => !existingIds.has(a.id))
+          const newActivities = gpsActivities.filter((a: Activity) => !existingIds.has(a.id))
           const combined = [...prev, ...newActivities]
           
           // Limit to 100 activities to prevent performance issues
@@ -158,7 +164,7 @@ export default function WaterfallMapView({
       setIsLoadingMore(true)
       setCurrentPage(prev => prev + 1)
     }
-  }, [isLoadingMore, hasMore, isLoading, isInitialized])
+  }, [allActivities.length, isLoadingMore, hasMore, isLoading, isInitialized])
 
   // Scroll event listener
   useEffect(() => {
@@ -357,7 +363,7 @@ export default function WaterfallMapView({
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2 text-gray-500 dark:text-gray-400">
             <span>🏁</span>
-            <span>You've seen all {allActivities.length} routes!</span>
+            <span>You have seen all {allActivities.length} routes!</span>
           </div>
         </div>
       )}

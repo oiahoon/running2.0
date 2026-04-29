@@ -44,6 +44,10 @@ export interface NikeAuthToken {
   tokenType: 'Bearer'
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 export class NikeRunClubClient {
   private baseUrl = 'https://api.nike.com'
   private authToken?: NikeAuthToken
@@ -78,7 +82,7 @@ export class NikeRunClubClient {
       this.authToken = authToken
       return authToken
     } catch (error) {
-      throw new Error(`Nike authentication error: ${error.message}`)
+      throw new Error(`Nike authentication error: ${getErrorMessage(error)}`)
     }
   }
 
@@ -115,7 +119,7 @@ export class NikeRunClubClient {
       this.authToken = authToken
       return authToken
     } catch (error) {
-      throw new Error(`Nike token refresh error: ${error.message}`)
+      throw new Error(`Nike token refresh error: ${getErrorMessage(error)}`)
     }
   }
 

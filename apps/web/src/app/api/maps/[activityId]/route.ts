@@ -4,10 +4,10 @@ import path from 'path'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { activityId: string } }
+  { params }: { params: Promise<{ activityId: string }> }
 ) {
   try {
-    const activityId = params.activityId
+    const { activityId } = await params
     
     // Check if static map exists (try both the provided ID and as external_id)
     const mapPath = path.join(process.cwd(), 'public', 'maps', `${activityId}.png`)
@@ -42,10 +42,10 @@ export async function GET(
 
 export async function HEAD(
   request: NextRequest,
-  { params }: { params: { activityId: string } }
+  { params }: { params: Promise<{ activityId: string }> }
 ) {
   try {
-    const activityId = params.activityId
+    const { activityId } = await params
     const mapPath = path.join(process.cwd(), 'public', 'maps', `${activityId}.png`)
     
     try {

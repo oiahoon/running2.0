@@ -7,7 +7,7 @@
     "dev": "next dev --webpack",
     "build": "node ../../scripts/prepare-vercel-db.js && next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "migrate": "node ../../scripts/migrate-data.js",
     "db:init": "node -e \"require('./src/lib/database/connection').getDatabase(); console.log('Database initialized')\"",

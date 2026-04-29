@@ -3,10 +3,10 @@
 import { useMemo, useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import Link from 'next/link'
-import { formatDuration, formatPace } from '@/lib/database/models/Activity'
+import { formatDuration, formatPace, type ActivityFilters, type ActivityType } from '@/lib/database/models/Activity'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 
-const typeOptions = ['all', 'Run', 'Walk', 'Hike', 'Ride', 'Swim', 'WeightTraining', 'Rowing']
+const typeOptions: Array<'all' | ActivityType> = ['all', 'Run', 'Walk', 'Hike', 'Ride', 'Swim', 'WeightTraining', 'Rowing']
 
 function KPI({ label, value }: { label: string; value: string }) {
   return (
@@ -21,11 +21,11 @@ function KPI({ label, value }: { label: string; value: string }) {
 
 export default function ActivitiesPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedType, setSelectedType] = useState('all')
+  const [selectedType, setSelectedType] = useState<'all' | ActivityType>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 20
 
-  const filters = useMemo(
+  const filters = useMemo<ActivityFilters>(
     () => ({
       search: searchTerm || undefined,
       type: selectedType === 'all' ? getDefaultActivityTypes() : [selectedType],
@@ -68,7 +68,7 @@ export default function ActivitiesPage() {
             <select
               value={selectedType}
               onChange={(e) => {
-                setSelectedType(e.target.value)
+                setSelectedType(e.target.value as 'all' | ActivityType)
                 setCurrentPage(1)
               }}
               className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2.5 text-sm text-[var(--text-strong)] focus:border-blue-400/60 focus:outline-none dark:border-white/20 dark:bg-white/5 dark:text-white"

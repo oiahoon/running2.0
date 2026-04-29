@@ -1,4 +1,6 @@
 // Activity types configuration with environment variable support
+import type { ActivityType } from '@/lib/database/models/Activity'
+
 export const DEFAULT_ACTIVITY_TYPES = [
   'Run',
   'Walk', 
@@ -6,17 +8,35 @@ export const DEFAULT_ACTIVITY_TYPES = [
   'Ride'
 ] as const
 
+const VALID_ACTIVITY_TYPES: ActivityType[] = [
+  'Run',
+  'Walk',
+  'Ride',
+  'Swim',
+  'Hike',
+  'WeightTraining',
+  'Yoga',
+  'CrossTraining',
+  'Rowing',
+  'Other',
+]
+
 // Get activity types from environment variable or use defaults
-export function getDefaultActivityTypes(): string[] {
+export function getDefaultActivityTypes(): ActivityType[] {
   if (typeof window !== 'undefined') {
     // Client side - get from window object set by server
-    return (window as any).__DEFAULT_ACTIVITY_TYPES__ || DEFAULT_ACTIVITY_TYPES
+    const windowTypes = (window as any).__DEFAULT_ACTIVITY_TYPES__ as string[] | undefined
+    if (windowTypes) return windowTypes.filter((type): type is ActivityType => VALID_ACTIVITY_TYPES.includes(type as ActivityType))
+    return [...DEFAULT_ACTIVITY_TYPES]
   }
   
   // Server side - get from environment variable
   const envTypes = process.env.NEXT_PUBLIC_DEFAULT_ACTIVITY_TYPES
   if (envTypes) {
-    return envTypes.split(',').map(type => type.trim())
+    return envTypes
+      .split(',')
+      .map(type => type.trim())
+      .filter((type): type is ActivityType => VALID_ACTIVITY_TYPES.includes(type as ActivityType))
   }
   
   return [...DEFAULT_ACTIVITY_TYPES]
@@ -77,5 +97,5 @@ export function normalizeActivityType(type: string): string {
 export function isDefaultActivityType(type: string): boolean {
   const normalizedType = normalizeActivityType(type)
   const defaultTypes = getDefaultActivityTypes()
-  return defaultTypes.includes(normalizedType)
+  return defaultTypes.includes(normalizedType as ActivityType)
 }

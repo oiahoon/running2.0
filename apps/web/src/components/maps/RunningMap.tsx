@@ -7,18 +7,29 @@ import ActivitySelector from '@/components/ActivitySelector'
 
 interface Activity {
   id: number
+  external_id?: string | number
+  externalId?: string | number
   name: string
   type: string
   distance: number
   start_latitude?: number
   start_longitude?: number
+  startLatitude?: number
+  startLongitude?: number
   end_latitude?: number
   end_longitude?: number
+  endLatitude?: number
+  endLongitude?: number
   summary_polyline?: string
+  summaryPolyline?: string
   start_date: string
+  startDate?: string
   location_city?: string
   location_state?: string
   location_country?: string
+  locationCity?: string
+  locationState?: string
+  locationCountry?: string
 }
 
 interface RunningMapProps {
@@ -90,6 +101,34 @@ const cleanupImageCache = () => {
   }
 }
 
+function getActivityId(activity: Activity): string | number {
+  return activity.external_id || activity.externalId || activity.id
+}
+
+function getStartLatitude(activity: Activity): number | undefined {
+  return activity.start_latitude ?? activity.startLatitude
+}
+
+function getStartLongitude(activity: Activity): number | undefined {
+  return activity.start_longitude ?? activity.startLongitude
+}
+
+function getEndLatitude(activity: Activity): number | undefined {
+  return activity.end_latitude ?? activity.endLatitude
+}
+
+function getEndLongitude(activity: Activity): number | undefined {
+  return activity.end_longitude ?? activity.endLongitude
+}
+
+function getSummaryPolyline(activity: Activity): string | undefined {
+  return activity.summary_polyline ?? activity.summaryPolyline
+}
+
+function hasStartLocation(activity: Activity): boolean {
+  return Boolean(getStartLatitude(activity) && getStartLongitude(activity))
+}
+
 // Preload adjacent activity maps for better UX
 const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number) => {
   const preloadPromises: Promise<void>[] = []
@@ -99,9 +138,9 @@ const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number)
     if (i === currentIndex) continue // Skip current activity
     
     const activity = activities[i]
-    if (!activity.startLatitude || !activity.startLongitude) continue
+    if (!hasStartLocation(activity)) continue
     
-    const activityId = activity.externalId || activity.id
+    const activityId = getActivityId(activity)
     
     preloadPromises.push(
       checkStaticMapExists(activityId.toString())
@@ -157,7 +196,7 @@ const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number)
 // Utility function to check if static map exists and create URL
 async function getStaticMapUrl(activity: Activity, width: number, height: number): Promise<string | null> {
   // Use externalId for static map filename (Strava activity ID)
-  const activityId = activity.externalId || activity.id
+  const activityId = getActivityId(activity)
   
   console.log(`🔍 Checking static map for activity ${activityId}`)
   
@@ -204,9 +243,9 @@ async function createCachedMapboxUrl(
   }
   
   // For single activity with polyline, try localStorage cache
-  if (activities.length === 1 && activities[0].summaryPolyline) {
+  if (activities.length === 1 && getSummaryPolyline(activities[0])) {
     const activity = activities[0]
-    const activityId = activity.externalId || activity.id
+    const activityId = getActivityId(activity)
     
     console.log(`💾 Checking cache for activity ${activityId}`)
     
@@ -268,12 +307,12 @@ function createSafeMapboxUrl(
   const suffix = `/${centerLng},${centerLat},${zoom},0/${width}x${height}@2x?access_token=${token}`
   
   // Strategy 1: Single activity with full route
-  if (activities.length === 1 && activities[0].summary_polyline) {
+  if (activities.length === 1 && getSummaryPolyline(activities[0])) {
     const activity = activities[0]
-    const polyline = `path-4+ff0000-1.0(${encodeURIComponent(activity.summary_polyline)})`
-    const startMarker = `pin-s-s+ff0000(${activity.start_longitude},${activity.start_latitude})`
-    const endMarker = activity.end_longitude && activity.end_latitude 
-      ? `pin-s-f+00ff00(${activity.end_longitude},${activity.end_latitude})`
+    const polyline = `path-4+ff0000-1.0(${encodeURIComponent(getSummaryPolyline(activity) || '')})`
+    const startMarker = `pin-s-s+ff0000(${getStartLongitude(activity)},${getStartLatitude(activity)})`
+    const endMarker = getEndLongitude(activity) && getEndLatitude(activity)
+      ? `pin-s-f+00ff00(${getEndLongitude(activity)},${getEndLatitude(activity)})`
       : ''
     
     const overlays = [polyline, startMarker, endMarker].filter(Boolean).join(',')
@@ -284,9 +323,9 @@ function createSafeMapboxUrl(
   
   // Strategy 2: Multiple activities - just show markers
   const markers = activities
-    .filter(a => a.start_latitude && a.start_longitude)
+    .filter(hasStartLocation)
     .slice(0, 10) // Limit markers
-    .map(a => `pin-s+ff0000(${a.start_longitude},${a.start_latitude})`)
+    .map(a => `pin-s+ff0000(${getStartLongitude(a)},${getStartLatitude(a)})`)
     .join(',')
   
   const markersUrl = `${baseUrl}${markers}${suffix}`
@@ -302,34 +341,40 @@ function calculateBounds(activities: Activity[]): {
   minLat: number, maxLat: number, minLng: number, maxLng: number 
 } | null {
   const validActivities = activities.filter(a => 
-    a.start_latitude && a.start_longitude
+    hasStartLocation(a)
   )
   
   if (validActivities.length === 0) return null
 
-  let minLat = validActivities[0].start_latitude!
-  let maxLat = validActivities[0].start_latitude!
-  let minLng = validActivities[0].start_longitude!
-  let maxLng = validActivities[0].start_longitude!
+  let minLat = getStartLatitude(validActivities[0])!
+  let maxLat = getStartLatitude(validActivities[0])!
+  let minLng = getStartLongitude(validActivities[0])!
+  let maxLng = getStartLongitude(validActivities[0])!
 
   validActivities.forEach(activity => {
-    if (activity.start_latitude && activity.start_longitude) {
-      minLat = Math.min(minLat, activity.start_latitude)
-      maxLat = Math.max(maxLat, activity.start_latitude)
-      minLng = Math.min(minLng, activity.start_longitude)
-      maxLng = Math.max(maxLng, activity.start_longitude)
+    const startLat = getStartLatitude(activity)
+    const startLng = getStartLongitude(activity)
+    const endLat = getEndLatitude(activity)
+    const endLng = getEndLongitude(activity)
+
+    if (startLat && startLng) {
+      minLat = Math.min(minLat, startLat)
+      maxLat = Math.max(maxLat, startLat)
+      minLng = Math.min(minLng, startLng)
+      maxLng = Math.max(maxLng, startLng)
     }
     
-    if (activity.end_latitude && activity.end_longitude) {
-      minLat = Math.min(minLat, activity.end_latitude)
-      maxLat = Math.max(maxLat, activity.end_latitude)
-      minLng = Math.min(minLng, activity.end_longitude)
-      maxLng = Math.max(maxLng, activity.end_longitude)
+    if (endLat && endLng) {
+      minLat = Math.min(minLat, endLat)
+      maxLat = Math.max(maxLat, endLat)
+      minLng = Math.min(minLng, endLng)
+      maxLng = Math.max(maxLng, endLng)
     }
 
     // Include polyline points in bounds calculation
-    if (activity.summary_polyline) {
-      const points = decodePolyline(activity.summary_polyline)
+    const summaryPolyline = getSummaryPolyline(activity)
+    if (summaryPolyline) {
+      const points = decodePolyline(summaryPolyline)
       points.forEach(([lat, lng]) => {
         minLat = Math.min(minLat, lat)
         maxLat = Math.max(maxLat, lat)
@@ -354,9 +399,9 @@ function calculateBounds(activities: Activity[]): {
 // Format location with smart truncation and better display
 function formatLocation(activity: Activity): { short: string; full: string } {
   const parts = [
-    activity.location_city,
-    activity.location_state,
-    activity.location_country
+    activity.location_city ?? activity.locationCity,
+    activity.location_state ?? activity.locationState,
+    activity.location_country ?? activity.locationCountry
   ].filter(Boolean)
   
   if (parts.length === 0) return { short: '', full: '' }
@@ -365,23 +410,25 @@ function formatLocation(activity: Activity): { short: string; full: string } {
   
   // Create short version
   let shortLocation = ''
-  if (activity.location_city && activity.location_country) {
-    shortLocation = `${activity.locationCity}, ${activity.locationCountry}`
-  } else if (activity.locationCity) {
-    shortLocation = activity.locationCity
-  } else if (activity.locationCountry) {
-    shortLocation = activity.locationCountry
+  const city = activity.location_city ?? activity.locationCity
+  const country = activity.location_country ?? activity.locationCountry
+  if (city && country) {
+    shortLocation = `${city}, ${country}`
+  } else if (city) {
+    shortLocation = city
+  } else if (country) {
+    shortLocation = country
   } else {
-    shortLocation = parts[0]
+    shortLocation = parts[0] || ''
   }
   
   // If short version is still too long, truncate city name
-  if (shortLocation.length > 25 && activity.locationCity) {
-    const truncatedCity = activity.locationCity.length > 12 
-      ? activity.locationCity.substring(0, 12) + '...'
-      : activity.locationCity
-    shortLocation = activity.locationCountry 
-      ? `${truncatedCity}, ${activity.locationCountry}`
+  if (shortLocation.length > 25 && city) {
+    const truncatedCity = city.length > 12 
+      ? city.substring(0, 12) + '...'
+      : city
+    shortLocation = country
+      ? `${truncatedCity}, ${country}`
       : truncatedCity
   }
   
@@ -397,15 +444,18 @@ function MapboxMap({ activities, height, selectedActivity }: {
   const [staticMapUrl, setStaticMapUrl] = useState<string>('')
   const [isLoadingMap, setIsLoadingMap] = useState(true)
   
-  const displayActivities = selectedActivity 
-    ? [selectedActivity] 
-    : activities.filter(a => a.startLatitude && a.startLongitude)
+  const displayActivities = useMemo(
+    () => selectedActivity ? [selectedActivity] : activities.filter(hasStartLocation),
+    [activities, selectedActivity]
+  )
 
   const bounds = useMemo(() => calculateBounds(displayActivities), [displayActivities])
 
   // Handle staticMapUrl changes with caching
   useEffect(() => {
     if (!staticMapUrl) {
+      // Synchronizes the image loader state with the currently selected static URL.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingMap(false)
       return
     }
@@ -505,6 +555,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
   // Generate map URL with debouncing
   useEffect(() => {
     if (!hasMapboxToken || !bounds || displayActivities.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingMap(false)
       return
     }
@@ -625,7 +676,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
             No Location Data
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Activities don't have GPS coordinates to display routes
+            Activities do not have GPS coordinates to display routes
           </p>
         </div>
       </div>
@@ -655,17 +706,20 @@ function MapboxMap({ activities, height, selectedActivity }: {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : staticMapUrl ? (
-        <img 
-          src={staticMapUrl}
-          alt="Activity route map"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            console.error('❌ Map display failed:', staticMapUrl)
-            e.currentTarget.style.display = 'none'
-            const fallback = e.currentTarget.nextElementSibling as HTMLElement
-            if (fallback) fallback.classList.remove('hidden')
-          }}
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={staticMapUrl}
+            alt="Activity route map"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('❌ Map display failed:', staticMapUrl)
+              e.currentTarget.style.display = 'none'
+              const fallback = e.currentTarget.nextElementSibling as HTMLElement
+              if (fallback) fallback.classList.remove('hidden')
+            }}
+          />
+        </>
       ) : (
         <div className="h-full flex items-center justify-center">
           <div className="text-center p-8">
@@ -705,19 +759,18 @@ export default function RunningMap({
   defaultView = 'single',
   showActivityInfo = true // Default to true for backward compatibility
 }: RunningMapProps) {
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
 
   // Filter activities that should show on map (Run, Walk, Hike, Ride)
-  const mapEnabledActivities = activities.filter(activity => 
-    shouldShowOnMap(activity.type) && activity.startLatitude && activity.startLongitude
+  const mapEnabledActivities = useMemo(
+    () => activities.filter(activity => shouldShowOnMap(activity.type) && hasStartLocation(activity)),
+    [activities]
   )
 
-  // Auto-select first activity (latest) when activities change
-  useEffect(() => {
-    if (!selectedActivity && mapEnabledActivities.length > 0) {
-      setSelectedActivity(mapEnabledActivities[0])
-    }
-  }, [mapEnabledActivities, selectedActivity])
+  const selectedActivity = useMemo(() => {
+    if (selectedActivityId === null) return mapEnabledActivities[0] ?? null
+    return mapEnabledActivities.find((activity) => activity.id === selectedActivityId) ?? mapEnabledActivities[0] ?? null
+  }, [mapEnabledActivities, selectedActivityId])
 
   // Preload adjacent maps when selected activity changes
   useEffect(() => {
@@ -758,7 +811,7 @@ export default function RunningMap({
           <div className="flex items-center space-x-4">
             <ActivitySelector
               selectedActivity={selectedActivity}
-              onActivitySelect={setSelectedActivity}
+              onActivitySelect={(activity) => setSelectedActivityId(activity?.id ?? null)}
               className="min-w-64"
             />
           </div>

@@ -63,7 +63,7 @@ export default function RouteWallGalleryPage() {
   const [activeFilter, setActiveFilter] = useState<RouteFilter>('all')
   const currentYear = new Date().getFullYear()
   const { data, isLoading, error } = useActivities({}, 1, 120)
-  const activities = (data?.activities || []) as ActivityLike[]
+  const activities = useMemo(() => (data?.activities || []) as ActivityLike[], [data?.activities])
 
   const routeActivities = useMemo(
     () => activities.filter((activity) => routePolyline(activity)),

@@ -4,6 +4,62 @@ import { getDatabase } from '@/lib/database/connection'
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic'
 
+type QueryParam = string
+
+interface BasicStatsRow {
+  total_activities: number
+  total_distance: number | null
+  total_time: number | null
+  total_elevation: number | null
+  avg_distance: number | null
+  avg_time: number | null
+  longest_distance: number | null
+  first_activity: string | null
+  last_activity: string | null
+}
+
+interface TypeDistributionRow {
+  type: string
+  count: number
+  total_distance: number | null
+  total_time: number | null
+}
+
+interface MonthlyStatsRow {
+  month: string
+  activities: number
+  distance: number | null
+  time: number | null
+  avg_distance: number | null
+}
+
+interface WeeklyStatsRow {
+  week: string
+  activities: number
+  distance: number | null
+  time: number | null
+}
+
+interface PaceAnalysisRow {
+  name: string
+  date: string
+  distance: number | null
+  pace: number
+}
+
+interface DailyStatsRow {
+  date: string
+  activities: number
+  distance: number | null
+  duration: number | null
+}
+
+interface RecentActivityRow {
+  distance: number | null
+  total_elevation_gain: number | null
+  [key: string]: unknown
+}
+
 export async function GET(request: NextRequest) {
   try {
     const db = getDatabase()
@@ -14,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     // Build WHERE clause based on parameters
     let whereClause = 'WHERE 1=1'
-    const params: any[] = []
+    const params: QueryParam[] = []
 
     // Only filter by year if explicitly provided
     if (year) {
@@ -46,7 +102,7 @@ export async function GET(request: NextRequest) {
         MAX(start_date) as last_activity
       FROM activities
       ${whereClause}
-    `).get(...params) as any
+    `).get(...params) as BasicStatsRow
 
     // Activity type distribution for the specified period
     const typeDistributionRaw = db.prepare(`
@@ -59,10 +115,10 @@ export async function GET(request: NextRequest) {
       ${whereClause}
       GROUP BY type 
       ORDER BY count DESC
-    `).all(...params)
+    `).all(...params) as TypeDistributionRow[]
 
-    const totalActivities = typeDistributionRaw.reduce((sum: number, item: any) => sum + item.count, 0)
-    const typeDistribution = typeDistributionRaw.map((item: any) => ({
+    const totalActivities = typeDistributionRaw.reduce((sum, item) => sum + item.count, 0)
+    const typeDistribution = typeDistributionRaw.map((item) => ({
       type: item.type,
       count: item.count,
       total_distance: Math.round((item.total_distance || 0) / 1000 * 100) / 100, // Convert to km
@@ -71,7 +127,7 @@ export async function GET(request: NextRequest) {
     }))
 
     // Monthly stats - only if year is specified, otherwise return empty array
-    let monthlyStats = []
+    let monthlyStats: MonthlyStatsRow[] = []
     if (year) {
       monthlyStats = db.prepare(`
         SELECT 
@@ -85,11 +141,11 @@ export async function GET(request: NextRequest) {
         ${type && type.length > 0 ? `AND type IN (${type.map(() => '?').join(',')})` : ''}
         GROUP BY strftime('%Y-%m', start_date)
         ORDER BY month
-      `).all(year.toString(), ...(type || []))
+      `).all(year.toString(), ...(type || [])) as MonthlyStatsRow[]
     }
 
     // Transform monthly data
-    const monthlyData = monthlyStats.map((item: any) => ({
+    const monthlyData = monthlyStats.map((item) => ({
       month: item.month,
       activities: item.activities,
       distance: Math.round((item.distance || 0) / 1000 * 100) / 100, // Convert to km
@@ -98,7 +154,7 @@ export async function GET(request: NextRequest) {
     }))
 
     // Weekly stats - only if year is specified, otherwise return empty array
-    let weeklyStatsRaw = []
+    let weeklyStatsRaw: WeeklyStatsRow[] = []
     if (year) {
       weeklyStatsRaw = db.prepare(`
         SELECT 
@@ -111,11 +167,11 @@ export async function GET(request: NextRequest) {
         ${type && type.length > 0 ? `AND type IN (${type.map(() => '?').join(',')})` : ''}
         GROUP BY strftime('%W', start_date)
         ORDER BY week
-      `).all(year.toString(), ...(type || []))
+      `).all(year.toString(), ...(type || [])) as WeeklyStatsRow[]
     }
 
     // Transform weekly data
-    const weeklyData = weeklyStatsRaw.map((item: any) => ({
+    const weeklyData = weeklyStatsRaw.map((item) => ({
       week: item.week,
       activities: item.activities,
       distance: Math.round((item.distance || 0) / 1000 * 100) / 100,
@@ -123,7 +179,7 @@ export async function GET(request: NextRequest) {
     }))
 
     // Pace analysis for running activities - only if year is specified
-    let paceDataRaw = []
+    let paceDataRaw: PaceAnalysisRow[] = []
     if (year) {
       paceDataRaw = db.prepare(`
         SELECT 
@@ -143,11 +199,11 @@ export async function GET(request: NextRequest) {
         ${type && type.length > 0 ? `AND type IN (${type.map(() => '?').join(',')})` : ''}
         ORDER BY start_date DESC
         LIMIT 50
-      `).all(year.toString(), ...(type || []))
+      `).all(year.toString(), ...(type || [])) as PaceAnalysisRow[]
     }
 
     // Transform pace data
-    const paceAnalysis = paceDataRaw.map((item: any) => ({
+    const paceAnalysis = paceDataRaw.map((item) => ({
       name: item.name,
       date: item.date,
       distance: Math.round((item.distance || 0) / 1000 * 100) / 100,
@@ -155,7 +211,7 @@ export async function GET(request: NextRequest) {
     }))
 
     // Daily stats for heatmap - only if year is specified
-    let dailyStatsRaw = []
+    let dailyStatsRaw: DailyStatsRow[] = []
     if (year) {
       dailyStatsRaw = db.prepare(`
         SELECT 
@@ -168,11 +224,11 @@ export async function GET(request: NextRequest) {
         ${type && type.length > 0 ? `AND type IN (${type.map(() => '?').join(',')})` : ''}
         GROUP BY DATE(start_date)
         ORDER BY date
-      `).all(year.toString(), ...(type || []))
+      `).all(year.toString(), ...(type || [])) as DailyStatsRow[]
     }
 
     // Transform daily data for heatmap
-    const dailyData = dailyStatsRaw.map((item: any) => ({
+    const dailyData = dailyStatsRaw.map((item) => ({
       date: item.date,
       activities: item.activities,
       distance: Math.round((item.distance || 0) / 1000 * 100) / 100, // Convert to km
@@ -222,9 +278,9 @@ export async function GET(request: NextRequest) {
       ${whereClause}
       ORDER BY start_date DESC 
       LIMIT 10
-    `).all(...params)
+    `).all(...params) as RecentActivityRow[]
 
-    const transformedRecentActivities = recentActivities.map((activity: any) => ({
+    const transformedRecentActivities = recentActivities.map((activity) => ({
       ...activity,
       distance: Math.round((activity.distance || 0) / 1000 * 100) / 100, // Convert to km
       total_elevation_gain: Math.round(activity.total_elevation_gain || 0)

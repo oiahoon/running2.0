@@ -58,6 +58,8 @@ export function ThemeSelector(
   let [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // next-themes needs a client-only hydration guard before reading theme state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 

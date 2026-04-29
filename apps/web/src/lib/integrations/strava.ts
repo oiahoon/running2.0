@@ -2,7 +2,7 @@
 // Based on original strava_sync.py but modernized with TypeScript
 
 import axios, { AxiosInstance } from 'axios';
-import { Activity, ActivityCreateInput, DataSource } from '../database/models/Activity';
+import { Activity, ActivityCreateInput, DataSource, type ActivityType, type SportType } from '../database/models/Activity';
 
 // Strava API configuration
 const STRAVA_BASE_URL = 'https://www.strava.com/api/v3';
@@ -271,7 +271,7 @@ export class StravaIntegration {
       name: stravaActivity.name,
       description: stravaActivity.description,
       type: this.mapActivityType(stravaActivity.type),
-      sportType: stravaActivity.sport_type,
+      sportType: this.mapSportType(stravaActivity.sport_type),
       startDate: new Date(stravaActivity.start_date),
       startDateLocal: new Date(stravaActivity.start_date_local),
       distance: stravaActivity.distance,
@@ -320,8 +320,8 @@ export class StravaIntegration {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private mapActivityType(stravaType: string): string {
-    const typeMap: Record<string, string> = {
+  private mapActivityType(stravaType: string): ActivityType {
+    const typeMap: Record<string, ActivityType> = {
       'Run': 'Run',
       'TrailRun': 'Run',
       'Treadmill': 'Run',
@@ -338,6 +338,24 @@ export class StravaIntegration {
     };
 
     return typeMap[stravaType] || 'Other';
+  }
+
+  private mapSportType(sportType?: string): SportType | undefined {
+    const sportTypeMap: Record<string, SportType> = {
+      TrailRun: 'TrailRun',
+      Run: 'RoadRun',
+      Treadmill: 'Treadmill',
+      VirtualRun: 'VirtualRun',
+      Ride: 'RoadBike',
+      RoadBike: 'RoadBike',
+      MountainBikeRide: 'MountainBike',
+      MountainBike: 'MountainBike',
+      Swim: 'PoolSwim',
+      OpenWaterSwim: 'OpenWaterSwim',
+      PoolSwim: 'PoolSwim',
+    };
+
+    return sportType ? sportTypeMap[sportType] : undefined;
   }
 }
 

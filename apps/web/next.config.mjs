@@ -8,10 +8,6 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   // Native module used by server routes/pages
   serverExternalPackages: ['better-sqlite3'],
-  // Disable TypeScript errors during build (temporary for deployment)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Image optimization
   images: {
     remotePatterns: [

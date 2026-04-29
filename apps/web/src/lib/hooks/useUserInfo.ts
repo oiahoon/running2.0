@@ -1,7 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
 interface UserInfo {
   name: string
   username: string
@@ -22,20 +20,15 @@ const DEFAULT_USER_INFO: UserInfo = {
 }
 
 export function useUserInfo(): UserInfo {
-  const [userInfo, setUserInfo] = useState<UserInfo>(DEFAULT_USER_INFO)
-
-  useEffect(() => {
-    // If we have a GitHub username but no avatar, use GitHub avatar
-    if (userInfo.username && userInfo.username !== 'runner' && !userInfo.avatar) {
-      setUserInfo(prev => ({
-        ...prev,
-        avatar: '/images/default-avatar.svg', // 使用本地默认头像
-        githubUrl: `https://github.com/${userInfo.username}`
-      }))
+  if (DEFAULT_USER_INFO.username && DEFAULT_USER_INFO.username !== 'runner' && !DEFAULT_USER_INFO.avatar) {
+    return {
+      ...DEFAULT_USER_INFO,
+      avatar: '/images/default-avatar.svg',
+      githubUrl: `https://github.com/${DEFAULT_USER_INFO.username}`,
     }
-  }, [userInfo.username, userInfo.avatar])
+  }
 
-  return userInfo
+  return DEFAULT_USER_INFO
 }
 
 // Static function to get user info for server-side usage

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { Badge } from '@/components/catalyst'
+import type { ReactNode } from 'react'
 import { getDatabase } from '@/lib/database/connection'
 
 export const metadata: Metadata = {
@@ -63,6 +63,18 @@ function Metric({ label, value, sub }: { label: string; value: string | number; 
   )
 }
 
+function Badge({ children, tone = 'zinc' }: { children: ReactNode; tone?: 'blue' | 'zinc' }) {
+  const classes = tone === 'blue'
+    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+    : 'bg-zinc-600/10 text-zinc-700 dark:bg-white/5 dark:text-zinc-300'
+
+  return (
+    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ${classes}`}>
+      {children}
+    </span>
+  )
+}
+
 export default async function SyncStatusPage() {
   const status = await getSyncStatus()
 
@@ -101,7 +113,7 @@ export default async function SyncStatusPage() {
               <div className="space-y-2">
                 <div className="font-medium">{status.latestActivity.name}</div>
                 <div className="flex items-center gap-2">
-                  <Badge color="blue">{status.latestActivity.type}</Badge>
+                  <Badge tone="blue">{status.latestActivity.type}</Badge>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(status.latestActivity.start_date).toLocaleDateString()}
                   </span>
@@ -121,7 +133,7 @@ export default async function SyncStatusPage() {
             {status.typeStats.slice(0, 5).map((stat) => (
               <div key={stat.type} className="flex items-center justify-between text-sm">
                 <span>{stat.type}</span>
-                <Badge color="zinc">{stat.count}</Badge>
+                <Badge tone="zinc">{stat.count}</Badge>
               </div>
             ))}
             {status.typeStats.length === 0 && (

@@ -37,6 +37,17 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/app/activities/CyberActivities.tsx",
+    "src/components/CatalystAppLayout.tsx",
+    "src/components/CyberAppLayout.tsx",
+    "src/components/DocsLayout.tsx",
+    "src/components/Layout.tsx",
+    "src/components/MobileNavigation.tsx",
+    "src/components/TableOfContents.tsx",
+    "src/components/charts/**",
+    "src/components/catalyst/**",
+    "src/components/ui/**",
+    "src/lib/sections.ts"
   ]
 }

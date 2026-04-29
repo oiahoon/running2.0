@@ -10,6 +10,7 @@ export type ActivityType =
   | 'WeightTraining'
   | 'Yoga'
   | 'CrossTraining'
+  | 'Rowing'
   | 'Other';
 
 export type SportType = 
@@ -272,6 +273,7 @@ export function getActivityIcon(type: ActivityType): string {
     WeightTraining: '🏋️',
     Yoga: '🧘',
     CrossTraining: '💪',
+    Rowing: '🚣',
     Other: '⚡',
   };
   return icons[type] || '⚡';
@@ -287,6 +289,7 @@ export function getActivityColor(type: ActivityType): string {
     WeightTraining: 'red',
     Yoga: 'pink',
     CrossTraining: 'yellow',
+    Rowing: 'cyan',
     Other: 'gray',
   };
   return colors[type] || 'gray';
