@@ -41,6 +41,14 @@ function formatDistanceKm(valueKm?: number) {
   return `${Number(valueKm || 0).toFixed(1)} km`
 }
 
+function dateKey(date: Date) {
+  return date.toISOString().slice(0, 10)
+}
+
+function parseDateKey(value: string) {
+  return new Date(`${value}T00:00:00.000Z`)
+}
+
 function monthLabel(month: string, fallbackIndex: number) {
   const parsed = new Date(`${month}-01T00:00:00`)
   if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleDateString('en-US', { month: 'short' })
@@ -124,21 +132,95 @@ function EffortMix({ activities }: { activities: ActivityLike[] }) {
 
 function ConsistencyHeatmap({ data }: { data: DailyStat[] }) {
   const maxDistance = Math.max(...data.map((item) => item.distance), 1)
-  const cells = data.slice(-98)
+  const byDate = new Map(data.map((item) => [item.date, item]))
+  const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date))
+  const latestDate = sortedData.length > 0
+    ? parseDateKey(sortedData[sortedData.length - 1].date)
+    : new Date()
+  const lastSaturday = new Date(latestDate)
+  lastSaturday.setUTCDate(latestDate.getUTCDate() + (6 - latestDate.getUTCDay()))
+  const cells = Array.from({ length: 98 }, (_, index) => {
+    const date = new Date(lastSaturday)
+    date.setUTCDate(lastSaturday.getUTCDate() - 97 + index)
+    const key = dateKey(date)
+    const day = byDate.get(key) || { date: key, activities: 0, distance: 0, duration: 0 }
+    return {
+      ...day,
+      column: Math.floor(index / 7),
+      dayOfWeek: date.getUTCDay(),
+      isFuture: date > latestDate,
+      month: date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
+    }
+  })
+  const monthLabels = cells.reduce<Array<{ month: string; column: number }>>((labels, day) => {
+    if (day.dayOfWeek !== 0) return labels
+    const previous = labels.at(-1)
+    if (previous?.month === day.month || (previous && day.column - previous.column < 3)) return labels
+    labels.push({ month: day.month, column: day.column })
+    return labels
+  }, [])
+  const weekdayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 
   return (
-    <div className="grid grid-cols-14 gap-1">
-      {cells.map((day) => {
-        const intensity = Math.min(day.distance / maxDistance, 1)
-        return (
+    <div className="space-y-3">
+      <div className="w-full overflow-x-auto pb-1">
+        <div className="grid w-fit grid-cols-[2rem_auto] gap-x-2 gap-y-1">
+          <div />
           <div
-            key={day.date}
-            title={`${day.date}: ${formatDistanceKm(day.distance)}`}
-            className="aspect-square rounded-[4px] border border-[var(--line)]"
-            style={{ backgroundColor: `rgba(93, 255, 157, ${0.08 + intensity * 0.72})` }}
+            className="relative h-4 text-[10px] text-[var(--text-muted)]"
+            style={{ width: 'calc(14 * 0.875rem + 13 * 0.25rem)' }}
+          >
+            {monthLabels.map((label) => (
+              <span
+                key={`${label.month}-${label.column}`}
+                className="absolute top-0"
+                style={{ left: `calc(${label.column} * (0.875rem + 0.25rem))` }}
+              >
+                {label.month}
+              </span>
+            ))}
+          </div>
+          <div
+            className="grid gap-1 text-right text-[10px] leading-none text-[var(--text-muted)]"
+            style={{ gridTemplateRows: 'repeat(7, 0.875rem)' }}
+          >
+            {weekdayLabels.map((label, index) => (
+              <div key={index} className="flex items-center justify-end">{label}</div>
+            ))}
+          </div>
+          <div
+            className="grid grid-flow-col gap-1"
+            style={{
+              gridTemplateColumns: 'repeat(14, 0.875rem)',
+              gridTemplateRows: 'repeat(7, 0.875rem)',
+            }}
+          >
+            {cells.map((day) => {
+              const intensity = day.isFuture ? 0 : Math.min(day.distance / maxDistance, 1)
+              const alpha = day.isFuture ? 0.04 : 0.08 + intensity * 0.72
+              return (
+                <div
+                  key={day.date}
+                  title={`${day.date}: ${day.isFuture ? 'future date' : formatDistanceKm(day.distance)}`}
+                  className="size-3.5 rounded-[3px] border border-[var(--line)]"
+                  style={{ backgroundColor: `rgba(93, 255, 157, ${alpha})` }}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
+        <span>Less</span>
+        {[0.08, 0.24, 0.42, 0.62, 0.8].map((alpha) => (
+          <span
+            key={alpha}
+            className="size-3.5 rounded-[3px] border border-[var(--line)]"
+            style={{ backgroundColor: `rgba(93, 255, 157, ${alpha})` }}
           />
-        )
-      })}
+        ))}
+        <span>More</span>
+      </div>
     </div>
   )
 }
