@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
+import Link from 'next/link'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 
@@ -43,7 +44,7 @@ export default function ActivitiesPage() {
     <div className="space-y-6">
       <section className="panel">
         <div className="panel-body py-6 sm:py-7">
-          <h2 className="section-title">Training Ledger</h2>
+          <h2 className="section-title">Runs Archive</h2>
           <p className="section-subtitle">Filter your records, compare sessions, and inspect execution quality by date and activity type.</p>
         </div>
       </section>
@@ -101,8 +102,8 @@ export default function ActivitiesPage() {
 
       <section className="panel">
         <div className="panel-header flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-[var(--text-strong)]">Activities Table</h3>
-          <span className="text-sm text-[var(--text-muted)]">{pagination ? `Total ${pagination.total} activities` : 'Loading...'}</span>
+          <h3 className="text-lg font-semibold text-[var(--text-strong)]">Runs Table</h3>
+          <span className="text-sm text-[var(--text-muted)]">{pagination ? `Total ${pagination.total} runs` : 'Loading...'}</span>
         </div>
 
         <div className="panel-body">
@@ -133,7 +134,11 @@ export default function ActivitiesPage() {
                     return (
                       <tr key={activity.id} className="border-b border-slate-200 text-[var(--text-strong)] dark:border-white/5 dark:text-gray-200">
                         <td className="py-2 pr-4 text-[var(--text-muted)]">{new Date(activity.start_date || activity.startDate).toLocaleDateString()}</td>
-                        <td className="py-2 pr-4">{activity.name || '-'}</td>
+                        <td className="py-2 pr-4">
+                          <Link href={`/activities/${activity.id}`} className="hover:text-[var(--route-green)]">
+                            {activity.name || '-'}
+                          </Link>
+                        </td>
                         <td className="py-2 pr-4 text-[var(--text-muted)]">{activity.type || '-'}</td>
                         <td className="py-2 pr-4">{(Number(activity.distance || 0) / 1000).toFixed(1)} km</td>
                         <td className="py-2 pr-4">{formatDuration(Number(activity.moving_time || activity.movingTime || 0))}</td>
