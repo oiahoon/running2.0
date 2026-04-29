@@ -1,31 +1,8 @@
-# Documentation Index
+# Docs Entry
 
-This folder is the source-of-truth for current project status.
+This directory is optimized for agentic coding context.
 
-## Active Docs
+Read [agentic/INDEX.md](agentic/INDEX.md), then load only the context pack needed for the current task.
 
-- `current-status.md`
-  - Current functionality
-  - Implementation status
-  - Document/code consistency findings
-- `optimization-plan.md`
-  - Strengths and weaknesses
-  - Phased optimization roadmap
-  - Progress tracking
-- `ui-minimal-guidelines.md`
-  - Minimalist UI language and implementation checklist
-- `uiux-rearchitecture-plan.md`
-  - IA/workflow/layout redesign blueprint
-  - Phased execution and acceptance criteria
-- `deployment/`
-  - Deployment setup and troubleshooting
-- `api/api-design.md`
-  - Historical API design reference (not fully aligned with current implementation)
+Do not use `archive/` as current truth.
 
-## Archived Docs
-
-Historical planning/completion/design docs from the 2025-07 phase are moved to:
-
-- `archive/2025-07/`
-
-Those files are kept for context only and should not be used as current implementation truth.
