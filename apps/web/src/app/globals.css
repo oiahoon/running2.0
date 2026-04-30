@@ -200,10 +200,55 @@
     stroke-dashoffset: 1;
     animation: draw-route 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
+  .route-constellation-runner,
+  .route-constellation-glow {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+    animation: route-constellation-pass var(--route-cycle, 12s) linear infinite;
+    animation-delay: var(--route-delay, 0s);
+  }
+
+  .route-constellation-runner {
+    filter: drop-shadow(0 0 8px color-mix(in srgb, currentColor 60%, transparent));
+  }
+
+  .route-constellation-glow {
+    opacity: 0;
+    filter: blur(1px);
+  }
 }
 
 @keyframes draw-route {
   to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes route-constellation-pass {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  8% {
+    opacity: 0.95;
+  }
+
+  22% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  34% {
+    opacity: 0.72;
+    stroke-dashoffset: 0;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
     stroke-dashoffset: 0;
   }
 }

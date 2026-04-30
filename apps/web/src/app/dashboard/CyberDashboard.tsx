@@ -1,11 +1,20 @@
 'use client'
 
 import { useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
-import { RouteGlyph, RouteTile } from '@/components/routes'
-import { RouteData, inferRouteEffort } from '@/lib/routes'
+import { RouteTile } from '@/components/routes'
+import {
+  RouteData,
+  getEffortColor,
+  inferRouteEffort,
+  normalizeRoute,
+  pointsToPath,
+  resolveRoutePoints,
+  samplePoints,
+} from '@/lib/routes'
 
 type ActivityLike = {
   id: number
@@ -67,6 +76,142 @@ function StatPill({ label, value, sublabel }: { label: string; value: string | n
   )
 }
 
+const constellationColors = [
+  'var(--route-green)',
+  'var(--route-cyan)',
+  'var(--route-lime)',
+  'var(--route-purple)',
+  'var(--route-orange)',
+  'var(--route-red)',
+]
+
+function AnimatedRouteConstellation({
+  activities,
+  width = 760,
+  height = 560,
+}: {
+  activities: ActivityLike[]
+  width?: number
+  height?: number
+}) {
+  const animatedRoutes = useMemo(
+    () =>
+      activities
+        .filter((activity) => resolvePolyline(activity))
+        .slice(0, 14)
+        .map((activity, index) => {
+          const route = routeForActivity(activity)
+          const points = samplePoints(resolveRoutePoints(route), 420)
+          const path = pointsToPath(normalizeRoute(points, width, height, 54))
+          const effortColor = getEffortColor(effortForActivity(activity))
+
+          return {
+            id: activity.id,
+            path,
+            title: activity.name || `${activity.type || 'Run'} route`,
+            color: constellationColors[index % constellationColors.length] || effortColor,
+            effortColor,
+          }
+        })
+        .filter((route) => route.path.length > 0),
+    [activities, height, width]
+  )
+
+  const cycleSeconds = Math.max(animatedRoutes.length * 1.15, 7)
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label="Latest route constellation animation"
+      className="block h-full w-full overflow-hidden"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <rect width={width} height={height} rx="18" fill="rgba(7,10,12,0.58)" />
+      <g opacity="0.8">
+        {Array.from({ length: Math.floor(width / 24) + 1 }, (_, index) => (
+          <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={height} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+        ))}
+        {Array.from({ length: Math.floor(height / 24) + 1 }, (_, index) => (
+          <line key={`hy-${index}`} x1={0} y1={index * 24} x2={width} y2={index * 24} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+        ))}
+      </g>
+
+      {animatedRoutes.length > 0 ? (
+        <>
+          <g>
+            {animatedRoutes.map((route, index) => (
+              <path
+                key={`ghost-${route.id}-${index}`}
+                d={route.path}
+                fill="none"
+                stroke={route.effortColor}
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                opacity="0.18"
+              />
+            ))}
+          </g>
+          <g>
+            {animatedRoutes.map((route, index) => {
+              const animationStyle = {
+                '--route-cycle': `${cycleSeconds}s`,
+                '--route-delay': `${index * 1.15}s`,
+                color: route.color,
+              } as CSSProperties
+
+              return (
+                <g key={`active-${route.id}-${index}`} style={animationStyle}>
+                  <path
+                    d={route.path}
+                    fill="none"
+                    stroke={route.color}
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    pathLength={1}
+                    vectorEffect="non-scaling-stroke"
+                    className="route-constellation-glow"
+                  />
+                  <path
+                    d={route.path}
+                    fill="none"
+                    stroke={route.color}
+                    strokeWidth="5.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    pathLength={1}
+                    vectorEffect="non-scaling-stroke"
+                    className="route-constellation-runner"
+                  >
+                    <title>{route.title}</title>
+                  </path>
+                </g>
+              )
+            })}
+          </g>
+        </>
+      ) : (
+        <g>
+          <path
+            d={`M ${width * 0.22} ${height * 0.58} C ${width * 0.34} ${height * 0.34}, ${width * 0.48} ${height * 0.7}, ${width * 0.62} ${height * 0.46} S ${width * 0.82} ${height * 0.48}, ${width * 0.78} ${height * 0.65}`}
+            fill="none"
+            stroke="rgba(139,154,147,0.5)"
+            strokeDasharray="6 10"
+            strokeLinecap="round"
+            strokeWidth="5"
+          />
+          <text x={width / 2} y={height / 2 + 42} textAnchor="middle" fill="rgba(238,244,233,0.62)" fontSize="13" fontWeight="600">
+            No route shape
+          </text>
+        </g>
+      )}
+    </svg>
+  )
+}
+
 function LoadingRouteWall() {
   return (
     <div className="space-y-6">
@@ -85,18 +230,14 @@ function LoadingRouteWall() {
 export function CyberDashboard() {
   const currentYear = new Date().getFullYear()
   const { data: statsData, isLoading: statsLoading } = useActivityStats(currentYear)
-  const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(18)
+  const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(36)
 
   const routeActivities = useMemo(
-    () => (recentActivities as ActivityLike[]).filter((activity) => resolvePolyline(activity)).slice(0, 12),
+    () => (recentActivities as ActivityLike[]).filter((activity) => resolvePolyline(activity)).slice(0, 14),
     [recentActivities]
   )
 
   const latestActivity = (recentActivities as ActivityLike[])[0]
-  const latestRouteActivity = routeActivities[0] || latestActivity
-  const latestRoute = routeForActivity(latestRouteActivity)
-  const ghostRoutes = routeActivities.slice(1, 7).map(routeForActivity)
-  const latestEffort = effortForActivity(latestRouteActivity)
 
   const basicStats = statsData?.basicStats
   const records = statsData?.personalRecords
@@ -136,19 +277,12 @@ export function CyberDashboard() {
 
           <div className="flex min-h-[420px] flex-col gap-4">
             <div className="relative flex-1 overflow-hidden rounded-3xl border border-[var(--line)] bg-[rgba(7,10,12,0.72)]">
-              <RouteGlyph
-                route={latestRoute}
-                ghostRoutes={ghostRoutes}
-                effort={latestEffort}
-                width={760}
-                height={560}
-                padding={54}
-                strokeWidth={7}
-                maxPoints={520}
-                label={`${latestRouteActivity?.name || 'Latest'} route constellation`}
-              />
+              <AnimatedRouteConstellation activities={routeActivities} />
               <div className="pointer-events-none absolute left-5 top-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
                 Latest constellation
+              </div>
+              <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                {routeActivities.length} live traces
               </div>
             </div>
 

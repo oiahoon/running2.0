@@ -77,4 +77,5 @@ Legacy cyber primitives are not the active visual direction. Reuse them only whe
 - Keep tables readable in light and dark mode.
 - Avoid introducing new nested card layouts.
 - For form controls, make light mode text explicit; do not rely on inherited dark text classes.
+- Dashboard route constellations may animate real route polylines, but should stay route-atlas themed: dark map grid, subdued ghost traces, sequential colored route highlights, and `prefers-reduced-motion` compatibility.
 - Stats consistency heatmaps should use a GitHub-style calendar: continuous week columns, weekday labels, month markers, fixed small cells, horizontal scrolling for the selected year, and a compact Less/More intensity legend.
