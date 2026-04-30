@@ -21,7 +21,7 @@ Recent commits show the project is past the old cyberpunk/mock-data phase:
 - Sync/runtime consolidation and API smoke gate work completed.
 - Legacy static homepage, docs-template UI, Catalyst primitives, Cyber UI primitives, unused Recharts wrappers, and stale pointer docs were removed.
 - English/Chinese/Japanese UI localization added with a global language toggle and localized route-atlas slogan.
-- Favorite runner low-poly cutouts added as distributed UI cameos with reserved space so they stay visible without covering route/poster data.
+- Favorite runner low-poly cutouts added as distributed, unlabeled UI cameos with reserved space so they stay visible without covering route/poster data.
 
 ## Current Product Reality
 

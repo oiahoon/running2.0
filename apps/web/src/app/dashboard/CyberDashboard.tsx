@@ -8,7 +8,7 @@ import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { RouteTile } from '@/components/routes'
 import { useI18n } from '@/lib/i18n'
-import { runnerMuses } from '@/lib/runnerMuses'
+import { runnerMuseCameos } from '@/lib/runnerMuses'
 import {
   RouteData,
   getEffortColor,
@@ -87,7 +87,7 @@ const constellationColors = [
   'var(--route-orange)',
   'var(--route-red)',
 ]
-const SHORTCUT_MUSES = [runnerMuses.sayakaSato, runnerMuses.nozomiTanaka, runnerMuses.seiraFuwa]
+const SHORTCUT_MUSES = runnerMuseCameos.shortcutStrip
 
 function AnimatedRouteConstellation({
   activities,
@@ -276,18 +276,14 @@ export function CyberDashboard() {
               <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg">
                 {t('dashboard.copy')}
               </p>
-              <div className="mt-6 hidden min-h-40 items-end justify-between gap-4 rounded-3xl border border-[var(--line)] bg-[var(--surface)] px-5 pt-4 sm:flex">
-                <div className="max-w-[18rem] pb-4">
-                  <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
-                </div>
+              <div className="mt-4 hidden h-28 items-end justify-end sm:flex">
                 <Image
-                  src={runnerMuses.seiraFuwa.src}
+                  src={runnerMuseCameos.dashboardHero.src}
                   alt=""
                   width={768}
                   height={768}
                   priority
-                  className="h-40 w-32 shrink-0 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)]"
+                  className="h-28 w-32 shrink-0 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)]"
                 />
               </div>
             </div>
@@ -392,36 +388,26 @@ export function CyberDashboard() {
             <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
           </div>
           <div className="panel-body grid gap-2">
-            <div className="mb-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-4">
-              <div className="flex items-end justify-between gap-3">
-                <div className="min-w-0 pb-1">
-                  <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
-                  <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
-                </div>
-                <Image
-                  src={runnerMuses.shieriDrury.src}
-                  alt=""
-                  width={768}
-                  height={768}
-                  loading="eager"
-                  className="h-28 w-24 shrink-0 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)]"
-                />
-              </div>
-              <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="-mt-2 mb-1 flex h-20 items-end justify-end gap-3 px-2">
+              <Image
+                src={runnerMuseCameos.dashboardShortcutLead.src}
+                alt=""
+                width={768}
+                height={768}
+                loading="eager"
+                className="h-20 w-16 shrink-0 object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)]"
+              />
+              <div className="flex items-end gap-2">
                 {SHORTCUT_MUSES.map((runner) => (
-                  <div
+                  <Image
                     key={runner.src}
-                    className="grid aspect-[4/3] min-h-0 place-items-center overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg)]"
-                  >
-                    <Image
-                      src={runner.src}
-                      alt=""
-                      width={768}
-                      height={768}
-                      loading="eager"
-                      className="h-[92%] w-[92%] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
-                    />
-                  </div>
+                    src={runner.src}
+                    alt=""
+                    width={768}
+                    height={768}
+                    loading="eager"
+                    className="h-14 w-12 object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.16)]"
+                  />
                 ))}
               </div>
             </div>

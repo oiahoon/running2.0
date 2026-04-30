@@ -6,7 +6,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
-import { runnerMuses } from '@/lib/runnerMuses'
+import { runnerMuseCameos } from '@/lib/runnerMuses'
 
 type PosterMode = 'month' | 'week'
 
@@ -105,7 +105,7 @@ export default function PostersPage() {
             </div>
             <div className="hidden h-32 w-28 place-items-end self-end md:grid lg:h-40 lg:w-32">
               <Image
-                src={runnerMuses.sayakaSato.src}
+                src={runnerMuseCameos.posterLab.src}
                 alt=""
                 width={768}
                 height={768}
@@ -187,7 +187,7 @@ export default function PostersPage() {
                 </div>
                 {index === 0 ? (
                   <Image
-                    src={runnerMuses.nozomiTanaka.src}
+                    src={runnerMuseCameos.posterSignature.src}
                     alt=""
                     width={768}
                     height={768}
