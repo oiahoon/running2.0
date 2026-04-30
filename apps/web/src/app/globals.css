@@ -60,6 +60,31 @@
     scroll-behavior: smooth;
   }
 
+  html:lang(zh),
+  html:lang(zh-CN) {
+    font-family:
+      var(--font-manrope),
+      var(--font-cjk-sc),
+      'PingFang SC',
+      'Microsoft YaHei',
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
+  html:lang(ja) {
+    font-family:
+      var(--font-manrope),
+      var(--font-cjk-jp),
+      'Hiragino Sans',
+      'Yu Gothic',
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
   body {
     background:
       linear-gradient(rgba(44, 60, 57, 0.08) 1px, transparent 1px),

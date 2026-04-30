@@ -41,6 +41,7 @@ Read this for UI, UX, layout, theme, and page workflow tasks.
 
 - Theme provider uses `next-themes` with class strategy.
 - Use `resolvedTheme` for toggles, not raw `theme`, because `theme` can be `system`.
+- Typography uses Manrope for Latin/numerics, JetBrains Mono for monospace, Noto Sans SC for Simplified Chinese, and Noto Sans JP for Japanese. Keep CJK fonts neutral and data-friendly; avoid decorative handwritten or rounded display fonts for operational UI.
 - Light/dark core tokens live in `globals.css`:
   - `--bg-0`, `--bg-1`, `--bg-2`
   - `--surface`, `--surface-2`

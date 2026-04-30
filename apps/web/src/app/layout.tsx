@@ -1,5 +1,5 @@
 import { type Metadata } from 'next'
-import { JetBrains_Mono, Manrope } from 'next/font/google'
+import { JetBrains_Mono, Manrope, Noto_Sans_JP, Noto_Sans_SC } from 'next/font/google'
 import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
@@ -17,6 +17,22 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-mono',
+})
+
+const notoSansSc = Noto_Sans_SC({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '900'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-cjk-sc',
+})
+
+const notoSansJp = Noto_Sans_JP({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '900'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-cjk-jp',
 })
 
 export const metadata: Metadata = {
@@ -65,7 +81,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={clsx('h-full antialiased', manrope.variable, jetbrainsMono.variable)}
+      className={clsx('h-full antialiased', manrope.variable, jetbrainsMono.variable, notoSansSc.variable, notoSansJp.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-full">
