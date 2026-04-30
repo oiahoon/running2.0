@@ -1,12 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Image from 'next/image'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
-import { runnerMuses } from '@/lib/runnerMuses'
 
 type PosterMode = 'month' | 'week'
 
@@ -94,16 +92,8 @@ export default function PostersPage() {
   return (
     <div className="space-y-6">
       <section className="panel route-atlas-surface overflow-hidden">
-        <div className="panel-body relative py-7">
-          <Image
-            src={runnerMuses.sayakaSato.src}
-            alt=""
-            width={768}
-            height={768}
-            loading="eager"
-            className="pointer-events-none absolute -bottom-12 right-4 hidden h-56 w-56 object-contain opacity-[0.28] drop-shadow-[0_18px_34px_rgba(0,0,0,0.2)] md:block lg:h-64 lg:w-64"
-          />
-          <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="panel-body py-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="route-atlas-label">{t('posters.kicker')}</div>
               <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('posters.title')}</h1>
@@ -140,16 +130,8 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-                <Image
-                  src={runnerMuses.nozomiTanaka.src}
-                  alt=""
-                  width={768}
-                  height={768}
-                  loading="eager"
-                  className="pointer-events-none absolute -bottom-8 -left-12 z-0 h-56 w-56 object-contain opacity-[0.08] dark:opacity-[0.12]"
-                />
-                <div className="relative z-10 flex h-full flex-col">
+              <article key={period.key} className="aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+                <div className="flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
