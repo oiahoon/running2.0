@@ -30,6 +30,7 @@ Read this for UI, UX, layout, theme, and page workflow tasks.
 - Translation state lives in `apps/web/src/lib/i18n.tsx`.
 - `I18nProvider` is wired through `apps/web/src/app/providers.tsx`; use `useI18n()` for visible app copy.
 - The language toggle is an icon button in `apps/web/src/components/AppLayout.tsx` and cycles `en -> zh -> ja`.
+- Locale defaults to the browser language on first visit. Manual language changes are saved as an explicit preference in localStorage and then override browser language on later visits.
 - Keep route names, dashboard slogans, empty states, button labels, and map/sync helper copy in the shared dictionaries instead of hard-coding new visible strings.
 - Current hero slogan:
   - English: "Leave a running trace in every city you reach."

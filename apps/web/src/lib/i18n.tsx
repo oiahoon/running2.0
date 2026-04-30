@@ -5,6 +5,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 export type Locale = 'en' | 'zh' | 'ja'
 
 const storageKey = 'run2.locale'
+const preferenceKey = 'run2.locale.preference'
+const manualPreference = 'manual'
 
 export const localeOptions: Array<{ locale: Locale; label: string; shortLabel: string; htmlLang: string; dateLocale: string }> = [
   { locale: 'en', label: 'English', shortLabel: 'EN', htmlLang: 'en', dateLocale: 'en-US' },
@@ -18,15 +20,29 @@ function isLocale(value: string | null): value is Locale {
   return value === 'en' || value === 'zh' || value === 'ja'
 }
 
+function localeFromBrowser(): Locale {
+  if (typeof window === 'undefined') return 'en'
+  const languages = window.navigator.languages?.length ? window.navigator.languages : [window.navigator.language]
+  const normalized = languages.map((language) => language.toLowerCase())
+
+  if (normalized.some((language) => language.startsWith('zh'))) return 'zh'
+  if (normalized.some((language) => language.startsWith('ja'))) return 'ja'
+  return 'en'
+}
+
 function detectLocale(): Locale {
   if (typeof window === 'undefined') return 'en'
   const saved = window.localStorage.getItem(storageKey)
-  if (isLocale(saved)) return saved
+  const hasManualPreference = window.localStorage.getItem(preferenceKey) === manualPreference
 
-  const language = window.navigator.language.toLowerCase()
-  if (language.startsWith('zh')) return 'zh'
-  if (language.startsWith('ja')) return 'ja'
-  return 'en'
+  if (isLocale(saved) && hasManualPreference) return saved
+
+  if (isLocale(saved) && !window.localStorage.getItem(preferenceKey)) {
+    window.localStorage.setItem(preferenceKey, manualPreference)
+    return saved
+  }
+
+  return localeFromBrowser()
 }
 
 const dictionaries: Record<Locale, Record<string, string>> = {
@@ -929,6 +945,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(nextLocale)
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(storageKey, nextLocale)
+      window.localStorage.setItem(preferenceKey, manualPreference)
       const meta = localeOptions.find((item) => item.locale === nextLocale)
       document.documentElement.lang = meta?.htmlLang || nextLocale
     }
