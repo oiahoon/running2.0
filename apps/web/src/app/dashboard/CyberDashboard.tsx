@@ -87,8 +87,6 @@ const constellationColors = [
   'var(--route-orange)',
   'var(--route-red)',
 ]
-const SHORTCUT_MUSES = runnerMuseCameos.shortcutStrip
-
 function AnimatedRouteConstellation({
   activities,
   noShapeLabel,
@@ -265,27 +263,25 @@ export function CyberDashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="panel route-atlas-surface overflow-hidden">
+      <section className="panel route-atlas-surface overflow-visible">
         <div className="grid min-h-[620px] grid-cols-1 gap-6 p-5 lg:grid-cols-[0.88fr_1.12fr] lg:p-7">
-          <div className="relative flex flex-col justify-between gap-8 overflow-hidden">
-            <div className="relative z-10">
+          <div className="relative flex flex-col justify-between gap-8 overflow-visible">
+            <div className="relative z-10 pb-20 sm:pb-24">
               <div className="route-atlas-label">{t('dashboard.kicker')}</div>
               <h1 className="mt-5 max-w-[720px] text-[clamp(56px,8vw,112px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
                 {t('dashboard.headline')}
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:pr-16 sm:text-lg xl:pr-8">
                 {t('dashboard.copy')}
               </p>
-              <div className="mt-4 hidden h-28 items-end justify-end sm:flex">
-                <Image
-                  src={runnerMuseCameos.dashboardHero.src}
-                  alt=""
-                  width={768}
-                  height={768}
-                  priority
-                  className="h-28 w-32 shrink-0 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)]"
-                />
-              </div>
+              <Image
+                src={runnerMuseCameos.dashboardHero.src}
+                alt=""
+                width={768}
+                height={1152}
+                priority
+                className="pointer-events-none absolute -bottom-10 -right-8 z-20 hidden h-64 w-56 rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)] sm:block xl:-bottom-12 xl:-right-12 xl:h-72 xl:w-64"
+              />
             </div>
 
             <div className="relative z-10 grid grid-cols-2 gap-3">
@@ -388,28 +384,15 @@ export function CyberDashboard() {
             <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
           </div>
           <div className="panel-body grid gap-2">
-            <div className="-mt-2 mb-1 flex h-20 items-end justify-end gap-3 px-2">
+            <div className="relative -mt-5 mb-0 h-28 overflow-visible px-2">
               <Image
                 src={runnerMuseCameos.dashboardShortcutLead.src}
                 alt=""
                 width={768}
                 height={768}
                 loading="eager"
-                className="h-20 w-16 shrink-0 object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)]"
+                className="pointer-events-none absolute -bottom-1 right-6 z-10 h-36 w-32 -rotate-3 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.2)]"
               />
-              <div className="flex items-end gap-2">
-                {SHORTCUT_MUSES.map((runner) => (
-                  <Image
-                    key={runner.src}
-                    src={runner.src}
-                    alt=""
-                    width={768}
-                    height={768}
-                    loading="eager"
-                    className="h-14 w-12 object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.16)]"
-                  />
-                ))}
-              </div>
             </div>
             <Link href="/activities" className="action-secondary justify-start">{t('dashboard.browseRuns')}</Link>
             <Link href="/routes" className="action-secondary justify-start">{t('dashboard.openGallery')}</Link>

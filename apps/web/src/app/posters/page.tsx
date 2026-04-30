@@ -93,27 +93,25 @@ export default function PostersPage() {
 
   return (
     <div className="space-y-6">
-      <section className="panel route-atlas-surface overflow-hidden">
-        <div className="panel-body py-7">
-          <div className="grid gap-5 md:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_auto] lg:items-end">
-            <div>
+      <section className="panel route-atlas-surface overflow-visible">
+        <div className="panel-body relative py-7 md:min-h-[220px] lg:min-h-[232px]">
+          <div className="relative grid gap-5 md:grid-cols-[1fr_auto] lg:items-end">
+            <div className="relative z-10">
               <div className="route-atlas-label">{t('posters.kicker')}</div>
               <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('posters.title')}</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base md:pr-40">
                 {t('posters.copy')}
               </p>
             </div>
-            <div className="hidden h-32 w-28 place-items-end self-end md:grid lg:h-40 lg:w-32">
-              <Image
-                src={runnerMuseCameos.posterLab.src}
-                alt=""
-                width={768}
-                height={768}
-                loading="eager"
-                className="h-full w-full object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
-              />
-            </div>
-            <div className="flex gap-2 self-end">
+            <Image
+              src={runnerMuseCameos.posterLab.src}
+              alt=""
+              width={768}
+              height={768}
+              loading="eager"
+              className="pointer-events-none absolute -top-5 right-28 z-20 hidden h-56 w-44 -rotate-2 object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)] md:block lg:-top-8 lg:right-40 lg:h-64 lg:w-52"
+            />
+            <div className="relative z-30 flex gap-2 self-end">
               <button onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>{t('posters.monthly')}</button>
               <button onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>{t('posters.weekly')}</button>
             </div>
@@ -142,7 +140,7 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+              <article key={period.key} className="relative aspect-[4/5] overflow-visible rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
                 <div className="flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -181,7 +179,7 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <p className={index === 0 ? 'mt-5 pr-24 text-sm leading-6 text-[var(--text-muted)] sm:pr-28' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
+                  <p className={index === 0 ? 'mt-5 pr-32 text-sm leading-6 text-[var(--text-muted)] sm:pr-44' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
                     {t('posters.artifactCopy')}
                   </p>
                 </div>
@@ -192,7 +190,7 @@ export default function PostersPage() {
                     width={768}
                     height={768}
                     loading="eager"
-                    className="pointer-events-none absolute bottom-3 right-4 z-10 hidden h-28 w-24 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)] sm:block"
+                    className="pointer-events-none absolute -bottom-5 -right-3 z-10 hidden h-44 w-36 rotate-2 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)] sm:block"
                   />
                 ) : null}
               </article>

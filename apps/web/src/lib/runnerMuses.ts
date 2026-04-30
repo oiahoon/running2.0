@@ -9,6 +9,11 @@ export const runnerMuses = {
         src: '/assets/runners/seira-fuwa-runner.png',
         role: 'hero-running-cameo',
       },
+      stride: {
+        id: 'seira-fuwa-stride',
+        src: '/assets/runners/seira-fuwa-stride.png',
+        role: 'hero-floating-stride',
+      },
     },
   },
   shieriDrury: {
@@ -50,7 +55,7 @@ export const runnerMuses = {
 } as const
 
 export const runnerMuseCameos = {
-  dashboardHero: runnerMuses.seiraFuwa.variants.run,
+  dashboardHero: runnerMuses.seiraFuwa.variants.stride,
   dashboardShortcutLead: runnerMuses.shieriDrury.variants.stretch,
   posterLab: runnerMuses.sayakaSato.variants.watch,
   posterSignature: runnerMuses.nozomiTanaka.variants.wave,
