@@ -44,7 +44,7 @@ npm run lint
 ```
 
 Notes:
-- Type check and lint may still expose legacy debt. Build is the primary deploy gate today.
+- Type check, lint, and build should all be treated as active local gates after the 2026-04-30 cleanup.
 - For runtime API smoke tests, start the app with an explicit Next-compatible port command, then check `/api/debug`, `/api/stats`, `/api/sync/history`, and `/api/data-sources`.
 
 ## Do Not Load By Default
@@ -52,4 +52,3 @@ Notes:
 - `docs/archive/`
 - `apps/web/public/maps/`
 - SQLite database binaries in `apps/web/data/` or `apps/web/public/`
-- Template/doc-site components unless the task touches them.

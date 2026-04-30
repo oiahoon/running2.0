@@ -7,7 +7,6 @@ Use this to choose files without scanning the whole repository.
 - `apps/web/`: main Next.js app.
 - `scripts/`: sync, migration, map generation, deployment helpers.
 - `.github/workflows/`: CI and scheduled sync.
-- `homepage/`: old/static homepage; not active app surface.
 - `docs/agentic/`: agent-facing source of truth.
 - `docs/archive/`: historical context only.
 
@@ -44,13 +43,10 @@ Use this to choose files without scanning the whole repository.
 ## Shared Frontend
 
 - Active shell: `apps/web/src/components/AppLayout.tsx`
-- Mobile nav legacy/support: `apps/web/src/components/MobileNavigation.tsx`
-- Charts: `apps/web/src/components/charts/`
+- Activity selector: `apps/web/src/components/ActivitySelector.tsx`
 - Maps: `apps/web/src/components/maps/`
-- Personal records: `apps/web/src/components/PersonalRecords.tsx`
-- Catalyst primitives: `apps/web/src/components/catalyst/`
-- Legacy docs/template components: `Docs*`, `Navigation`, `TableOfContents`, `Hero`, `Prose`, `Fence`.
-- Legacy cyber primitives: `apps/web/src/components/ui/`, `CyberAppLayout.tsx`, `CyberActivities.tsx`.
+- Route glyphs/tiles: `apps/web/src/components/routes/`
+- Brand icons: `apps/web/src/components/icons/`
 
 ## Data Layer
 
@@ -75,3 +71,8 @@ Use this to choose files without scanning the whole repository.
 - Deployment prep: `scripts/prepare-vercel-db.js`
 - Diagnostics: `scripts/test-mapbox-token.py`, `scripts/test-strava-connection.py`, `scripts/check-strava-permissions.py`
 
+## Removed Legacy Surfaces
+
+- Static `homepage/` and its manual gh-pages deployment script were retired; production is the Vercel `apps/web` app.
+- Old documentation-template components, Catalyst primitives, Cyber UI primitives, and unused Recharts wrapper components were removed in the 2026-04-30 cleanup.
+- Compatibility pointer docs outside `docs/agentic/` were removed; `docs/agentic/INDEX.md` is the context router.

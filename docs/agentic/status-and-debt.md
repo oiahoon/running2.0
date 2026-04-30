@@ -4,7 +4,7 @@ Use this for current progress, known traps, and backlog. Keep it terse.
 
 ## Last Context Refresh
 
-- Date: 2026-04-29
+- Date: 2026-04-30
 - Branch checked: `master`
 - `git pull --ff-only`: already up to date at refresh time.
 
@@ -19,6 +19,7 @@ Recent commits show the project is past the old cyberpunk/mock-data phase:
 - Next 16 + React 19 upgrade completed.
 - Node/runtime baseline documented around Node 22.
 - Sync/runtime consolidation and API smoke gate work completed.
+- Legacy static homepage, docs-template UI, Catalyst primitives, Cyber UI primitives, unused Recharts wrappers, and stale pointer docs were removed.
 
 ## Current Product Reality
 
@@ -35,8 +36,7 @@ Working:
 Partial:
 - Multi-source architecture exists, but non-Strava sources are incomplete.
 - Nike configuration path exists but should be treated as experimental.
-- TypeScript/lint debt is still present enough that CI may keep them non-blocking.
-- Some legacy template/docs/cyber components remain in the tree.
+- TypeScript/lint should be treated as active quality gates after the 2026-04-30 legacy cleanup; if they fail, investigate as current debt.
 
 ## Known Traps
 
@@ -47,13 +47,11 @@ Partial:
 - Avoid scanning all static maps or DB binaries during general tasks.
 - `quality-gate.yml` may need periodic alignment with Node 22 and the current start command.
 - `sync-data.yml` may need periodic alignment with current runtime/dependency baseline.
+- Historical plans and removed UI experiments now live only under `docs/archive/`.
 
 ## Backlog
 
-- Make type-check/lint hard-gate once legacy issues are fixed.
-- Retire or remove unused cyber/template UI primitives.
 - Consolidate repeated SQL into repository/helpers where it reduces real duplication.
 - Add integration tests for data-source lifecycle and sync logging.
 - Harden multi-source support only after Strava path remains stable.
 - Review GitHub Actions Node versions and smoke command syntax after runtime upgrades.
-

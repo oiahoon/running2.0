@@ -30,7 +30,7 @@ npm run build --workspace=apps/web
 Important:
 - `apps/web/package.json` uses `next build --webpack`.
 - `apps/web/vercel.json` forces Vercel to run `npm run build`.
-- This avoids known Next 16/Turbopack CSS parsing issues from Tailwind/Catalyst syntax.
+- Keep this explicit until Turbopack has been revalidated with the current Tailwind/Next stack.
 
 ## Vercel
 
@@ -43,14 +43,14 @@ Important:
 - Node version on project should stay aligned to Node 22.x.
 
 Known deploy trap:
-- If Vercel uses `next build` directly, it may invoke Turbopack and fail on CSS generated from Catalyst/Tailwind syntax.
+- If Vercel uses `next build` directly, it may invoke a different bundler path than local verification.
 - Keep project-level or repo-level build command as `npm run build`.
 
 ## Quality Gate
 
 - Workflow: `.github/workflows/quality-gate.yml`
 - Should run install, type-check, lint, build, and API smoke checks.
-- Type-check/lint are legacy-debt aware and may be non-blocking.
+- Type-check and lint should be treated as current quality gates after the 2026-04-30 legacy cleanup.
 - API smoke checks should hit:
   - `/api/debug`
   - `/api/stats`

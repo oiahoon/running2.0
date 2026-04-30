@@ -62,12 +62,11 @@ Use these before adding new one-off card/button styles.
 
 ## Component Areas
 
-- Charts: `apps/web/src/components/charts/`
 - Map views: `apps/web/src/components/maps/`
-- Catalyst primitives: `apps/web/src/components/catalyst/`
-- Legacy cyber primitives: `apps/web/src/components/ui/` and some `Cyber*` files.
+- Route visuals: `apps/web/src/components/routes/`
+- Brand/icons: `apps/web/src/components/icons/`
 
-Legacy cyber primitives are not the active visual direction. Reuse them only when a task explicitly touches them.
+Legacy cyber/template/Catalyst component islands were removed in the 2026-04-30 cleanup. Keep new UI in the active app shell and page-local components unless a shared primitive is genuinely reused.
 
 ## UI Guardrails
 
