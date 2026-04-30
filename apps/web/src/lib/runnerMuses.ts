@@ -65,3 +65,16 @@ export const runnerMuseCameos = {
     runnerMuses.seiraFuwa.variants.run,
   ],
 } as const
+
+export const runnerPosterBackgrounds = {
+  run: [
+    runnerMuses.seiraFuwa.variants.stride,
+    runnerMuses.seiraFuwa.variants.run,
+    runnerMuses.sayakaSato.variants.watch,
+  ],
+  walk: [
+    runnerMuses.nozomiTanaka.variants.wave,
+    runnerMuses.shieriDrury.variants.stretch,
+    runnerMuses.sayakaSato.variants.watch,
+  ],
+} as const

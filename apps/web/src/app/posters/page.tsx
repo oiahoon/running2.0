@@ -6,7 +6,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
-import { runnerMuseCameos } from '@/lib/runnerMuses'
+import { runnerMuseCameos, runnerPosterBackgrounds } from '@/lib/runnerMuses'
 
 type PosterMode = 'month' | 'week'
 
@@ -72,6 +72,24 @@ function formatDuration(seconds?: number) {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
 }
 
+function stableIndex(seed: string, length: number) {
+  let hash = 0
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0
+  }
+  return hash % length
+}
+
+function isWalkLikePeriod(items: ActivityLike[], averageSpeedMetersPerSecond: number) {
+  const walkLikeCount = items.filter((activity) => {
+    const type = String(activity.type || '').toLowerCase()
+    return type.includes('walk') || type.includes('hike')
+  }).length
+
+  if (walkLikeCount >= Math.ceil(items.length / 2)) return true
+  return averageSpeedMetersPerSecond > 0 && averageSpeedMetersPerSecond < 2.35
+}
+
 export default function PostersPage() {
   const { t, dateLocale } = useI18n()
   const [mode, setMode] = useState<PosterMode>('month')
@@ -129,9 +147,14 @@ export default function PostersPage() {
       {!isLoading && !error ? (
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {periods.map((period, index) => {
-            const totalDistanceKm = period.items.reduce((sum, activity) => sum + Number(activity.distance || 0) / 1000, 0)
+            const totalDistanceMeters = period.items.reduce((sum, activity) => sum + Number(activity.distance || 0), 0)
+            const totalDistanceKm = totalDistanceMeters / 1000
             const totalTime = period.items.reduce((sum, activity) => sum + Number(activity.moving_time || 0), 0)
             const representative = period.items[0]
+            const averageSpeed = totalTime > 0 ? totalDistanceMeters / totalTime : Number(representative.average_speed || 0)
+            const movementKind = isWalkLikePeriod(period.items, averageSpeed) ? 'walk' : 'run'
+            const backgroundOptions = runnerPosterBackgrounds[movementKind]
+            const backgroundRunner = backgroundOptions[stableIndex(`${period.key}-${mode}`, backgroundOptions.length)]
             const fingerprints = period.items
               .map((activity) => calculateRouteFingerprint({ encodedPolyline: routePolyline(activity) }))
               .filter(Boolean)
@@ -140,8 +163,16 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="relative aspect-[4/5] overflow-visible rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-                <div className="flex h-full flex-col">
+              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+                <Image
+                  src={backgroundRunner.src}
+                  alt=""
+                  width={768}
+                  height={768}
+                  loading="lazy"
+                  className="pointer-events-none absolute -bottom-8 -right-8 z-0 h-[38%] w-[38%] rotate-3 object-contain opacity-[0.10] dark:opacity-[0.14]"
+                />
+                <div className="relative z-10 flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
@@ -179,20 +210,10 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <p className={index === 0 ? 'mt-5 pr-32 text-sm leading-6 text-[var(--text-muted)] sm:pr-44' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
+                  <p className={index === 0 ? 'mt-5 pr-28 text-sm leading-6 text-[var(--text-muted)] sm:pr-32' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
                     {t('posters.artifactCopy')}
                   </p>
                 </div>
-                {index === 0 ? (
-                  <Image
-                    src={runnerMuseCameos.posterSignature.src}
-                    alt=""
-                    width={768}
-                    height={768}
-                    loading="eager"
-                    className="pointer-events-none absolute -bottom-5 -right-3 z-10 hidden h-44 w-36 rotate-2 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)] sm:block"
-                  />
-                ) : null}
               </article>
             )
           })}
