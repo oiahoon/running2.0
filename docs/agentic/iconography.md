@@ -50,3 +50,4 @@ Static brand assets:
 - Buttons may include icons when the action benefits from fast scanning.
 - Empty states should use one quiet icon plus text, not emoji-only illustrations.
 - For social and favicon assets, use the route-loop mark, not a screenshot or generated bitmap.
+- Low-poly runner character PNGs in `apps/web/public/assets/runners/` are decorative illustration accents, not part of the reusable icon system. Keep action/navigation symbols vector-first.

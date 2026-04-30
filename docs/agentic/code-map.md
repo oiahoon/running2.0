@@ -48,6 +48,8 @@ Use this to choose files without scanning the whole repository.
 - Route glyphs/tiles: `apps/web/src/components/routes/`
 - Brand icons: `apps/web/src/components/icons/`
 - Localization provider/dictionaries: `apps/web/src/lib/i18n.tsx`
+- Favorite runner illustration registry: `apps/web/src/lib/runnerMuses.ts`
+- Favorite runner cutout assets: `apps/web/public/assets/runners/`
 
 ## Data Layer
 

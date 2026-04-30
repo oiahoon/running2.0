@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
+import { runnerMuses } from '@/lib/runnerMuses'
 
 type PosterMode = 'month' | 'week'
 
@@ -91,9 +93,17 @@ export default function PostersPage() {
 
   return (
     <div className="space-y-6">
-      <section className="panel route-atlas-surface">
-        <div className="panel-body py-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="panel route-atlas-surface overflow-hidden">
+        <div className="panel-body relative py-7">
+          <Image
+            src={runnerMuses.sayakaSato.src}
+            alt=""
+            width={768}
+            height={768}
+            loading="eager"
+            className="pointer-events-none absolute -bottom-12 right-4 hidden h-56 w-56 object-contain opacity-[0.28] drop-shadow-[0_18px_34px_rgba(0,0,0,0.2)] md:block lg:h-64 lg:w-64"
+          />
+          <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="route-atlas-label">{t('posters.kicker')}</div>
               <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('posters.title')}</h1>
@@ -130,47 +140,57 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="aspect-[4/5] rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
-                    <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--text-strong)]">{formatPeriodLabel(period.key, mode, dateLocale, t)}</h2>
+              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+                <Image
+                  src={runnerMuses.nozomiTanaka.src}
+                  alt=""
+                  width={768}
+                  height={768}
+                  loading="eager"
+                  className="pointer-events-none absolute -bottom-8 -left-12 z-0 h-56 w-56 object-contain opacity-[0.08] dark:opacity-[0.12]"
+                />
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
+                      <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--text-strong)]">{formatPeriodLabel(period.key, mode, dateLocale, t)}</h2>
+                    </div>
+                    <div className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--route-green)]">
+                      {t('posters.routes', { count: period.items.length })}
+                    </div>
                   </div>
-                  <div className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--route-green)]">
-                    {t('posters.routes', { count: period.items.length })}
-                  </div>
-                </div>
 
-                <div className="mt-5 aspect-square overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
-                  <RouteGlyph
-                    route={{ encodedPolyline: routePolyline(representative) }}
-                    ghostRoutes={period.items.slice(1, 8).map((activity) => ({ encodedPolyline: routePolyline(activity) }))}
-                    effort={effortForActivity(representative)}
-                    padding={42}
-                    strokeWidth={6}
-                    maxPoints={360}
-                    label={`${formatPeriodLabel(period.key, mode, dateLocale, t)} route poster`}
-                  />
-                </div>
+                  <div className="mt-5 aspect-square overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
+                    <RouteGlyph
+                      route={{ encodedPolyline: routePolyline(representative) }}
+                      ghostRoutes={period.items.slice(1, 8).map((activity) => ({ encodedPolyline: routePolyline(activity) }))}
+                      effort={effortForActivity(representative)}
+                      padding={42}
+                      strokeWidth={6}
+                      maxPoints={360}
+                      label={`${formatPeriodLabel(period.key, mode, dateLocale, t)} route poster`}
+                    />
+                  </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3">
-                  <div>
-                    <div className="route-atlas-label">{t('common.distance')}</div>
-                    <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{totalDistanceKm.toFixed(1)} km</div>
+                  <div className="mt-5 grid grid-cols-3 gap-3">
+                    <div>
+                      <div className="route-atlas-label">{t('common.distance')}</div>
+                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{totalDistanceKm.toFixed(1)} km</div>
+                    </div>
+                    <div>
+                      <div className="route-atlas-label">{t('common.time')}</div>
+                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{formatDuration(totalTime)}</div>
+                    </div>
+                    <div>
+                      <div className="route-atlas-label">{t('posters.shape')}</div>
+                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{Math.round(averageComplexity * 100)}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="route-atlas-label">{t('common.time')}</div>
-                    <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{formatDuration(totalTime)}</div>
-                  </div>
-                  <div>
-                    <div className="route-atlas-label">{t('posters.shape')}</div>
-                    <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{Math.round(averageComplexity * 100)}</div>
-                  </div>
-                </div>
 
-                <p className="mt-5 text-sm leading-6 text-[var(--text-muted)]">
-                  {t('posters.artifactCopy')}
-                </p>
+                  <p className="mt-5 text-sm leading-6 text-[var(--text-muted)]">
+                    {t('posters.artifactCopy')}
+                  </p>
+                </div>
               </article>
             )
           })}

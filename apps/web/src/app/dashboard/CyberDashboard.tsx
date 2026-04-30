@@ -2,11 +2,13 @@
 
 import { useMemo } from 'react'
 import type { CSSProperties } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { RouteTile } from '@/components/routes'
 import { useI18n } from '@/lib/i18n'
+import { runnerMuses } from '@/lib/runnerMuses'
 import {
   RouteData,
   getEffortColor,
@@ -264,8 +266,17 @@ export function CyberDashboard() {
     <div className="space-y-6">
       <section className="panel route-atlas-surface overflow-hidden">
         <div className="grid min-h-[620px] grid-cols-1 gap-6 p-5 lg:grid-cols-[0.88fr_1.12fr] lg:p-7">
-          <div className="flex flex-col justify-between gap-8">
-            <div>
+          <div className="relative flex flex-col justify-between gap-8 overflow-hidden">
+            <Image
+              src={runnerMuses.seiraFuwa.src}
+              alt=""
+              width={768}
+              height={768}
+              priority
+              className="pointer-events-none absolute bottom-40 right-0 z-20 hidden h-40 w-40 object-contain opacity-75 drop-shadow-[0_18px_36px_rgba(0,0,0,0.28)] xl:block"
+            />
+            <div className="pointer-events-none absolute bottom-44 right-8 z-0 hidden h-32 w-32 rounded-full bg-[var(--route-green)]/10 blur-sm xl:block" />
+            <div className="relative z-10">
               <div className="route-atlas-label">{t('dashboard.kicker')}</div>
               <h1 className="mt-5 max-w-[720px] text-[clamp(56px,8vw,112px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
                 {t('dashboard.headline')}
@@ -275,7 +286,7 @@ export function CyberDashboard() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="relative z-10 grid grid-cols-2 gap-3">
               <StatPill label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
               <StatPill label={t('dashboard.runs')} value={runCount} />
               <StatPill label={t('dashboard.recentRoutes')} value={routeCount} sublabel={t('dashboard.withGpsShape')} />
@@ -375,6 +386,20 @@ export function CyberDashboard() {
             <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
           </div>
           <div className="panel-body grid gap-2">
+            <div className="relative mb-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-4">
+              <Image
+                src={runnerMuses.shieriDrury.src}
+                alt={t('runnerMuses.stretchAlt')}
+                width={768}
+                height={768}
+                loading="eager"
+                className="absolute bottom-1 right-0 z-0 h-36 w-36 object-contain opacity-95 drop-shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
+              />
+              <div className="relative z-10 max-w-[11rem]">
+                <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
+                <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
+              </div>
+            </div>
             <Link href="/activities" className="action-secondary justify-start">{t('dashboard.browseRuns')}</Link>
             <Link href="/routes" className="action-secondary justify-start">{t('dashboard.openGallery')}</Link>
             <Link href="/posters" className="action-secondary justify-start">{t('dashboard.generatePosters')}</Link>
