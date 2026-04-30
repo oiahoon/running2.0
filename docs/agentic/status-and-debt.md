@@ -36,6 +36,7 @@ Working:
 - Data Sources page reads persisted data source settings.
 - Strava is the production-ready source.
 - Vercel deployment for `run2` works with repo-level `apps/web/vercel.json`.
+- Manual sync from `/sync` works through GitHub Actions dispatch. Latest verified run: `25165016166` on 2026-04-30, committed `9c086bf`, and production `/api/sync/history` reflected the new log.
 
 Partial:
 - Multi-source architecture exists, but non-Strava sources are incomplete.

@@ -14,6 +14,12 @@ Read this for Strava sync, static maps, data import scripts, and scheduled data 
 
 Manual sync from the app should dispatch `.github/workflows/sync-data.yml`; it should not run Strava import inside a Vercel function. Vercel only has a `/tmp` copy of the SQLite database, so runtime writes are not durable and will not update the committed data file.
 
+Manual sync was verified end-to-end on 2026-04-30 after refreshing the GitHub dispatch token:
+- `POST https://run2.miaowu.org/api/sync` returned `202` and queued `sync-data.yml`.
+- GitHub Actions run `25165016166` completed successfully from `workflow_dispatch`.
+- The workflow committed data update `9c086bfbdb153cac2b2f49aad0d5a7408a1b7a86`.
+- Production `/api/sync/history` reflected the new sync log at `2026-04-30T12:21:33.379Z`.
+
 ## Runtime Sync
 
 - Direct Strava executor: `apps/web/src/app/api/sync/strava/route.ts`
@@ -66,6 +72,8 @@ Vercel/runtime:
 - `NEXT_PUBLIC_APP_URL`
 
 `GITHUB_ACTIONS_TRIGGER_TOKEN` should be a narrowly scoped GitHub fine-grained token that can dispatch Actions for this repository. Do not store Strava access or refresh tokens in the committed SQLite database.
+
+If manual sync returns a GitHub dispatch error, first verify the Vercel value of `GITHUB_ACTIONS_TRIGGER_TOKEN`. Local `gh auth status` is not authoritative for the production manual-sync path.
 
 ## Generated Assets
 
