@@ -87,7 +87,7 @@ const constellationColors = [
   'var(--route-orange)',
   'var(--route-red)',
 ]
-const RUNNER_MUSE_LIST = Object.values(runnerMuses)
+const SHORTCUT_MUSES = [runnerMuses.sayakaSato, runnerMuses.nozomiTanaka, runnerMuses.seiraFuwa]
 
 function AnimatedRouteConstellation({
   activities,
@@ -276,6 +276,20 @@ export function CyberDashboard() {
               <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg">
                 {t('dashboard.copy')}
               </p>
+              <div className="mt-6 hidden min-h-40 items-end justify-between gap-4 rounded-3xl border border-[var(--line)] bg-[var(--surface)] px-5 pt-4 sm:flex">
+                <div className="max-w-[18rem] pb-4">
+                  <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
+                  <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
+                </div>
+                <Image
+                  src={runnerMuses.seiraFuwa.src}
+                  alt=""
+                  width={768}
+                  height={768}
+                  priority
+                  className="h-40 w-32 shrink-0 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)]"
+                />
+              </div>
             </div>
 
             <div className="relative z-10 grid grid-cols-2 gap-3">
@@ -379,15 +393,25 @@ export function CyberDashboard() {
           </div>
           <div className="panel-body grid gap-2">
             <div className="mb-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-4">
-              <div>
-                <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
-                <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
+              <div className="flex items-end justify-between gap-3">
+                <div className="min-w-0 pb-1">
+                  <div className="route-atlas-label">{t('runnerMuses.kicker')}</div>
+                  <p className="mt-2 text-sm leading-5 text-[var(--text-muted)]">{t('runnerMuses.copy')}</p>
+                </div>
+                <Image
+                  src={runnerMuses.shieriDrury.src}
+                  alt=""
+                  width={768}
+                  height={768}
+                  loading="eager"
+                  className="h-28 w-24 shrink-0 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)]"
+                />
               </div>
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {RUNNER_MUSE_LIST.map((runner) => (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {SHORTCUT_MUSES.map((runner) => (
                   <div
                     key={runner.src}
-                    className="grid aspect-square min-h-0 place-items-center overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg)]"
+                    className="grid aspect-[4/3] min-h-0 place-items-center overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg)]"
                   >
                     <Image
                       src={runner.src}
@@ -395,7 +419,7 @@ export function CyberDashboard() {
                       width={768}
                       height={768}
                       loading="eager"
-                      className="h-[88%] w-[88%] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
+                      className="h-[92%] w-[92%] object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
                     />
                   </div>
                 ))}

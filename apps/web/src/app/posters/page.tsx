@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
+import { runnerMuses } from '@/lib/runnerMuses'
 
 type PosterMode = 'month' | 'week'
 
@@ -93,7 +95,7 @@ export default function PostersPage() {
     <div className="space-y-6">
       <section className="panel route-atlas-surface overflow-hidden">
         <div className="panel-body py-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid gap-5 md:grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_auto] lg:items-end">
             <div>
               <div className="route-atlas-label">{t('posters.kicker')}</div>
               <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('posters.title')}</h1>
@@ -101,7 +103,17 @@ export default function PostersPage() {
                 {t('posters.copy')}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="hidden h-32 w-28 place-items-end self-end md:grid lg:h-40 lg:w-32">
+              <Image
+                src={runnerMuses.sayakaSato.src}
+                alt=""
+                width={768}
+                height={768}
+                loading="eager"
+                className="h-full w-full object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
+              />
+            </div>
+            <div className="flex gap-2 self-end">
               <button onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>{t('posters.monthly')}</button>
               <button onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>{t('posters.weekly')}</button>
             </div>
@@ -118,7 +130,7 @@ export default function PostersPage() {
 
       {!isLoading && !error ? (
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          {periods.map((period) => {
+          {periods.map((period, index) => {
             const totalDistanceKm = period.items.reduce((sum, activity) => sum + Number(activity.distance || 0) / 1000, 0)
             const totalTime = period.items.reduce((sum, activity) => sum + Number(activity.moving_time || 0), 0)
             const representative = period.items[0]
@@ -130,7 +142,7 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
                 <div className="flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -169,10 +181,20 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <p className="mt-5 text-sm leading-6 text-[var(--text-muted)]">
+                  <p className={index === 0 ? 'mt-5 pr-24 text-sm leading-6 text-[var(--text-muted)] sm:pr-28' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
                     {t('posters.artifactCopy')}
                   </p>
                 </div>
+                {index === 0 ? (
+                  <Image
+                    src={runnerMuses.nozomiTanaka.src}
+                    alt=""
+                    width={768}
+                    height={768}
+                    loading="eager"
+                    className="pointer-events-none absolute bottom-3 right-4 z-10 hidden h-28 w-24 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.22)] sm:block"
+                  />
+                ) : null}
               </article>
             )
           })}
