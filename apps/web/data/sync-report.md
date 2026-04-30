@@ -1,8 +1,8 @@
-## Sync Report - 2026-04-29 16:15:54 UTC
+## Sync Report - 2026-04-30 06:53:00 UTC
 
-- Basic activities: 810
-- Detailed activities: 6
-- Database records: 810
-- Static maps: 456 files (49M)
+- Basic activities: 836
+- Detailed activities: 18
+- Database records: 836
+- Static maps: 469 files (50M)
 
-Last sync: 2026-04-29 16:15:54 UTC
+Last sync: 2026-04-30 06:53:00 UTC
