@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useActivityStats, useActivities } from '@/lib/hooks/useActivities'
 import { formatDuration } from '@/lib/database/models/Activity'
 import { RouteGlyph } from '@/components/routes'
@@ -43,10 +43,6 @@ function formatDistanceKm(valueKm?: number) {
 
 function dateKey(date: Date) {
   return date.toISOString().slice(0, 10)
-}
-
-function parseDateKey(value: string) {
-  return new Date(`${value}T00:00:00.000Z`)
 }
 
 function monthLabel(month: string, fallbackIndex: number) {
@@ -130,25 +126,38 @@ function EffortMix({ activities }: { activities: ActivityLike[] }) {
   )
 }
 
-function ConsistencyHeatmap({ data }: { data: DailyStat[] }) {
+function ConsistencyHeatmap({ data, year }: { data: DailyStat[]; year: number }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
   const maxDistance = Math.max(...data.map((item) => item.distance), 1)
   const byDate = new Map(data.map((item) => [item.date, item]))
-  const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date))
-  const latestDate = sortedData.length > 0
-    ? parseDateKey(sortedData[sortedData.length - 1].date)
-    : new Date()
-  const lastSaturday = new Date(latestDate)
-  lastSaturday.setUTCDate(latestDate.getUTCDate() + (6 - latestDate.getUTCDay()))
-  const cells = Array.from({ length: 98 }, (_, index) => {
+  const today = new Date()
+  const currentYear = today.getFullYear()
+  const startDate = new Date(Date.UTC(year, 0, 1))
+  const endDate = new Date(Date.UTC(year, 11, 31))
+  const firstSunday = new Date(startDate)
+  firstSunday.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay())
+  const lastSaturday = new Date(endDate)
+  lastSaturday.setUTCDate(endDate.getUTCDate() + (6 - endDate.getUTCDay()))
+  const activeDate = year === currentYear ? today : endDate
+  const visibleEndDate = year === currentYear && activeDate < endDate ? activeDate : endDate
+  const dayCount = Math.round((lastSaturday.getTime() - firstSunday.getTime()) / 86400000) + 1
+  const columnCount = Math.ceil(dayCount / 7)
+  const cellSize = 14
+  const cellGap = 4
+  const heatmapWidth = columnCount * cellSize + (columnCount - 1) * cellGap
+  const activeColumn = Math.max(0, Math.floor((activeDate.getTime() - firstSunday.getTime()) / 86400000 / 7))
+  const cells = Array.from({ length: dayCount }, (_, index) => {
     const date = new Date(lastSaturday)
-    date.setUTCDate(lastSaturday.getUTCDate() - 97 + index)
+    date.setTime(firstSunday.getTime())
+    date.setUTCDate(firstSunday.getUTCDate() + index)
     const key = dateKey(date)
     const day = byDate.get(key) || { date: key, activities: 0, distance: 0, duration: 0 }
+    const isOutsideYear = date.getUTCFullYear() !== year
     return {
       ...day,
       column: Math.floor(index / 7),
       dayOfWeek: date.getUTCDay(),
-      isFuture: date > latestDate,
+      isDimmed: isOutsideYear || date > visibleEndDate,
       month: date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
     }
   })
@@ -161,20 +170,28 @@ function ConsistencyHeatmap({ data }: { data: DailyStat[] }) {
   }, [])
   const weekdayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 
+  useEffect(() => {
+    const node = scrollRef.current
+    if (!node) return
+    const cellPitch = cellSize + cellGap
+    const target = activeColumn * cellPitch - node.clientWidth + 160
+    node.scrollLeft = Math.max(target, 0)
+  }, [activeColumn])
+
   return (
     <div className="space-y-3">
-      <div className="w-full overflow-x-auto pb-1">
-        <div className="grid w-fit grid-cols-[2rem_auto] gap-x-2 gap-y-1">
+      <div ref={scrollRef} className="w-full overflow-x-auto pb-2">
+        <div className="grid min-w-full w-fit grid-cols-[2rem_auto] gap-x-2 gap-y-1">
           <div />
           <div
             className="relative h-4 text-[10px] text-[var(--text-muted)]"
-            style={{ width: 'calc(14 * 0.875rem + 13 * 0.25rem)' }}
+            style={{ width: heatmapWidth }}
           >
             {monthLabels.map((label) => (
               <span
                 key={`${label.month}-${label.column}`}
                 className="absolute top-0"
-                style={{ left: `calc(${label.column} * (0.875rem + 0.25rem))` }}
+                style={{ left: label.column * (cellSize + cellGap) }}
               >
                 {label.month}
               </span>
@@ -191,17 +208,17 @@ function ConsistencyHeatmap({ data }: { data: DailyStat[] }) {
           <div
             className="grid grid-flow-col gap-1"
             style={{
-              gridTemplateColumns: 'repeat(14, 0.875rem)',
-              gridTemplateRows: 'repeat(7, 0.875rem)',
+              gridTemplateColumns: `repeat(${columnCount}, ${cellSize}px)`,
+              gridTemplateRows: `repeat(7, ${cellSize}px)`,
             }}
           >
             {cells.map((day) => {
-              const intensity = day.isFuture ? 0 : Math.min(day.distance / maxDistance, 1)
-              const alpha = day.isFuture ? 0.04 : 0.08 + intensity * 0.72
+              const intensity = day.isDimmed ? 0 : Math.min(day.distance / maxDistance, 1)
+              const alpha = day.isDimmed ? 0.04 : 0.08 + intensity * 0.72
               return (
                 <div
                   key={day.date}
-                  title={`${day.date}: ${day.isFuture ? 'future date' : formatDistanceKm(day.distance)}`}
+                  title={`${day.date}: ${day.isDimmed ? 'outside selected range' : formatDistanceKm(day.distance)}`}
                   className="size-3.5 rounded-[3px] border border-[var(--line)]"
                   style={{ backgroundColor: `rgba(93, 255, 157, ${alpha})` }}
                 />
@@ -428,7 +445,7 @@ export default function StatsPage() {
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <LabPanel title="Consistency Heatmap" copy="Recent training density shows how often the year actually moved.">
-          <ConsistencyHeatmap data={dailyData} />
+          <ConsistencyHeatmap data={dailyData} year={selectedYear} />
         </LabPanel>
         <LabPanel title="Weekday Rhythm" copy="Weekly rhythm reveals when distance tends to land.">
           <WeekdayRhythm activities={activities} />
