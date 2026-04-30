@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
+import { useI18n } from '@/lib/i18n'
 
 type PosterMode = 'month' | 'week'
 
@@ -52,11 +53,14 @@ function dayOfYear(date: Date) {
   return Math.floor((date.getTime() - start.getTime()) / 86400000)
 }
 
-function formatPeriodLabel(key: string, mode: PosterMode) {
-  if (key === 'unknown') return 'Unknown period'
-  if (mode === 'week') return key.replace('-W', ' / Week ')
+function formatPeriodLabel(key: string, mode: PosterMode, dateLocale: string, t: (key: string, vars?: Record<string, string | number>) => string) {
+  if (key === 'unknown') return t('posters.unknownPeriod')
+  if (mode === 'week') {
+    const [year, week] = key.split('-W')
+    return t('posters.weekLabel', { year, week })
+  }
   const parsed = new Date(`${key}-01T00:00:00`)
-  return parsed.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  return parsed.toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' })
 }
 
 function formatDuration(seconds?: number) {
@@ -67,6 +71,7 @@ function formatDuration(seconds?: number) {
 }
 
 export default function PostersPage() {
+  const { t, dateLocale } = useI18n()
   const [mode, setMode] = useState<PosterMode>('month')
   const { data, isLoading, error } = useActivities({}, 1, 240)
   const activities = (data?.activities || []) as ActivityLike[]
@@ -90,25 +95,25 @@ export default function PostersPage() {
         <div className="panel-body py-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="route-atlas-label">RUN2 / Poster Lab</div>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">Route Posters</h1>
+              <div className="route-atlas-label">{t('posters.kicker')}</div>
+              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('posters.title')}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base">
-                Weekly and monthly artifacts generated entirely from route data, stacked into share-ready running atlas pages.
+                {t('posters.copy')}
               </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>Monthly</button>
-              <button onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>Weekly</button>
+              <button onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>{t('posters.monthly')}</button>
+              <button onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>{t('posters.weekly')}</button>
             </div>
           </div>
         </div>
       </section>
 
       {isLoading ? (
-        <section className="panel"><div className="panel-body text-sm text-[var(--text-muted)]">Composing route posters...</div></section>
+        <section className="panel"><div className="panel-body text-sm text-[var(--text-muted)]">{t('posters.composing')}</div></section>
       ) : null}
       {error ? (
-        <section className="panel"><div className="panel-body text-sm text-red-300">Poster data could not be loaded.</div></section>
+        <section className="panel"><div className="panel-body text-sm text-red-300">{t('posters.failed')}</div></section>
       ) : null}
 
       {!isLoading && !error ? (
@@ -128,11 +133,11 @@ export default function PostersPage() {
               <article key={period.key} className="aspect-[4/5] rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="route-atlas-label">RUN2 / {mode === 'month' ? 'Monthly' : 'Weekly'} Poster</div>
-                    <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--text-strong)]">{formatPeriodLabel(period.key, mode)}</h2>
+                    <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
+                    <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--text-strong)]">{formatPeriodLabel(period.key, mode, dateLocale, t)}</h2>
                   </div>
                   <div className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--route-green)]">
-                    {period.items.length} routes
+                    {t('posters.routes', { count: period.items.length })}
                   </div>
                 </div>
 
@@ -144,27 +149,27 @@ export default function PostersPage() {
                     padding={42}
                     strokeWidth={6}
                     maxPoints={360}
-                    label={`${formatPeriodLabel(period.key, mode)} route poster`}
+                    label={`${formatPeriodLabel(period.key, mode, dateLocale, t)} route poster`}
                   />
                 </div>
 
                 <div className="mt-5 grid grid-cols-3 gap-3">
                   <div>
-                    <div className="route-atlas-label">Distance</div>
+                    <div className="route-atlas-label">{t('common.distance')}</div>
                     <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{totalDistanceKm.toFixed(1)} km</div>
                   </div>
                   <div>
-                    <div className="route-atlas-label">Time</div>
+                    <div className="route-atlas-label">{t('common.time')}</div>
                     <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{formatDuration(totalTime)}</div>
                   </div>
                   <div>
-                    <div className="route-atlas-label">Shape</div>
+                    <div className="route-atlas-label">{t('posters.shape')}</div>
                     <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{Math.round(averageComplexity * 100)}</div>
                   </div>
                 </div>
 
                 <p className="mt-5 text-sm leading-6 text-[var(--text-muted)]">
-                  Routes compressed into a single atlas artifact. No map tiles, no external geography, just GPS shape memory.
+                  {t('posters.artifactCopy')}
                 </p>
               </article>
             )

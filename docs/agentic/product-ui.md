@@ -21,7 +21,20 @@ Read this for UI, UX, layout, theme, and page workflow tasks.
 - sticky contextual header
 - mobile drawer
 - theme toggle
+- language toggle
 - contextual quick actions
+
+## Localization
+
+- Current UI languages: English, Simplified Chinese, and Japanese.
+- Translation state lives in `apps/web/src/lib/i18n.tsx`.
+- `I18nProvider` is wired through `apps/web/src/app/providers.tsx`; use `useI18n()` for visible app copy.
+- The language toggle is an icon button in `apps/web/src/components/AppLayout.tsx` and cycles `en -> zh -> ja`.
+- Keep route names, dashboard slogans, empty states, button labels, and map/sync helper copy in the shared dictionaries instead of hard-coding new visible strings.
+- Current hero slogan:
+  - English: "Leave a running trace in every city you reach."
+  - Chinese: "在每座抵达的城市，留下跑步轨迹。"
+  - Japanese: "訪れたすべての街に、走った軌跡を残す。"
 
 ## Theme Rules
 

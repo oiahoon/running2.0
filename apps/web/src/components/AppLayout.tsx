@@ -9,6 +9,7 @@ import {
   ChartBarIcon,
   CircleStackIcon,
   HomeIcon,
+  LanguageIcon,
   ListBulletIcon,
   MapIcon,
   MoonIcon,
@@ -18,42 +19,44 @@ import {
 } from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
 import { Run2Logo } from '@/components/icons/Run2Logo'
+import { useI18n } from '@/lib/i18n'
 
 const navGroups = [
   {
-    label: 'Atlas',
+    labelKey: 'nav.group.atlas',
     items: [
-      { name: 'Route Wall', href: '/dashboard', icon: HomeIcon },
-      { name: 'Route Gallery', href: '/routes', icon: MapIcon },
-      { name: 'Posters', href: '/posters', icon: SparklesIcon },
-      { name: 'Stats Lab', href: '/stats', icon: ChartBarIcon },
+      { nameKey: 'nav.routeWall', href: '/dashboard', icon: HomeIcon },
+      { nameKey: 'nav.routeGallery', href: '/routes', icon: MapIcon },
+      { nameKey: 'nav.posters', href: '/posters', icon: SparklesIcon },
+      { nameKey: 'nav.statsLab', href: '/stats', icon: ChartBarIcon },
     ],
   },
   {
-    label: 'Training',
+    labelKey: 'nav.group.training',
     items: [
-      { name: 'Runs', href: '/activities', icon: ListBulletIcon },
-      { name: 'Route Map', href: '/map', icon: MapIcon },
+      { nameKey: 'nav.runs', href: '/activities', icon: ListBulletIcon },
+      { nameKey: 'nav.routeMap', href: '/map', icon: MapIcon },
     ],
   },
   {
-    label: 'Sync',
+    labelKey: 'nav.group.sync',
     items: [
-      { name: 'Sync', href: '/sync', icon: ArrowPathIcon },
-      { name: 'Sync Sources', href: '/data-sources', icon: CircleStackIcon },
+      { nameKey: 'nav.sync', href: '/sync', icon: ArrowPathIcon },
+      { nameKey: 'nav.syncSources', href: '/data-sources', icon: CircleStackIcon },
     ],
   },
 ]
 
-const pageCopy: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Route Wall', subtitle: 'A route-first atlas of shapes, effort, pace, and progress.' },
-  '/routes': { title: 'Route Gallery', subtitle: 'Browse GPS route shapes by effort, year, and recency.' },
-  '/posters': { title: 'Posters', subtitle: 'Weekly and monthly route artifacts generated from GPS shape data.' },
-  '/activities': { title: 'Runs', subtitle: 'Chronological training archive for search, scan, and comparison.' },
-  '/stats': { title: 'Stats Lab', subtitle: 'Designed fields, rhythms, records, and route-derived training insight.' },
-  '/map': { title: 'Route Map', subtitle: 'Spatial exploration, trajectory context, and route review.' },
-  '/sync': { title: 'Sync', subtitle: 'Connection health, manual sync, and operation history.' },
-  '/data-sources': { title: 'Sync Sources', subtitle: 'Integration lifecycle and source configuration.' },
+const pageCopy: Record<string, { titleKey: string; subtitleKey: string }> = {
+  '/dashboard': { titleKey: 'page.dashboard.title', subtitleKey: 'page.dashboard.subtitle' },
+  '/routes': { titleKey: 'page.routes.title', subtitleKey: 'page.routes.subtitle' },
+  '/posters': { titleKey: 'page.posters.title', subtitleKey: 'page.posters.subtitle' },
+  '/activities': { titleKey: 'page.activities.title', subtitleKey: 'page.activities.subtitle' },
+  '/stats': { titleKey: 'page.stats.title', subtitleKey: 'page.stats.subtitle' },
+  '/map': { titleKey: 'page.map.title', subtitleKey: 'page.map.subtitle' },
+  '/sync': { titleKey: 'page.sync.title', subtitleKey: 'page.sync.subtitle' },
+  '/data-sources': { titleKey: 'page.sources.title', subtitleKey: 'page.sources.subtitle' },
+  '/sync-status': { titleKey: 'page.syncStatus.title', subtitleKey: 'page.syncStatus.subtitle' },
 }
 
 function classNames(...classes: string[]) {
@@ -62,12 +65,13 @@ function classNames(...classes: string[]) {
 
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
+  const { t } = useI18n()
 
   return (
     <button
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       className="action-ghost"
-      aria-label="Toggle theme"
+      aria-label={t('theme.toggle')}
     >
       <SunIcon className="h-5 w-5 dark:hidden" />
       <MoonIcon className="hidden h-5 w-5 dark:block" />
@@ -75,7 +79,25 @@ function ThemeToggle() {
   )
 }
 
+function LanguageToggle() {
+  const { cycleLocale, localeLabel, locale, t } = useI18n()
+
+  return (
+    <button
+      onClick={cycleLocale}
+      className="action-ghost min-w-[3.25rem] gap-1.5"
+      aria-label={t('language.toggle')}
+      title={t('language.current', { language: localeLabel })}
+    >
+      <LanguageIcon className="h-5 w-5" />
+      <span className="text-xs font-semibold uppercase">{locale}</span>
+    </button>
+  )
+}
+
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  const { t } = useI18n()
+
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pb-5 pt-6">
@@ -84,14 +106,14 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
         {navGroups.map((group) => (
-          <div key={group.label}>
-            <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{group.label}</div>
+          <div key={group.labelKey}>
+            <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{t(group.labelKey)}</div>
             <div className="mt-2 space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href
                 return (
                   <Link
-                    key={item.name}
+                    key={item.nameKey}
                     href={item.href}
                     onClick={onNavigate}
                     className={classNames(
@@ -102,7 +124,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                     )}
                   >
                     <item.icon className={classNames('h-5 w-5', isActive ? 'text-[var(--route-green)]' : 'text-slate-400 group-hover:text-slate-600 dark:text-gray-500 dark:group-hover:text-gray-300')} />
-                    {item.name}
+                    {t(item.nameKey)}
                   </Link>
                 )
               })}
@@ -113,10 +135,10 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 
       <div className="border-t border-slate-200 px-5 py-4 dark:border-white/10">
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-          <span>System</span>
+          <span>{t('shell.system')}</span>
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-emerald-300 ring-1 ring-emerald-400/30">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            Online
+            {t('shell.online')}
           </span>
         </div>
       </div>
@@ -127,19 +149,21 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { t } = useI18n()
 
   const pageMeta = useMemo(() => {
-    return pageCopy[pathname] || { title: 'Running Page 2.0', subtitle: 'Training intelligence workspace.' }
-  }, [pathname])
+    const copy = pageCopy[pathname] || { titleKey: 'page.default.title', subtitleKey: 'page.default.subtitle' }
+    return { title: t(copy.titleKey), subtitle: t(copy.subtitleKey) }
+  }, [pathname, t])
 
   return (
     <div className="app-shell">
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
-          <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />
+          <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label={t('shell.closeSidebar')} />
           <aside className="relative h-full w-[86%] max-w-[320px] border-r border-slate-200 bg-[var(--sidebar-bg)] shadow-2xl dark:border-white/10">
             <div className="absolute right-3 top-3">
-              <button onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label="Close sidebar">
+              <button onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label={t('shell.closeSidebar')}>
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
@@ -158,7 +182,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <button
               onClick={() => setSidebarOpen(true)}
               className="action-ghost lg:hidden"
-              aria-label="Open sidebar"
+              aria-label={t('shell.openSidebar')}
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
@@ -169,10 +193,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="hidden items-center gap-2 sm:flex">
-              <Link href="/sync" className="action-secondary">Sync</Link>
-              <Link href="/map" className="action-primary">Route Map</Link>
+              <Link href="/sync" className="action-secondary">{t('shell.quickSync')}</Link>
+              <Link href="/map" className="action-primary">{t('shell.quickMap')}</Link>
             </div>
 
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </header>

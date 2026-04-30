@@ -5,6 +5,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import { formatPace } from '@/lib/database/models/Activity'
 import { RouteTile } from '@/components/routes'
 import { inferRouteEffort } from '@/lib/routes'
+import { useI18n } from '@/lib/i18n'
 
 type RouteFilter = 'all' | 'easy' | 'tempo' | 'long' | 'new' | 'year'
 
@@ -24,20 +25,20 @@ type ActivityLike = {
   location_city?: string
 }
 
-const filters: Array<{ id: RouteFilter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'easy', label: 'Easy' },
-  { id: 'tempo', label: 'Tempo' },
-  { id: 'long', label: 'Long' },
-  { id: 'new', label: 'New Routes' },
-  { id: 'year', label: String(new Date().getFullYear()) },
+const filters: Array<{ id: RouteFilter; labelKey?: string }> = [
+  { id: 'all', labelKey: 'common.all' },
+  { id: 'easy', labelKey: 'routes.filter.easy' },
+  { id: 'tempo', labelKey: 'routes.filter.tempo' },
+  { id: 'long', labelKey: 'routes.filter.long' },
+  { id: 'new', labelKey: 'routes.filter.new' },
+  { id: 'year' },
 ]
 
-function formatDate(value?: string) {
-  if (!value) return 'Unknown date'
+function formatDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
+  if (!value) return unknownLabel
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Unknown date'
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  if (Number.isNaN(date.getTime())) return unknownLabel
+  return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function formatDistanceKm(distanceMeters?: number) {
@@ -60,6 +61,7 @@ function effortForActivity(activity: ActivityLike) {
 }
 
 export default function RouteWallGalleryPage() {
+  const { t, dateLocale } = useI18n()
   const [activeFilter, setActiveFilter] = useState<RouteFilter>('all')
   const currentYear = new Date().getFullYear()
   const { data, isLoading, error } = useActivities({}, 1, 120)
@@ -88,14 +90,14 @@ export default function RouteWallGalleryPage() {
         <div className="panel-body py-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="route-atlas-label">RUN2 / Route Wall</div>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">Route Wall</h1>
+              <div className="route-atlas-label">{t('dashboard.kicker')}</div>
+              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('page.routes.title')}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base">
-                Browse the route shapes behind the training log. Every tile is rendered from real synced GPS polyline data.
+                {t('routes.copy')}
               </p>
             </div>
             <div className="text-sm text-[var(--text-muted)]">
-              {routeActivities.length} route shapes from {activities.length} recent records
+              {t('routes.countSummary', { routes: routeActivities.length, records: activities.length })}
             </div>
           </div>
         </div>
@@ -112,7 +114,7 @@ export default function RouteWallGalleryPage() {
                   onClick={() => setActiveFilter(filter.id)}
                   className={active ? 'action-primary' : 'action-secondary'}
                 >
-                  {filter.label}
+                  {filter.id === 'year' ? String(currentYear) : t(filter.labelKey || 'common.all')}
                 </button>
               )
             })}
@@ -122,13 +124,13 @@ export default function RouteWallGalleryPage() {
 
       {isLoading ? (
         <section className="panel">
-          <div className="panel-body text-sm text-[var(--text-muted)]">Drawing route tiles...</div>
+          <div className="panel-body text-sm text-[var(--text-muted)]">{t('routes.drawing')}</div>
         </section>
       ) : null}
 
       {error ? (
         <section className="panel">
-          <div className="panel-body text-sm text-red-300">Failed to load route wall.</div>
+          <div className="panel-body text-sm text-red-300">{t('routes.failed')}</div>
         </section>
       ) : null}
 
@@ -138,9 +140,9 @@ export default function RouteWallGalleryPage() {
             <RouteTile
               key={activity.id}
               activityId={activity.id}
-              title={activity.name || activity.location_city || `${activity.type || 'Run'} route`}
+              title={activity.name || activity.location_city || `${activity.type || t('activity.type.Run')} route`}
               distanceLabel={formatDistanceKm(activity.distance)}
-              dateLabel={formatDate(activity.start_date || activity.startDate)}
+              dateLabel={formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}
               paceLabel={activity.average_speed ? formatPace(activity.average_speed) : undefined}
               effort={effortForActivity(activity)}
               route={{ encodedPolyline: routePolyline(activity) }}
@@ -152,7 +154,7 @@ export default function RouteWallGalleryPage() {
       {!isLoading && !error && filteredActivities.length === 0 ? (
         <section className="panel">
           <div className="panel-body rounded-2xl border border-dashed border-[var(--line)] text-center text-sm text-[var(--text-muted)]">
-            No route shapes match this filter yet.
+            {t('routes.empty')}
           </div>
         </section>
       ) : null}

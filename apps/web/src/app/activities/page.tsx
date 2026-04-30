@@ -5,6 +5,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import Link from 'next/link'
 import { formatDuration, formatPace, type ActivityFilters, type ActivityType } from '@/lib/database/models/Activity'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
+import { useI18n } from '@/lib/i18n'
 
 const typeOptions: Array<'all' | ActivityType> = ['all', 'Run', 'Walk', 'Hike', 'Ride', 'Swim', 'WeightTraining', 'Rowing']
 
@@ -20,6 +21,7 @@ function KPI({ label, value }: { label: string; value: string }) {
 }
 
 export default function ActivitiesPage() {
+  const { t, dateLocale } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<'all' | ActivityType>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -44,15 +46,15 @@ export default function ActivitiesPage() {
     <div className="space-y-6">
       <section className="panel">
         <div className="panel-body py-6 sm:py-7">
-          <h2 className="section-title">Runs Archive</h2>
-          <p className="section-subtitle">Filter your records, compare sessions, and inspect execution quality by date and activity type.</p>
+          <h2 className="section-title">{t('activities.title')}</h2>
+          <p className="section-subtitle">{t('activities.copy')}</p>
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <div className="panel xl:col-span-3">
           <div className="panel-header">
-            <h3 className="text-lg font-semibold text-[var(--text-strong)]">Filter Workflow</h3>
+            <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('activities.filterWorkflow')}</h3>
           </div>
           <div className="panel-body grid grid-cols-1 gap-3 md:grid-cols-3">
             <input
@@ -61,7 +63,7 @@ export default function ActivitiesPage() {
                 setSearchTerm(e.target.value)
                 setCurrentPage(1)
               }}
-              placeholder="Search activity name or location"
+              placeholder={t('activities.searchPlaceholder')}
               className="w-full rounded-lg border border-slate-300/70 bg-white px-3 py-2.5 text-sm text-[var(--text-strong)] placeholder:text-slate-400 focus:border-blue-400/60 focus:outline-none dark:border-white/20 dark:bg-white/5 dark:text-white dark:placeholder:text-gray-400"
             />
 
@@ -75,7 +77,7 @@ export default function ActivitiesPage() {
             >
               {typeOptions.map((type) => (
                 <option key={type} value={type}>
-                  {type === 'all' ? 'All Types' : type}
+                  {type === 'all' ? t('activity.type.all') : t(`activity.type.${type}`)}
                 </option>
               ))}
             </select>
@@ -88,30 +90,30 @@ export default function ActivitiesPage() {
               }}
               className="action-secondary"
             >
-              Reset Filters
+              {t('activities.resetFilters')}
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-1">
-          <KPI label="Records (Page)" value={String(activities.length)} />
-          <KPI label="Distance (Page)" value={`${totalDistanceKm.toFixed(1)} km`} />
-          <KPI label="Duration (Page)" value={formatDuration(totalDuration)} />
+          <KPI label={t('activities.recordsPage')} value={String(activities.length)} />
+          <KPI label={t('activities.distancePage')} value={`${totalDistanceKm.toFixed(1)} km`} />
+          <KPI label={t('activities.durationPage')} value={formatDuration(totalDuration)} />
         </div>
       </section>
 
       <section className="panel">
         <div className="panel-header flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-[var(--text-strong)]">Runs Table</h3>
-          <span className="text-sm text-[var(--text-muted)]">{pagination ? `Total ${pagination.total} runs` : 'Loading...'}</span>
+          <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('activities.table')}</h3>
+          <span className="text-sm text-[var(--text-muted)]">{pagination ? t('activities.totalRuns', { total: pagination.total }) : t('common.loading')}</span>
         </div>
 
         <div className="panel-body">
-          {isLoading ? <p className="text-sm text-[var(--text-muted)]">Loading activities...</p> : null}
+          {isLoading ? <p className="text-sm text-[var(--text-muted)]">{t('activities.loading')}</p> : null}
           {error ? <p className="text-sm text-red-300">{error.message}</p> : null}
 
           {!isLoading && !error && activities.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)]">No activities found for current filters.</p>
+            <p className="text-sm text-[var(--text-muted)]">{t('activities.empty')}</p>
           ) : null}
 
           {!isLoading && !error && activities.length > 0 ? (
@@ -119,13 +121,13 @@ export default function ActivitiesPage() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
-                    <th className="py-2 pr-4 font-medium">Date</th>
-                    <th className="py-2 pr-4 font-medium">Name</th>
-                    <th className="py-2 pr-4 font-medium">Type</th>
-                    <th className="py-2 pr-4 font-medium">Distance</th>
-                    <th className="py-2 pr-4 font-medium">Duration</th>
-                    <th className="py-2 pr-4 font-medium">Pace</th>
-                    <th className="py-2 font-medium">Source</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.date')}</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.name')}</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.type')}</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.distance')}</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.duration')}</th>
+                    <th className="py-2 pr-4 font-medium">{t('common.pace')}</th>
+                    <th className="py-2 font-medium">{t('common.source')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,13 +135,13 @@ export default function ActivitiesPage() {
                     const speed = Number(activity.average_speed || activity.averageSpeed || 0)
                     return (
                       <tr key={activity.id} className="border-b border-slate-200 text-[var(--text-strong)] dark:border-white/5 dark:text-gray-200">
-                        <td className="py-2 pr-4 text-[var(--text-muted)]">{new Date(activity.start_date || activity.startDate).toLocaleDateString()}</td>
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{new Date(activity.start_date || activity.startDate).toLocaleDateString(dateLocale)}</td>
                         <td className="py-2 pr-4">
                           <Link href={`/activities/${activity.id}`} className="hover:text-[var(--route-green)]">
                             {activity.name || '-'}
                           </Link>
                         </td>
-                        <td className="py-2 pr-4 text-[var(--text-muted)]">{activity.type || '-'}</td>
+                        <td className="py-2 pr-4 text-[var(--text-muted)]">{activity.type ? t(`activity.type.${activity.type}`) : '-'}</td>
                         <td className="py-2 pr-4">{(Number(activity.distance || 0) / 1000).toFixed(1)} km</td>
                         <td className="py-2 pr-4">{formatDuration(Number(activity.moving_time || activity.movingTime || 0))}</td>
                         <td className="py-2 pr-4">{speed > 0 ? formatPace(speed) : '--:--/km'}</td>
@@ -161,17 +163,17 @@ export default function ActivitiesPage() {
             disabled={!pagination.hasPrev}
             className="action-secondary disabled:opacity-50"
           >
-            Previous
+            {t('activities.previous')}
           </button>
           <span className="text-sm text-[var(--text-muted)]">
-            Page {pagination.page} / {pagination.totalPages}
+            {t('activities.pageXofY', { page: pagination.page, totalPages: pagination.totalPages })}
           </span>
           <button
             onClick={() => setCurrentPage((p) => p + 1)}
             disabled={!pagination.hasNext}
             className="action-secondary disabled:opacity-50"
           >
-            Next
+            {t('activities.next')}
           </button>
         </section>
       ) : null}

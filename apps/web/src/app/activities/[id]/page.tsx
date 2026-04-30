@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { RouteGlyph } from '@/components/routes'
 import { calculateRouteFingerprint, inferRouteEffort } from '@/lib/routes'
+import { useI18n } from '@/lib/i18n'
 
 type ActivityDetail = {
   id: number
@@ -29,11 +30,11 @@ type ActivityDetail = {
   summaryPolyline?: string
 }
 
-function formatDate(value?: string) {
-  if (!value) return 'Unknown date'
+function formatDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
+  if (!value) return unknownLabel
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Unknown date'
-  return date.toLocaleDateString('en-US', {
+  if (Number.isNaN(date.getTime())) return unknownLabel
+  return date.toLocaleDateString(dateLocale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -72,25 +73,27 @@ function StatRow({ label, value }: { label: string; value?: string | number | nu
 }
 
 function ShareCard({ activity }: { activity: ActivityDetail }) {
+  const { t, dateLocale } = useI18n()
+
   return (
     <div className="aspect-[4/5] rounded-3xl border border-[var(--line)] bg-[var(--bg)] p-5">
-      <div className="route-atlas-label">RUN2 / Share Card</div>
-      <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--text-strong)]">{activity.name || 'Untitled Run'}</h3>
-      <p className="mt-1 text-sm text-[var(--text-muted)]">{formatDate(activity.start_date || activity.startDate)}</p>
+      <div className="route-atlas-label">{t('activityDetail.shareCard')}</div>
+      <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--text-strong)]">{activity.name || t('activityDetail.untitled')}</h3>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">{formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}</p>
       <div className="mt-5 aspect-square overflow-hidden rounded-2xl border border-[var(--line)]">
         <RouteGlyph route={{ encodedPolyline: routePolyline(activity) }} effort={effortForActivity(activity)} padding={30} maxPoints={220} />
       </div>
       <div className="mt-5 grid grid-cols-3 gap-3 text-sm tabular-nums">
         <div>
-          <div className="route-atlas-label">Distance</div>
+          <div className="route-atlas-label">{t('common.distance')}</div>
           <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDistanceKm(activity.distance)}</div>
         </div>
         <div>
-          <div className="route-atlas-label">Pace</div>
+          <div className="route-atlas-label">{t('common.pace')}</div>
           <div className="mt-1 font-semibold text-[var(--text-strong)]">{activity.average_speed ? formatPace(activity.average_speed) : '--:--/km'}</div>
         </div>
         <div>
-          <div className="route-atlas-label">Time</div>
+          <div className="route-atlas-label">{t('common.time')}</div>
           <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDuration(activity.moving_time)}</div>
         </div>
       </div>
@@ -99,21 +102,22 @@ function ShareCard({ activity }: { activity: ActivityDetail }) {
 }
 
 function FingerprintPanel({ activity }: { activity: ActivityDetail }) {
+  const { t } = useI18n()
   const fingerprint = calculateRouteFingerprint({ encodedPolyline: routePolyline(activity) })
 
   if (!fingerprint) {
     return (
       <div className="rounded-2xl border border-dashed border-[var(--line)] p-5 text-sm text-[var(--text-muted)]">
-        No route fingerprint is available for this activity.
+        {t('activityDetail.noFingerprint')}
       </div>
     )
   }
 
   const metrics = [
-    { label: 'Shape', value: fingerprint.shapeLabel },
-    { label: 'Complexity', value: `${Math.round(fingerprint.complexity * 100)}` },
-    { label: 'Loop', value: `${Math.round(fingerprint.loopScore * 100)}` },
-    { label: 'Compact', value: `${Math.round(fingerprint.compactness * 100)}` },
+    { label: t('activityDetail.shape'), value: fingerprint.shapeLabel },
+    { label: t('activityDetail.complexity'), value: `${Math.round(fingerprint.complexity * 100)}` },
+    { label: t('activityDetail.loop'), value: `${Math.round(fingerprint.loopScore * 100)}` },
+    { label: t('activityDetail.compact'), value: `${Math.round(fingerprint.compactness * 100)}` },
   ]
 
   return (
@@ -129,6 +133,7 @@ function FingerprintPanel({ activity }: { activity: ActivityDetail }) {
 }
 
 export default function ActivityPosterPage() {
+  const { t, dateLocale } = useI18n()
   const params = useParams<{ id: string }>()
   const activityId = params.id
 
@@ -136,7 +141,7 @@ export default function ActivityPosterPage() {
     queryKey: ['activity', activityId],
     queryFn: async () => {
       const response = await fetch(`/api/activities/${activityId}`)
-      if (!response.ok) throw new Error('Failed to fetch activity')
+      if (!response.ok) throw new Error(t('activityDetail.fetchFailed'))
       return response.json() as Promise<{ activity: ActivityDetail }>
     },
   })
@@ -148,7 +153,7 @@ export default function ActivityPosterPage() {
   if (isLoading) {
     return (
       <section className="panel">
-        <div className="panel-body py-10 text-sm text-[var(--text-muted)]">Preparing activity poster...</div>
+        <div className="panel-body py-10 text-sm text-[var(--text-muted)]">{t('activityDetail.preparing')}</div>
       </section>
     )
   }
@@ -157,8 +162,8 @@ export default function ActivityPosterPage() {
     return (
       <section className="panel">
         <div className="panel-body py-10">
-          <p className="text-sm text-red-300">Activity poster could not be loaded.</p>
-          <Link href="/routes" className="action-secondary mt-4">Back to Route Wall</Link>
+          <p className="text-sm text-red-300">{t('activityDetail.failed')}</p>
+          <Link href="/routes" className="action-secondary mt-4">{t('activityDetail.back')}</Link>
         </div>
       </section>
     )
@@ -183,24 +188,24 @@ export default function ActivityPosterPage() {
 
           <div className="flex flex-col justify-between gap-8">
             <div>
-              <div className="route-atlas-label">{String(effort).toUpperCase()} / {activity.type || 'Activity'}</div>
+              <div className="route-atlas-label">{String(effort).toUpperCase()} / {activity.type || t('activityDetail.activity')}</div>
               <h1 className="mt-4 text-4xl font-black leading-none tracking-tight text-[var(--text-strong)] sm:text-6xl">
-                {activity.name || 'Untitled Run'}
+                {activity.name || t('activityDetail.untitled')}
               </h1>
               <p className="mt-4 text-sm text-[var(--text-muted)]">
-                {formatDate(activity.start_date || activity.startDate)}
+                {formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}
                 {location ? ` · ${location}` : ''}
               </p>
             </div>
 
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-3">
-              <StatRow label="Distance" value={formatDistanceKm(activity.distance)} />
-              <StatRow label="Pace" value={activity.average_speed ? formatPace(activity.average_speed) : '--:--/km'} />
-              <StatRow label="Time" value={formatDuration(activity.moving_time)} />
-              <StatRow label="Elevation" value={activity.total_elevation_gain ? `+${Math.round(activity.total_elevation_gain)} m` : null} />
-              <StatRow label="Heart Rate" value={activity.average_heartrate ? `${Math.round(activity.average_heartrate)} bpm` : null} />
-              <StatRow label="Calories" value={activity.calories ? Math.round(activity.calories) : null} />
-              <StatRow label="Source" value={activity.source?.toUpperCase()} />
+              <StatRow label={t('common.distance')} value={formatDistanceKm(activity.distance)} />
+              <StatRow label={t('common.pace')} value={activity.average_speed ? formatPace(activity.average_speed) : '--:--/km'} />
+              <StatRow label={t('common.time')} value={formatDuration(activity.moving_time)} />
+              <StatRow label={t('stats.elevation')} value={activity.total_elevation_gain ? `+${Math.round(activity.total_elevation_gain)} m` : null} />
+              <StatRow label={t('activityDetail.heartRate')} value={activity.average_heartrate ? `${Math.round(activity.average_heartrate)} bpm` : null} />
+              <StatRow label={t('activityDetail.calories')} value={activity.calories ? Math.round(activity.calories) : null} />
+              <StatRow label={t('common.source')} value={activity.source?.toUpperCase()} />
             </div>
           </div>
         </div>
@@ -209,8 +214,8 @@ export default function ActivityPosterPage() {
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
         <div className="panel">
           <div className="panel-header">
-            <h2 className="text-lg font-semibold text-[var(--text-strong)]">Route Fingerprint</h2>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">A data-only read of route personality: shape, complexity, loop closure, and compactness.</p>
+            <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('activityDetail.routeFingerprint')}</h2>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">{t('activityDetail.routeFingerprintCopy')}</p>
           </div>
           <div className="panel-body">
             <FingerprintPanel activity={activity} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 
 interface DataSourceType {
   id: string
@@ -31,6 +32,7 @@ function statusTag(status: ConfiguredSource['status']) {
 }
 
 export default function DataSourcesPage() {
+  const { t, dateLocale } = useI18n()
   const [availableTypes, setAvailableTypes] = useState<DataSourceType[]>([])
   const [configuredSources, setConfiguredSources] = useState<ConfiguredSource[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,14 +70,14 @@ export default function DataSourcesPage() {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
-        throw new Error(data?.error || 'Sync failed')
+        throw new Error(data?.error || t('sync.manualFailed'))
       }
       const data = await response.json().catch(() => ({}))
-      setMessage(data?.message || 'Sync workflow queued')
+      setMessage(data?.message || t('sources.syncQueued'))
       await fetchDataSources()
     } catch (error) {
       console.error('Sync failed:', error)
-      setError(error instanceof Error ? error.message : 'Sync failed')
+      setError(error instanceof Error ? error.message : t('sync.manualFailed'))
     } finally {
       setSyncing(false)
     }
@@ -92,8 +94,8 @@ export default function DataSourcesPage() {
       <div className="space-y-6">
         <section className="panel">
           <div className="panel-body py-6 sm:py-7">
-            <h2 className="section-title">Integration Hub</h2>
-            <p className="section-subtitle">Loading source configuration...</p>
+            <h2 className="section-title">{t('sources.hub')}</h2>
+            <p className="section-subtitle">{t('sources.loading')}</p>
           </div>
         </section>
       </div>
@@ -106,11 +108,11 @@ export default function DataSourcesPage() {
         <div className="panel-body py-6 sm:py-7">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="section-title">Integration Hub</h2>
-              <p className="section-subtitle">Manage source lifecycle, validate health, and keep sync operations reliable.</p>
+              <h2 className="section-title">{t('sources.hub')}</h2>
+              <p className="section-subtitle">{t('sources.copy')}</p>
             </div>
             <button onClick={handleSync} disabled={syncing} className="action-primary disabled:opacity-60">
-              {syncing ? 'Queueing...' : 'Run Sync'}
+              {syncing ? t('sync.queueing') : t('sources.runSync')}
             </button>
           </div>
         </div>
@@ -129,18 +131,18 @@ export default function DataSourcesPage() {
       ) : null}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KPI label="Configured" value={String(summary.total)} />
-        <KPI label="Active" value={String(summary.active)} />
-        <KPI label="Error" value={String(summary.errors)} />
+        <KPI label={t('common.configured')} value={String(summary.total)} />
+        <KPI label={t('common.active')} value={String(summary.active)} />
+        <KPI label={t('common.error')} value={String(summary.errors)} />
       </section>
 
       <section className="panel">
         <div className="panel-body flex flex-wrap gap-2">
           <button onClick={() => setActiveTab('configured')} className={activeTab === 'configured' ? 'action-primary !py-2' : 'action-secondary !py-2'}>
-            Configured ({configuredSources.length})
+            {t('common.configured')} ({configuredSources.length})
           </button>
           <button onClick={() => setActiveTab('available')} className={activeTab === 'available' ? 'action-primary !py-2' : 'action-secondary !py-2'}>
-            Available ({availableTypes.length})
+            {t('common.available')} ({availableTypes.length})
           </button>
         </div>
       </section>
@@ -149,7 +151,7 @@ export default function DataSourcesPage() {
         <section className="space-y-4">
           {configuredSources.length === 0 ? (
             <div className="panel">
-              <div className="panel-body text-sm text-[var(--text-muted)]">No configured data sources.</div>
+              <div className="panel-body text-sm text-[var(--text-muted)]">{t('sources.noConfigured')}</div>
             </div>
           ) : (
             configuredSources.map((source) => (
@@ -159,11 +161,11 @@ export default function DataSourcesPage() {
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusTag(source.status)}`}>{source.status}</span>
                 </div>
                 <div className="panel-body grid grid-cols-1 gap-4 text-sm text-[var(--text-strong)] sm:grid-cols-3">
-                  <Info label="Type" value={source.type} />
-                  <Info label="Enabled" value={source.enabled ? 'Yes' : 'No'} />
-                  <Info label="Last Sync" value={source.lastSync ? new Date(source.lastSync).toLocaleString() : 'N/A'} />
+                  <Info label={t('common.type')} value={source.type} />
+                  <Info label={t('common.enabled')} value={source.enabled ? t('common.yes') : t('common.no')} />
+                  <Info label={t('sources.lastSync')} value={source.lastSync ? new Date(source.lastSync).toLocaleString(dateLocale) : t('common.none')} />
                   <div className="sm:col-span-3">
-                    <div className="metric-label mb-2">Supported Activities</div>
+                    <div className="metric-label mb-2">{t('sources.supportedActivities')}</div>
                     <div className="flex flex-wrap gap-2">
                       {source.supportedActivities.map((activity) => (
                         <span key={activity} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{activity}</span>
@@ -183,14 +185,14 @@ export default function DataSourcesPage() {
               <div className="panel-header flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-[var(--text-strong)]">{type.name}</h3>
                 {type.configured ? (
-                  <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs text-blue-700 ring-1 ring-blue-400/35 dark:text-blue-200">configured</span>
+                  <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-xs text-blue-700 ring-1 ring-blue-400/35 dark:text-blue-200">{t('common.configured')}</span>
                 ) : null}
               </div>
               <div className="panel-body grid grid-cols-1 gap-4 text-sm text-[var(--text-strong)]">
                 <p className="text-[var(--text-muted)]">{type.description}</p>
 
                 <div>
-                  <div className="metric-label mb-2">Auth Methods</div>
+                  <div className="metric-label mb-2">{t('sources.authMethods')}</div>
                   <div className="flex flex-wrap gap-2">
                     {type.authMethods.map((method) => (
                       <span key={method} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{method}</span>
@@ -199,7 +201,7 @@ export default function DataSourcesPage() {
                 </div>
 
                 <div>
-                  <div className="metric-label mb-2">Supported Activities</div>
+                  <div className="metric-label mb-2">{t('sources.supportedActivities')}</div>
                   <div className="flex flex-wrap gap-2">
                     {type.supportedActivities.map((activity) => (
                       <span key={activity} className="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs text-slate-700 ring-1 ring-slate-300 dark:bg-white/10 dark:text-gray-200 dark:ring-white/15">{activity}</span>
@@ -208,7 +210,7 @@ export default function DataSourcesPage() {
                 </div>
 
                 <details className="rounded-lg border border-slate-300/70 bg-white px-3 py-2 dark:border-white/15 dark:bg-white/5">
-                  <summary className="cursor-pointer text-sm font-medium text-[var(--text-strong)]">Setup Instructions</summary>
+                  <summary className="cursor-pointer text-sm font-medium text-[var(--text-strong)]">{t('sources.setupInstructions')}</summary>
                   <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-[var(--text-muted)]">
                     {type.setupInstructions.map((item, idx) => (
                       <li key={idx}>{item}</li>

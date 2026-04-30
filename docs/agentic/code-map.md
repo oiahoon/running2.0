@@ -47,6 +47,7 @@ Use this to choose files without scanning the whole repository.
 - Maps: `apps/web/src/components/maps/`
 - Route glyphs/tiles: `apps/web/src/components/routes/`
 - Brand icons: `apps/web/src/components/icons/`
+- Localization provider/dictionaries: `apps/web/src/lib/i18n.tsx`
 
 ## Data Layer
 

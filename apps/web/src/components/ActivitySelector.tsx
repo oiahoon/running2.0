@@ -5,6 +5,7 @@ import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { ActivityIcon } from '@/components/icons/AtlasIcon'
+import { useI18n } from '@/lib/i18n'
 
 // Custom hook for debounced value
 function useDebounce<T>(value: T, delay: number): T {
@@ -44,6 +45,7 @@ export default function ActivitySelector({
   onActivitySelect, 
   className = '' 
 }: ActivitySelectorProps) {
+  const { t, dateLocale } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const pageSize = 50 // Increase page size for better UX
@@ -92,7 +94,7 @@ export default function ActivitySelector({
               {selectedActivity.name} ({(selectedActivity.distance / 1000).toFixed(1)}km)
             </span>
           ) : (
-            'Select Activity'
+            t('activitySelector.select')
           )}
         </span>
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -111,7 +113,7 @@ export default function ActivitySelector({
           <div className="p-2 border-b border-gray-200 dark:border-gray-700">
             <input
               type="text"
-              placeholder="Search activities..."
+              placeholder={t('activitySelector.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -124,7 +126,7 @@ export default function ActivitySelector({
               onClick={handleClear}
               className="w-full px-3 py-2 text-left text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              Clear Selection
+              {t('activitySelector.clear')}
             </button>
           </div>
 
@@ -132,7 +134,7 @@ export default function ActivitySelector({
           <div className="max-h-60 overflow-y-auto">
             {isLoading ? (
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                Loading activities...
+                {t('activities.loading')}
               </div>
             ) : activities.length > 0 ? (
               <>
@@ -155,7 +157,7 @@ export default function ActivitySelector({
                         </div>
                         <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
                           <span>{(activity.distance / 1000).toFixed(1)}km</span>
-                          <span>{new Date(activity.start_date).toLocaleDateString()}</span>
+                          <span>{new Date(activity.start_date).toLocaleDateString(dateLocale)}</span>
                         </div>
                       </div>
                     </button>
@@ -165,14 +167,14 @@ export default function ActivitySelector({
                 {/* Show count info */}
                 <div className="border-t border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800">
                   <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                    Showing {activities.length} of {totalCount} activities
-                    {debouncedSearchTerm && ` matching "${debouncedSearchTerm}"`}
+                    {t('activitySelector.showing', { shown: activities.length, total: totalCount })}
+                    {debouncedSearchTerm ? t('activitySelector.matching', { term: debouncedSearchTerm }) : ''}
                   </div>
                 </div>
               </>
             ) : (
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-                {debouncedSearchTerm ? `No activities found for "${debouncedSearchTerm}"` : 'No activities found'}
+                {debouncedSearchTerm ? t('activitySelector.emptySearch', { term: debouncedSearchTerm }) : t('activities.empty')}
               </div>
             )}
           </div>

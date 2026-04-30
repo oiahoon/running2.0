@@ -2,8 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useI18n } from '@/lib/i18n'
 
 export default function HomePage() {
+  const { t } = useI18n()
   const router = useRouter()
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export default function HomePage() {
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">Opening Route Wall...</p>
+        <p className="mt-2 text-gray-500 dark:text-gray-400">{t('home.opening')}</p>
       </div>
     </div>
   )

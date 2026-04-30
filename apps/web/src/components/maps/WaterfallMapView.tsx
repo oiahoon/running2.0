@@ -6,9 +6,11 @@ import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { formatDistance, formatDuration, formatPace, ActivityType } from '@/lib/database/models/Activity'
 import RunningMap from './RunningMap'
 import { ActivityIcon, AtlasIcon } from '@/components/icons/AtlasIcon'
+import { useI18n } from '@/lib/i18n'
 
 // Lazy loading component for maps
 function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height?: number }) {
+  const { t } = useI18n()
   const [isVisible, setIsVisible] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
   const elementRef = useRef<HTMLDivElement>(null)
@@ -53,7 +55,7 @@ function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height
         <div className="h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
           <div className="text-gray-400 dark:text-gray-500">
             <AtlasIcon name="map" className="mx-auto mb-2 h-7 w-7" />
-            <div className="text-sm">Loading map...</div>
+            <div className="text-sm">{t('map.loadingMap')}</div>
           </div>
         </div>
       )}
@@ -90,6 +92,7 @@ export default function WaterfallMapView({
   filters = {}, 
   className = '' 
 }: WaterfallMapViewProps) {
+  const { t, dateLocale } = useI18n()
   const [allActivities, setAllActivities] = useState<Activity[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -186,7 +189,7 @@ export default function WaterfallMapView({
         <div className="text-center">
           <AtlasIcon name="warning" className="mx-auto mb-2 h-10 w-10" />
           <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
-            Failed to Load Activities
+            {t('map.failedActivities')}
           </h3>
           <p className="text-red-600 dark:text-red-300">
             {error.message}
@@ -201,10 +204,10 @@ export default function WaterfallMapView({
       <div className={`space-y-8 ${className}`}>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Route Gallery
+            {t('map.routeGallery')}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Loading your GPS activities...
+            {t('map.loadingGps')}
           </p>
         </div>
         
@@ -228,17 +231,17 @@ export default function WaterfallMapView({
       <div className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center ${className}`}>
         <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          No GPS Routes Found
+          {t('map.noGpsRoutes')}
         </h3>
         <p className="text-gray-500 dark:text-gray-400 mb-4">
-          No activities with GPS route data match your current filters.
+          {t('map.noGpsRoutesCopy')}
         </p>
         <div className="text-sm text-gray-400 dark:text-gray-500">
-          <p>Routes are shown for activities with:</p>
+          <p>{t('map.routesShownFor')}</p>
           <ul className="mt-2 space-y-1">
-            <li>• GPS coordinates (start/end location)</li>
-            <li>• Route polyline data</li>
-            <li>• Supported activity types (Run, Walk, Hike, Ride)</li>
+            <li>• {t('map.requireCoordinates')}</li>
+            <li>• {t('map.requirePolyline')}</li>
+            <li>• {t('map.requireTypes')}</li>
           </ul>
         </div>
       </div>
@@ -250,13 +253,13 @@ export default function WaterfallMapView({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Route Gallery
+          {t('map.routeGallery')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Explore your GPS activities in a visual waterfall layout
+          {t('map.waterfallCopy')}
         </p>
         <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Showing {allActivities.length} routes {hasMore && '• Scroll down for more'}
+          {t('map.showingRoutes', { count: allActivities.length })} {hasMore ? `• ${t('map.scrollMore')}` : ''}
         </div>
       </div>
 
@@ -283,14 +286,14 @@ export default function WaterfallMapView({
                     className="px-2 py-1 rounded-full text-xs font-medium text-white shadow-lg"
                     style={{ backgroundColor: config.color }}
                   >
-                    <ActivityIcon type={config.type} className="h-3.5 w-3.5" /> {config.displayName}
+                    <ActivityIcon type={config.type} className="h-3.5 w-3.5" /> {t(`activity.type.${config.type}`) === `activity.type.${config.type}` ? config.displayName : t(`activity.type.${config.type}`)}
                   </div>
                 </div>
                 
                 {/* Date badge */}
                 <div className="absolute top-3 right-3">
                   <div className="bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs">
-                    {new Date(activity.start_date).toLocaleDateString()}
+                    {new Date(activity.start_date).toLocaleDateString(dateLocale)}
                   </div>
                 </div>
               </div>
@@ -303,20 +306,20 @@ export default function WaterfallMapView({
                 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <span className="text-gray-500 dark:text-gray-400">Distance</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('common.distance')}</span>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {formatDistance(activity.distance)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-500 dark:text-gray-400">Time</span>
+                    <span className="text-gray-500 dark:text-gray-400">{t('common.time')}</span>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {formatDuration(activity.moving_time)}
                     </p>
                   </div>
                   {activity.distance > 0 && activity.moving_time > 0 && (
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Pace</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t('common.pace')}</span>
                       <p className="font-medium text-gray-900 dark:text-white">
                         {formatPace((activity.moving_time / 60) / (activity.distance / 1000))}
                       </p>
@@ -324,7 +327,7 @@ export default function WaterfallMapView({
                   )}
                   {activity.total_elevation_gain > 0 && (
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Elevation</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t('stats.elevation')}</span>
                       <p className="font-medium text-gray-900 dark:text-white">
                         {Math.round(activity.total_elevation_gain)}m
                       </p>
@@ -335,7 +338,7 @@ export default function WaterfallMapView({
                 {/* Full date */}
                 <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(activity.start_date).toLocaleDateString('en-US', {
+                    {new Date(activity.start_date).toLocaleDateString(dateLocale, {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -354,7 +357,7 @@ export default function WaterfallMapView({
         <div className="flex justify-center py-8">
           <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span>Loading more routes...</span>
+            <span>{t('map.loadingMore')}</span>
           </div>
         </div>
       )}
@@ -364,7 +367,7 @@ export default function WaterfallMapView({
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2 text-gray-500 dark:text-gray-400">
             <AtlasIcon name="finish" className="h-4 w-4" />
-            <span>You have seen all {allActivities.length} routes!</span>
+            <span>{t('map.seenAll', { count: allActivities.length })}</span>
           </div>
         </div>
       )}

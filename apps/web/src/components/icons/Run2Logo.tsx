@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n'
 
 function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ')
@@ -25,13 +28,15 @@ export function Run2Mark({ className, title = 'RUN2 Atlas' }: { className?: stri
 }
 
 export function Run2Logo({ compact = false, className, onClick }: { compact?: boolean; className?: string; onClick?: () => void }) {
+  const { t } = useI18n()
+
   return (
     <Link href="/dashboard" onClick={onClick} className={classNames('flex items-center gap-2', className)}>
       <Run2Mark className="h-8 w-8" />
       {compact ? null : (
         <div>
-          <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">RUN2 Atlas</div>
-          <div className="text-xs text-[var(--text-muted)]">Every run leaves a shape</div>
+          <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">{t('app.brand')}</div>
+          <div className="text-xs text-[var(--text-muted)]">{t('app.tagline')}</div>
         </div>
       )}
     </Link>

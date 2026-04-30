@@ -5,6 +5,7 @@ import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/confi
 import { checkStaticMapExists } from '@/lib/utils/cdn'
 import ActivitySelector from '@/components/ActivitySelector'
 import { AtlasIcon } from '@/components/icons/AtlasIcon'
+import { useI18n } from '@/lib/i18n'
 
 interface Activity {
   id: number
@@ -441,6 +442,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
   height: number
   selectedActivity: Activity | null
 }) {
+  const { t } = useI18n()
   const hasMapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   const [staticMapUrl, setStaticMapUrl] = useState<string>('')
   const [isLoadingMap, setIsLoadingMap] = useState(true)
@@ -654,9 +656,9 @@ function MapboxMap({ activities, height, selectedActivity }: {
             
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-xs text-blue-800 dark:text-blue-200">
-                <strong>To enable route visualization:</strong><br/>
-                1. Get a free Mapbox token at mapbox.com<br/>
-                2. Add NEXT_PUBLIC_MAPBOX_TOKEN to your environment
+                <strong>{t('map.enableRoutes')}</strong><br/>
+                {t('map.enableStep1')}<br/>
+                {t('map.enableStep2')}
               </p>
             </div>
           </div>
@@ -674,10 +676,10 @@ function MapboxMap({ activities, height, selectedActivity }: {
         <div className="text-center p-8">
           <AtlasIcon name="pin" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No Location Data
+            {t('map.noLocationData')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Activities do not have GPS coordinates to display routes
+            {t('map.noLocationCopy')}
           </p>
         </div>
       </div>
@@ -711,7 +713,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             src={staticMapUrl}
-            alt="Activity route map"
+            alt={t('map.routeMap')}
             className="w-full h-full object-cover"
             onError={(e) => {
               console.error('Map display failed:', staticMapUrl)
@@ -726,10 +728,10 @@ function MapboxMap({ activities, height, selectedActivity }: {
           <div className="text-center p-8">
             <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No Map Available
+              {t('map.noMap')}
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              Unable to generate map for this activity
+              {t('map.noMapCopy')}
             </p>
           </div>
         </div>
@@ -739,13 +741,13 @@ function MapboxMap({ activities, height, selectedActivity }: {
         <div className="text-center p-8">
           <AtlasIcon name="warning" className="mx-auto mb-4 h-12 w-12 text-[var(--route-red)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Map Loading Failed
+            {t('map.loadingFailed')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-2">
-            Unable to load map with current route
+            {t('map.loadingFailedCopy')}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            Check your Mapbox token configuration
+            {t('map.checkToken')}
           </p>
         </div>
       </div>
@@ -760,6 +762,7 @@ export default function RunningMap({
   defaultView = 'single',
   showActivityInfo = true // Default to true for backward compatibility
 }: RunningMapProps) {
+  const { t, dateLocale } = useI18n()
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
 
   // Filter activities that should show on map (Run, Walk, Hike, Ride)
@@ -794,10 +797,10 @@ export default function RunningMap({
         <div className="text-center p-8">
           <AtlasIcon name="map" className="mx-auto mb-4 h-12 w-12 text-[var(--route-green)]" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            No GPS Activities
+            {t('map.noGpsActivities')}
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Activities with GPS data will show here
+            {t('map.noGpsActivitiesCopy')}
           </p>
         </div>
       </div>
@@ -819,8 +822,8 @@ export default function RunningMap({
           
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {selectedActivity 
-              ? `Route: ${selectedActivity.name}`
-              : 'No route selected'
+              ? t('map.routeSelected', { name: selectedActivity.name })
+              : t('map.noRouteSelected')
             }
           </div>
         </div>
@@ -841,30 +844,30 @@ export default function RunningMap({
           </h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Type:</span> 
+              <span className="text-gray-500 dark:text-gray-400">{t('common.type')}:</span>
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                 {selectedActivity.type}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Distance:</span> 
+              <span className="text-gray-500 dark:text-gray-400">{t('common.distance')}:</span>
               <span className="ml-2 font-medium">{(selectedActivity.distance / 1000).toFixed(2)}km</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Coordinates:</span> 
+              <span className="text-gray-500 dark:text-gray-400">{t('map.coordinates')}:</span>
               <span className="ml-2 font-mono text-xs">
                 {selectedActivity.start_latitude?.toFixed(4)}, {selectedActivity.start_longitude?.toFixed(4)}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Date:</span> 
-              <span className="ml-2 font-medium">{new Date(selectedActivity.start_date).toLocaleDateString()}</span>
+              <span className="text-gray-500 dark:text-gray-400">{t('common.date')}:</span>
+              <span className="ml-2 font-medium">{new Date(selectedActivity.start_date).toLocaleDateString(dateLocale)}</span>
             </div>
             {(() => {
               const location = formatLocation(selectedActivity)
               return location.short ? (
                 <div className="col-span-2">
-                  <span className="text-gray-500 dark:text-gray-400">Location:</span> 
+                  <span className="text-gray-500 dark:text-gray-400">{t('map.location')}:</span>
                   <span className="ml-2 font-medium" title={location.full}>
                     <AtlasIcon name="pin" className="mr-1 inline h-3.5 w-3.5 text-[var(--route-green)]" /> {location.short}
                   </span>

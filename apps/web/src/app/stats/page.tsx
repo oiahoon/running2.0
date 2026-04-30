@@ -5,6 +5,7 @@ import { useActivityStats, useActivities } from '@/lib/hooks/useActivities'
 import { formatDuration } from '@/lib/database/models/Activity'
 import { RouteGlyph } from '@/components/routes'
 import { inferRouteEffort } from '@/lib/routes'
+import { useI18n } from '@/lib/i18n'
 
 type ActivityLike = {
   id: number
@@ -45,10 +46,10 @@ function dateKey(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function monthLabel(month: string, fallbackIndex: number) {
+function monthLabel(month: string, fallbackIndex: number, dateLocale: string) {
   const parsed = new Date(`${month}-01T00:00:00`)
-  if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleDateString('en-US', { month: 'short' })
-  return new Date(0, fallbackIndex).toLocaleDateString('en-US', { month: 'short' })
+  if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleDateString(dateLocale, { month: 'short' })
+  return new Date(0, fallbackIndex).toLocaleDateString(dateLocale, { month: 'short' })
 }
 
 function routePolyline(activity: ActivityLike) {
@@ -78,7 +79,7 @@ function LabPanel({ title, copy, children }: { title: string; copy: string; chil
   )
 }
 
-function DistanceField({ data }: { data: MonthlyStat[] }) {
+function DistanceField({ data, dateLocale }: { data: MonthlyStat[]; dateLocale: string }) {
   const maxDistance = Math.max(...data.map((item) => item.distance), 1)
   return (
     <div className="flex h-72 items-end gap-2">
@@ -88,10 +89,10 @@ function DistanceField({ data }: { data: MonthlyStat[] }) {
             <div
               className="w-full rounded-t-lg bg-[linear-gradient(180deg,var(--route-green),var(--route-cyan))]"
               style={{ height: `${Math.max((item.distance / maxDistance) * 100, item.distance > 0 ? 8 : 1)}%` }}
-              title={`${monthLabel(item.month, index)} ${formatDistanceKm(item.distance)}`}
+              title={`${monthLabel(item.month, index, dateLocale)} ${formatDistanceKm(item.distance)}`}
             />
           </div>
-          <div className="truncate text-center text-[10px] uppercase text-[var(--text-muted)]">{monthLabel(item.month, index)}</div>
+          <div className="truncate text-center text-[10px] uppercase text-[var(--text-muted)]">{monthLabel(item.month, index, dateLocale)}</div>
         </div>
       ))}
     </div>
@@ -126,7 +127,8 @@ function EffortMix({ activities }: { activities: ActivityLike[] }) {
   )
 }
 
-function ConsistencyHeatmap({ data, year }: { data: DailyStat[]; year: number }) {
+function ConsistencyHeatmap({ data, year, dateLocale }: { data: DailyStat[]; year: number; dateLocale: string }) {
+  const { t } = useI18n()
   const scrollRef = useRef<HTMLDivElement>(null)
   const maxDistance = Math.max(...data.map((item) => item.distance), 1)
   const byDate = new Map(data.map((item) => [item.date, item]))
@@ -158,7 +160,7 @@ function ConsistencyHeatmap({ data, year }: { data: DailyStat[]; year: number })
       column: Math.floor(index / 7),
       dayOfWeek: date.getUTCDay(),
       isDimmed: isOutsideYear || date > visibleEndDate,
-      month: date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
+      month: date.toLocaleDateString(dateLocale, { month: 'short', timeZone: 'UTC' }),
     }
   })
   const monthLabels = cells.reduce<Array<{ month: string; column: number }>>((labels, day) => {
@@ -228,7 +230,7 @@ function ConsistencyHeatmap({ data, year }: { data: DailyStat[]; year: number })
         </div>
       </div>
       <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
-        <span>Less</span>
+        <span>{t('stats.less')}</span>
         {[0.08, 0.24, 0.42, 0.62, 0.8].map((alpha) => (
           <span
             key={alpha}
@@ -236,13 +238,13 @@ function ConsistencyHeatmap({ data, year }: { data: DailyStat[]; year: number })
             style={{ backgroundColor: `rgba(93, 255, 157, ${alpha})` }}
           />
         ))}
-        <span>More</span>
+        <span>{t('stats.more')}</span>
       </div>
     </div>
   )
 }
 
-function WeekdayRhythm({ activities }: { activities: ActivityLike[] }) {
+function WeekdayRhythm({ activities, dateLocale }: { activities: ActivityLike[]; dateLocale: string }) {
   const weekdayData = Array.from({ length: 7 }, (_, day) => ({ day, count: 0, distanceKm: 0 }))
   activities.forEach((activity) => {
     const date = new Date(activity.start_date || activity.startDate || '')
@@ -257,7 +259,7 @@ function WeekdayRhythm({ activities }: { activities: ActivityLike[] }) {
     <div className="space-y-3">
       {weekdayData.map((item) => (
         <div key={item.day} className="grid grid-cols-[48px_1fr_88px] items-center gap-3 text-sm">
-          <div className="text-[var(--text-muted)]">{new Date(2024, 0, item.day).toLocaleDateString('en-US', { weekday: 'short' })}</div>
+          <div className="text-[var(--text-muted)]">{new Date(2024, 0, item.day).toLocaleDateString(dateLocale, { weekday: 'short' })}</div>
           <div className="h-3 overflow-hidden rounded-full bg-[var(--bg)]">
             <div className="h-full rounded-full bg-[var(--route-cyan)]" style={{ width: `${(item.distanceKm / maxDistance) * 100}%` }} />
           </div>
@@ -269,6 +271,7 @@ function WeekdayRhythm({ activities }: { activities: ActivityLike[] }) {
 }
 
 function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
+  const { t } = useI18n()
   const routeActivities = activities.filter((activity) => routePolyline(activity))
   const representatives = routeActivities.slice(0, 4)
 
@@ -288,7 +291,7 @@ function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
       ))}
       {representatives.length === 0 ? (
         <div className="col-span-2 rounded-2xl border border-dashed border-[var(--line)] p-8 text-center text-sm text-[var(--text-muted)]">
-          No route shapes available for diversity sampling.
+          {t('stats.noRouteDiversity')}
         </div>
       ) : null}
     </div>
@@ -296,6 +299,7 @@ function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
 }
 
 function YearSpiral({ activities }: { activities: ActivityLike[] }) {
+  const { t } = useI18n()
   const points = activities
     .map((activity) => {
       const date = new Date(activity.start_date || activity.startDate || '')
@@ -344,12 +348,12 @@ function YearSpiral({ activities }: { activities: ActivityLike[] }) {
       </svg>
       <div className="grid content-center gap-3">
         <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
-          <div className="route-atlas-label">Constellation</div>
+          <div className="route-atlas-label">{t('stats.constellation')}</div>
           <div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{points.length}</div>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">Each dot is one activity placed by day-of-year. Size follows distance; color follows inferred effort.</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">{t('stats.constellationCopy')}</p>
         </div>
         <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
-          <div className="route-atlas-label">Orbit Distance</div>
+          <div className="route-atlas-label">{t('stats.orbitDistance')}</div>
           <div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">
             {points.reduce((sum, point) => sum + point.distanceKm, 0).toFixed(1)} km
           </div>
@@ -365,6 +369,7 @@ function dayOfYear(date: Date) {
 }
 
 export default function StatsPage() {
+  const { t, dateLocale } = useI18n()
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const { data: yearStats, isLoading } = useActivityStats(selectedYear)
@@ -398,14 +403,14 @@ export default function StatsPage() {
         <div className="panel-body py-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="route-atlas-label">RUN2 / Stats Lab</div>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">Stats Lab</h1>
+              <div className="route-atlas-label">{t('stats.kicker')}</div>
+              <h1 className="mt-3 text-4xl font-black tracking-tight text-[var(--text-strong)] sm:text-6xl">{t('page.stats.title')}</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base">
-                Designed training signals for distance, rhythm, effort, route variety, and record-level breakthroughs.
+                {t('stats.copy')}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <label className="route-atlas-label" htmlFor="stats-year">Year</label>
+              <label className="route-atlas-label" htmlFor="stats-year">{t('common.year')}</label>
               <select
                 id="stats-year"
                 value={selectedYear}
@@ -422,60 +427,60 @@ export default function StatsPage() {
       </section>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="panel"><div className="panel-body"><div className="route-atlas-label">Distance</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{formatDistanceKm(stats?.total_distance)}</div></div></div>
-        <div className="panel"><div className="panel-body"><div className="route-atlas-label">Runs</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{Number(stats?.total_activities || 0)}</div></div></div>
-        <div className="panel"><div className="panel-body"><div className="route-atlas-label">Time</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{formatDuration(stats?.total_time)}</div></div></div>
-        <div className="panel"><div className="panel-body"><div className="route-atlas-label">Elevation</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{Math.round(stats?.total_elevation || 0)} m</div></div></div>
+        <div className="panel"><div className="panel-body"><div className="route-atlas-label">{t('common.distance')}</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{formatDistanceKm(stats?.total_distance)}</div></div></div>
+        <div className="panel"><div className="panel-body"><div className="route-atlas-label">{t('dashboard.runs')}</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{Number(stats?.total_activities || 0)}</div></div></div>
+        <div className="panel"><div className="panel-body"><div className="route-atlas-label">{t('common.time')}</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{formatDuration(stats?.total_time)}</div></div></div>
+        <div className="panel"><div className="panel-body"><div className="route-atlas-label">{t('stats.elevation')}</div><div className="mt-2 text-3xl font-semibold text-[var(--text-strong)]">{Math.round(stats?.total_elevation || 0)} m</div></div></div>
       </section>
 
       {isLoading ? (
         <section className="panel">
-          <div className="panel-body text-sm text-[var(--text-muted)]">Assembling yearly fields...</div>
+          <div className="panel-body text-sm text-[var(--text-muted)]">{t('stats.assembling')}</div>
         </section>
       ) : null}
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.35fr_0.65fr]">
-        <LabPanel title="Yearly Distance Field" copy="Monthly distance forms the terrain of the selected training year.">
-          <DistanceField data={monthlyData} />
+        <LabPanel title={t('stats.distanceField')} copy={t('stats.distanceFieldCopy')}>
+          <DistanceField data={monthlyData} dateLocale={dateLocale} />
         </LabPanel>
-        <LabPanel title="Effort Mix" copy="Effort is inferred from distance, pace, elevation, and heart rate when no explicit tag exists.">
+        <LabPanel title={t('stats.effortMix')} copy={t('stats.effortMixCopy')}>
           <EffortMix activities={activities} />
         </LabPanel>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <LabPanel title="Consistency Heatmap" copy="Recent training density shows how often the year actually moved.">
-          <ConsistencyHeatmap data={dailyData} year={selectedYear} />
+        <LabPanel title={t('stats.heatmap')} copy={t('stats.heatmapCopy')}>
+          <ConsistencyHeatmap data={dailyData} year={selectedYear} dateLocale={dateLocale} />
         </LabPanel>
-        <LabPanel title="Weekday Rhythm" copy="Weekly rhythm reveals when distance tends to land.">
-          <WeekdayRhythm activities={activities} />
+        <LabPanel title={t('stats.weekdayRhythm')} copy={t('stats.weekdayRhythmCopy')}>
+          <WeekdayRhythm activities={activities} dateLocale={dateLocale} />
         </LabPanel>
       </section>
 
-      <LabPanel title="Year Spiral" copy="A constellation view of the training year, generated without map tiles or external geography.">
+      <LabPanel title={t('stats.yearSpiral')} copy={t('stats.yearSpiralCopy')}>
         <YearSpiral activities={activities} />
       </LabPanel>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <LabPanel title="Route Diversity" copy="Representative route shapes keep spatial variety visible inside the statistics layer.">
+        <LabPanel title={t('stats.routeDiversity')} copy={t('stats.routeDiversityCopy')}>
           <RouteDiversity activities={activities} />
         </LabPanel>
-        <LabPanel title="Records Strip" copy="Record moments stay readable as text, not buried in charts.">
+        <LabPanel title={t('stats.recordsStrip')} copy={t('stats.recordsStripCopy')}>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
-              <div className="route-atlas-label">Longest</div>
+              <div className="route-atlas-label">{t('dashboard.longest')}</div>
               <div className="mt-2 text-2xl font-semibold text-[var(--text-strong)]">{longest ? `${(Number(longest.distance || 0) / 1000).toFixed(1)} km` : '--'}</div>
-              <div className="mt-2 text-sm text-[var(--text-muted)]">{longest?.name || 'No record yet'}</div>
+              <div className="mt-2 text-sm text-[var(--text-muted)]">{longest?.name || t('common.noRecord')}</div>
             </div>
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
-              <div className="route-atlas-label">Fastest Pace</div>
+              <div className="route-atlas-label">{t('stats.fastestPace')}</div>
               <div className="mt-2 text-2xl font-semibold text-[var(--text-strong)]">{fastest?.pace_per_km ? `${Number(fastest.pace_per_km).toFixed(2)} min/km` : '--'}</div>
-              <div className="mt-2 text-sm text-[var(--text-muted)]">{fastest?.name || 'No pace record yet'}</div>
+              <div className="mt-2 text-sm text-[var(--text-muted)]">{fastest?.name || t('stats.noPaceRecord')}</div>
             </div>
             <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-4">
-              <div className="route-atlas-label">Most Climb</div>
+              <div className="route-atlas-label">{t('stats.mostClimb')}</div>
               <div className="mt-2 text-2xl font-semibold text-[var(--text-strong)]">{elevation?.total_elevation_gain ? `${Math.round(elevation.total_elevation_gain)} m` : '--'}</div>
-              <div className="mt-2 text-sm text-[var(--text-muted)]">{elevation?.name || 'No climb record yet'}</div>
+              <div className="mt-2 text-sm text-[var(--text-muted)]">{elevation?.name || t('stats.noClimbRecord')}</div>
             </div>
           </div>
         </LabPanel>

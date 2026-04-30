@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { RouteTile } from '@/components/routes'
+import { useI18n } from '@/lib/i18n'
 import {
   RouteData,
   getEffortColor,
@@ -34,11 +35,11 @@ type ActivityLike = {
   locationCity?: string
 }
 
-function formatDate(value?: string) {
-  if (!value) return 'Unknown date'
+function formatDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
+  if (!value) return unknownLabel
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Unknown date'
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  if (Number.isNaN(date.getTime())) return unknownLabel
+  return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })
 }
 
 function formatDistanceKm(distanceMeters?: number) {
@@ -87,10 +88,14 @@ const constellationColors = [
 
 function AnimatedRouteConstellation({
   activities,
+  noShapeLabel,
+  ariaLabel,
   width = 760,
   height = 560,
 }: {
   activities: ActivityLike[]
+  noShapeLabel: string
+  ariaLabel: string
   width?: number
   height?: number
 }) {
@@ -123,7 +128,7 @@ function AnimatedRouteConstellation({
     <svg
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label="Latest route constellation animation"
+      aria-label={ariaLabel}
       className="block h-full w-full overflow-hidden"
       preserveAspectRatio="xMidYMid meet"
     >
@@ -204,7 +209,7 @@ function AnimatedRouteConstellation({
             strokeWidth="5"
           />
           <text x={width / 2} y={height / 2 + 42} textAnchor="middle" fill="rgba(238,244,233,0.62)" fontSize="13" fontWeight="600">
-            No route shape
+            {noShapeLabel}
           </text>
         </g>
       )}
@@ -213,13 +218,15 @@ function AnimatedRouteConstellation({
 }
 
 function LoadingRouteWall() {
+  const { t } = useI18n()
+
   return (
     <div className="space-y-6">
       <section className="panel route-atlas-surface overflow-hidden">
         <div className="panel-body grid min-h-[520px] place-items-center">
           <div className="text-center">
-            <div className="route-atlas-label">Route Wall</div>
-            <p className="mt-3 text-lg text-[var(--text-muted)]">Drawing the latest route shapes...</p>
+            <div className="route-atlas-label">{t('dashboard.loadingLabel')}</div>
+            <p className="mt-3 text-lg text-[var(--text-muted)]">{t('dashboard.loadingCopy')}</p>
           </div>
         </div>
       </section>
@@ -228,6 +235,7 @@ function LoadingRouteWall() {
 }
 
 export function CyberDashboard() {
+  const { t, dateLocale } = useI18n()
   const currentYear = new Date().getFullYear()
   const { data: statsData, isLoading: statsLoading } = useActivityStats(currentYear)
   const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(36)
@@ -246,7 +254,7 @@ export function CyberDashboard() {
   const routeCount = routeActivities.length
   const longestRunMeters = Number(records?.longestRun?.distance || 0)
   const latestPace = latestActivity?.average_speed ? formatPace(latestActivity.average_speed) : '--:--/km'
-  const latestLocation = latestActivity?.location_city || latestActivity?.locationCity || 'Route archive'
+  const latestLocation = latestActivity?.location_city || latestActivity?.locationCity || t('page.routes.title')
 
   if (statsLoading || recentLoading) {
     return <LoadingRouteWall />
@@ -258,31 +266,35 @@ export function CyberDashboard() {
         <div className="grid min-h-[620px] grid-cols-1 gap-6 p-5 lg:grid-cols-[0.88fr_1.12fr] lg:p-7">
           <div className="flex flex-col justify-between gap-8">
             <div>
-              <div className="route-atlas-label">RUN2 / Route Wall</div>
+              <div className="route-atlas-label">{t('dashboard.kicker')}</div>
               <h1 className="mt-5 max-w-[720px] text-[clamp(56px,8vw,112px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
-                Every Run Leaves A Shape.
+                {t('dashboard.headline')}
               </h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg">
-                Your personal running atlas: routes, effort, pace, elevation, and memories compressed into one visual system.
+                {t('dashboard.copy')}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <StatPill label={`${currentYear} Distance`} value={`${totalDistanceKm.toFixed(1)} km`} />
-              <StatPill label="Runs" value={runCount} />
-              <StatPill label="Recent Routes" value={routeCount} sublabel="with GPS shape" />
-              <StatPill label="Longest" value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
+              <StatPill label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
+              <StatPill label={t('dashboard.runs')} value={runCount} />
+              <StatPill label={t('dashboard.recentRoutes')} value={routeCount} sublabel={t('dashboard.withGpsShape')} />
+              <StatPill label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
             </div>
           </div>
 
           <div className="flex min-h-[420px] flex-col gap-4">
             <div className="relative flex-1 overflow-hidden rounded-3xl border border-[var(--line)] bg-[rgba(7,10,12,0.72)]">
-              <AnimatedRouteConstellation activities={routeActivities} />
+              <AnimatedRouteConstellation
+                activities={routeActivities}
+                noShapeLabel={t('route.noShape')}
+                ariaLabel={t('dashboard.latestConstellation')}
+              />
               <div className="pointer-events-none absolute left-5 top-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                Latest constellation
+                {t('dashboard.latestConstellation')}
               </div>
               <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {routeActivities.length} live traces
+                {t('dashboard.liveTraces', { count: routeActivities.length })}
               </div>
             </div>
 
@@ -290,23 +302,23 @@ export function CyberDashboard() {
               {latestActivity ? (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="route-atlas-label">Latest</div>
-                    <div className="mt-1 truncate text-lg font-semibold text-[var(--text-strong)]">{latestActivity.name || 'Untitled run'}</div>
+                    <div className="route-atlas-label">{t('dashboard.latest')}</div>
+                    <div className="mt-1 truncate text-lg font-semibold text-[var(--text-strong)]">{latestActivity.name || t('dashboard.untitledRun')}</div>
                     <div className="mt-1 text-sm text-[var(--text-muted)]">
-                      {formatDate(latestActivity.start_date || latestActivity.startDate)} · {latestLocation} · {String(effortForActivity(latestActivity)).toUpperCase()}
+                      {formatDate(latestActivity.start_date || latestActivity.startDate, dateLocale, t('common.unknownDate'))} · {latestLocation} · {String(effortForActivity(latestActivity)).toUpperCase()}
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 text-right text-sm tabular-nums">
                     <div>
-                      <div className="route-atlas-label">Distance</div>
+                      <div className="route-atlas-label">{t('common.distance')}</div>
                       <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDistanceKm(latestActivity.distance)}</div>
                     </div>
                     <div>
-                      <div className="route-atlas-label">Pace</div>
+                      <div className="route-atlas-label">{t('common.pace')}</div>
                       <div className="mt-1 font-semibold text-[var(--text-strong)]">{latestPace}</div>
                     </div>
                     <div>
-                      <div className="route-atlas-label">Time</div>
+                      <div className="route-atlas-label">{t('common.time')}</div>
                       <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDuration(latestActivity.moving_time)}</div>
                     </div>
                   </div>
@@ -314,10 +326,10 @@ export function CyberDashboard() {
               ) : (
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="route-atlas-label">No routes yet</div>
-                    <p className="mt-1 text-sm text-[var(--text-muted)]">Connect a source to start drawing your running atlas.</p>
+                    <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
                   </div>
-                  <Link href="/sync" className="action-primary">Sync Source</Link>
+                  <Link href="/sync" className="action-primary">{t('dashboard.syncSource')}</Link>
                 </div>
               )}
             </div>
@@ -329,10 +341,10 @@ export function CyberDashboard() {
         <div className="panel">
           <div className="panel-header flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--text-strong)]">Recent Route Shapes</h2>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">A quick wall of real GPS shapes from the latest synced activities.</p>
+              <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.recentShapes')}</h2>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.recentShapesCopy')}</p>
             </div>
-            <Link href="/routes" className="action-secondary shrink-0">Open Gallery</Link>
+            <Link href="/routes" className="action-secondary shrink-0">{t('dashboard.openGallery')}</Link>
           </div>
           <div className="panel-body">
             {routeActivities.length > 0 ? (
@@ -341,9 +353,9 @@ export function CyberDashboard() {
                   <RouteTile
                     key={activity.id}
                     activityId={activity.id}
-                    title={activity.name || `${activity.type || 'Run'} route`}
+                    title={activity.name || `${activity.type || t('activity.type.Run')} route`}
                     distanceLabel={formatDistanceKm(activity.distance)}
-                    dateLabel={formatDate(activity.start_date || activity.startDate)}
+                    dateLabel={formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}
                     paceLabel={activity.average_speed ? formatPace(activity.average_speed) : undefined}
                     effort={effortForActivity(activity)}
                     route={routeForActivity(activity)}
@@ -352,7 +364,7 @@ export function CyberDashboard() {
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-[var(--line)] p-8 text-center text-[var(--text-muted)]">
-                No route shapes are available yet. Sync Strava or import route data to fill the wall.
+                {t('dashboard.emptyRouteWall')}
               </div>
             )}
           </div>
@@ -360,15 +372,15 @@ export function CyberDashboard() {
 
         <div className="panel">
           <div className="panel-header">
-            <h2 className="text-lg font-semibold text-[var(--text-strong)]">Atlas Shortcuts</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
           </div>
           <div className="panel-body grid gap-2">
-            <Link href="/activities" className="action-secondary justify-start">Browse Runs</Link>
-            <Link href="/routes" className="action-secondary justify-start">Open Route Gallery</Link>
-            <Link href="/posters" className="action-secondary justify-start">Generate Posters</Link>
-            <Link href="/stats" className="action-secondary justify-start">Open Stats Lab</Link>
-            <Link href="/map" className="action-secondary justify-start">Inspect Route Map</Link>
-            <Link href="/sync" className="action-primary justify-start">Sync Latest Data</Link>
+            <Link href="/activities" className="action-secondary justify-start">{t('dashboard.browseRuns')}</Link>
+            <Link href="/routes" className="action-secondary justify-start">{t('dashboard.openGallery')}</Link>
+            <Link href="/posters" className="action-secondary justify-start">{t('dashboard.generatePosters')}</Link>
+            <Link href="/stats" className="action-secondary justify-start">{t('dashboard.openStatsLab')}</Link>
+            <Link href="/map" className="action-secondary justify-start">{t('dashboard.inspectRouteMap')}</Link>
+            <Link href="/sync" className="action-primary justify-start">{t('dashboard.syncLatestData')}</Link>
           </div>
         </div>
       </section>
