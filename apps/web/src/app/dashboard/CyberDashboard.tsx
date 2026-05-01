@@ -379,27 +379,25 @@ export function CyberDashboard() {
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel relative overflow-visible">
           <div className="panel-header">
             <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
           </div>
-          <div className="panel-body grid gap-2">
-            <div className="relative -mt-5 mb-0 h-28 overflow-visible px-2">
-              <Image
-                src={runnerMuseCameos.dashboardShortcutLead.src}
-                alt=""
-                width={768}
-                height={768}
-                loading="eager"
-                className="pointer-events-none absolute -bottom-1 right-6 z-10 h-36 w-32 -rotate-3 object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.2)]"
-              />
-            </div>
-            <Link href="/activities" className="action-secondary justify-start">{t('dashboard.browseRuns')}</Link>
-            <Link href="/routes" className="action-secondary justify-start">{t('dashboard.openGallery')}</Link>
-            <Link href="/posters" className="action-secondary justify-start">{t('dashboard.generatePosters')}</Link>
-            <Link href="/stats" className="action-secondary justify-start">{t('dashboard.openStatsLab')}</Link>
-            <Link href="/map" className="action-secondary justify-start">{t('dashboard.inspectRouteMap')}</Link>
-            <Link href="/sync" className="action-primary justify-start">{t('dashboard.syncLatestData')}</Link>
+          <div className="panel-body relative isolate grid gap-2 overflow-visible">
+            <Image
+              src={runnerMuseCameos.dashboardShortcutLead.src}
+              alt=""
+              width={768}
+              height={768}
+              loading="eager"
+              className="pointer-events-none absolute -bottom-8 -right-8 z-0 h-64 w-56 -rotate-3 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)] sm:h-72 sm:w-60 lg:-bottom-10 lg:-right-10"
+            />
+            <Link href="/activities" className="action-secondary relative z-10 justify-start">{t('dashboard.browseRuns')}</Link>
+            <Link href="/routes" className="action-secondary relative z-10 justify-start">{t('dashboard.openGallery')}</Link>
+            <Link href="/posters" className="action-secondary relative z-10 justify-start">{t('dashboard.generatePosters')}</Link>
+            <Link href="/stats" className="action-secondary relative z-10 justify-start">{t('dashboard.openStatsLab')}</Link>
+            <Link href="/map" className="action-secondary relative z-10 justify-start">{t('dashboard.inspectRouteMap')}</Link>
+            <Link href="/sync" className="action-primary relative z-10 justify-start">{t('dashboard.syncLatestData')}</Link>
           </div>
         </div>
       </section>
