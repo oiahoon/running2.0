@@ -243,6 +243,12 @@
     opacity: 0;
     filter: blur(1px);
   }
+
+  .hero-runner-float {
+    animation: hero-runner-float 4.2s ease-in-out infinite;
+    transform-origin: 52% 82%;
+    will-change: transform;
+  }
 }
 
 @keyframes draw-route {
@@ -278,6 +284,21 @@
   }
 }
 
+@keyframes hero-runner-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  34% {
+    transform: translate3d(0, -8px, 0) scale(1.012);
+  }
+
+  68% {
+    transform: translate3d(4px, -3px, 0) scale(0.998);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -286,5 +307,9 @@
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
+  }
+
+  .hero-runner-float {
+    animation: none !important;
   }
 }

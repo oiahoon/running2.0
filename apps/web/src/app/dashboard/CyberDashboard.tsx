@@ -285,14 +285,16 @@ export function CyberDashboard() {
                 <HeroMetric label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
               </div>
 
-              <Image
-                src={runnerMuseCameos.dashboardHero.src}
-                alt=""
-                width={768}
-                height={1152}
-                priority
-                className="pointer-events-none relative z-10 mx-auto mt-2 h-64 w-56 rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)] sm:h-72 sm:w-64 lg:absolute lg:-bottom-44 lg:right-0 lg:mx-0 lg:mt-0 xl:-bottom-48 xl:-right-4 xl:h-80 xl:w-72"
-              />
+              <div aria-hidden="true" className="hero-runner-float pointer-events-none relative z-10 mx-auto mt-2 h-64 w-56 sm:h-72 sm:w-64 lg:absolute lg:-bottom-44 lg:right-0 lg:mx-0 lg:mt-0 xl:-bottom-48 xl:-right-4 xl:h-80 xl:w-72">
+                <Image
+                  src={runnerMuseCameos.dashboardHero.src}
+                  alt=""
+                  width={768}
+                  height={1152}
+                  priority
+                  className="h-full w-full rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)]"
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-4">
