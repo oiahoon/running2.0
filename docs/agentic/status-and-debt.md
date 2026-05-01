@@ -22,13 +22,14 @@ Recent commits show the project is past the old cyberpunk/mock-data phase:
 - Legacy static homepage, docs-template UI, Catalyst primitives, Cyber UI primitives, unused Recharts wrappers, and stale pointer docs were removed.
 - English/Chinese/Japanese UI localization added with a global language toggle and localized route-atlas slogan.
 - Favorite runner low-poly cutouts added as distributed, unlabeled UI cameos with reserved space so they stay visible without covering route/poster data.
+- Favorite runner asset library expanded to four fictional characters with run/stretch/lifestyle/pose coverage and wired into dashboard/poster placement pools.
 
 ## Current Product Reality
 
 Working:
 - Dashboard reads real stats/recent activities.
 - Dashboard hero slogan and core UI copy support English, Simplified Chinese, and Japanese.
-- Dashboard and posters can place generated transparent runner characters without using real athlete photos; keep each placement fully visible and clear of text, controls, and route metrics.
+- Dashboard and posters can place generated transparent runner characters without using real athlete photos; use `apps/web/src/lib/runnerMuses.ts` as the placement registry and keep route/poster data readable.
 - Activities page reads real data with search/filter/pagination.
 - Stats page reads real yearly analytics.
 - Map page preserves map and static route gallery workflows.

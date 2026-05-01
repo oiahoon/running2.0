@@ -170,7 +170,7 @@ export default function PostersPage() {
                   width={768}
                   height={768}
                   loading="lazy"
-                  className="pointer-events-none absolute -bottom-8 -right-8 z-0 h-[38%] w-[38%] rotate-3 object-contain opacity-[0.10] dark:opacity-[0.14]"
+                  className="pointer-events-none absolute bottom-3 right-3 z-0 h-[34%] w-[34%] rotate-2 object-contain opacity-[0.09] dark:opacity-[0.13]"
                 />
                 <div className="relative z-10 flex h-full flex-col">
                   <div className="flex items-start justify-between gap-4">
