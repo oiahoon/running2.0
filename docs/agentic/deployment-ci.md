@@ -31,6 +31,7 @@ Important:
 - `apps/web/package.json` uses `next build --webpack`.
 - `apps/web/vercel.json` forces Vercel to run `npm run build`.
 - Keep this explicit until Turbopack has been revalidated with the current Tailwind/Next stack.
+- Do not set `turbopack.root` while the project is webpack-backed; Vercel/Next may also set `outputFileTracingRoot`, and mismatched roots produce noisy build warnings.
 
 ## Vercel
 

@@ -1,8 +1,3 @@
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
-
-const projectRoot = path.dirname(fileURLToPath(import.meta.url))
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -14,9 +9,6 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'via.placeholder.com' },
     ],
-  },
-  turbopack: {
-    root: projectRoot,
   },
   // API routes configuration
   async headers() {
