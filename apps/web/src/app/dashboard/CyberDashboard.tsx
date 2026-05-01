@@ -69,11 +69,11 @@ function effortForActivity(activity?: ActivityLike) {
   })
 }
 
-function StatPill({ label, value, sublabel }: { label: string; value: string | number; sublabel?: string }) {
+function HeroMetric({ label, value, sublabel }: { label: string; value: string | number; sublabel?: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
+    <div className="border-t border-[var(--line)] py-3">
       <div className="route-atlas-label">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tabular-nums text-[var(--text-strong)] sm:text-3xl">{value}</div>
+      <div className="mt-2 text-2xl font-semibold tabular-nums text-[var(--text-strong)]">{value}</div>
       {sublabel ? <div className="mt-1 text-xs text-[var(--text-muted)]">{sublabel}</div> : null}
     </div>
   )
@@ -264,83 +264,87 @@ export function CyberDashboard() {
   return (
     <div className="space-y-6">
       <section className="panel route-atlas-surface overflow-visible">
-        <div className="grid min-h-[620px] grid-cols-1 gap-6 p-5 lg:grid-cols-[0.88fr_1.12fr] lg:p-7">
-          <div className="relative flex flex-col justify-between gap-8 overflow-visible">
-            <div className="relative z-10 pb-20 sm:pb-24">
-              <div className="route-atlas-label">{t('dashboard.kicker')}</div>
-              <h1 className="mt-5 max-w-[720px] text-[clamp(56px,8vw,112px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
-                {t('dashboard.headline')}
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:pr-16 sm:text-lg xl:pr-8">
+        <div className="grid gap-6 overflow-visible p-5 lg:p-7">
+          <div className="relative z-10 max-w-[1060px]">
+            <div className="route-atlas-label">{t('dashboard.kicker')}</div>
+            <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
+              {t('dashboard.headline')}
+            </h1>
+          </div>
+
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(300px,0.82fr)_minmax(520px,1.18fr)]">
+            <div className="relative min-h-[330px] overflow-visible pb-4 sm:pb-6 lg:min-h-[420px] lg:pb-0">
+              <p className="relative z-20 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg lg:max-w-md">
                 {t('dashboard.copy')}
               </p>
+
+              <div className="relative z-20 mt-8 grid grid-cols-2 gap-x-6 gap-y-2 sm:max-w-xl lg:max-w-[390px]">
+                <HeroMetric label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
+                <HeroMetric label={t('dashboard.runs')} value={runCount} />
+                <HeroMetric label={t('dashboard.recentRoutes')} value={routeCount} sublabel={t('dashboard.withGpsShape')} />
+                <HeroMetric label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
+              </div>
+
               <Image
                 src={runnerMuseCameos.dashboardHero.src}
                 alt=""
                 width={768}
                 height={1152}
                 priority
-                className="pointer-events-none absolute -bottom-10 -right-8 z-20 hidden h-64 w-56 rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)] sm:block xl:-bottom-12 xl:-right-12 xl:h-72 xl:w-64"
+                className="pointer-events-none relative z-10 mx-auto mt-2 h-64 w-56 rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)] sm:h-72 sm:w-64 lg:absolute lg:-bottom-44 lg:right-0 lg:mx-0 lg:mt-0 xl:-bottom-48 xl:-right-4 xl:h-80 xl:w-72"
               />
             </div>
 
-            <div className="relative z-10 grid grid-cols-2 gap-3">
-              <StatPill label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
-              <StatPill label={t('dashboard.runs')} value={runCount} />
-              <StatPill label={t('dashboard.recentRoutes')} value={routeCount} sublabel={t('dashboard.withGpsShape')} />
-              <StatPill label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
-            </div>
-          </div>
-
-          <div className="flex min-h-[420px] flex-col justify-center gap-4">
-            <div className="relative aspect-[19/14] overflow-hidden rounded-3xl border border-[var(--line)] bg-[rgba(7,10,12,0.72)]">
-              <AnimatedRouteConstellation
-                activities={routeActivities}
-                noShapeLabel={t('route.noShape')}
-                ariaLabel={t('dashboard.latestConstellation')}
-              />
-              <div className="pointer-events-none absolute left-5 top-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {t('dashboard.latestConstellation')}
-              </div>
-              <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {t('dashboard.liveTraces', { count: routeActivities.length })}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
-              {latestActivity ? (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="route-atlas-label">{t('dashboard.latest')}</div>
-                    <div className="mt-1 truncate text-lg font-semibold text-[var(--text-strong)]">{latestActivity.name || t('dashboard.untitledRun')}</div>
-                    <div className="mt-1 text-sm text-[var(--text-muted)]">
-                      {formatDate(latestActivity.start_date || latestActivity.startDate, dateLocale, t('common.unknownDate'))} · {latestLocation} · {String(effortForActivity(latestActivity)).toUpperCase()}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 text-right text-sm tabular-nums">
-                    <div>
-                      <div className="route-atlas-label">{t('common.distance')}</div>
-                      <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDistanceKm(latestActivity.distance)}</div>
-                    </div>
-                    <div>
-                      <div className="route-atlas-label">{t('common.pace')}</div>
-                      <div className="mt-1 font-semibold text-[var(--text-strong)]">{latestPace}</div>
-                    </div>
-                    <div>
-                      <div className="route-atlas-label">{t('common.time')}</div>
-                      <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDuration(latestActivity.moving_time)}</div>
-                    </div>
-                  </div>
+            <div className="flex flex-col gap-4">
+              <div className="relative aspect-[19/14] overflow-hidden rounded-3xl border border-[var(--line)] bg-[rgba(7,10,12,0.72)]">
+                <AnimatedRouteConstellation
+                  activities={routeActivities}
+                  noShapeLabel={t('route.noShape')}
+                  ariaLabel={t('dashboard.latestConstellation')}
+                />
+                <div className="pointer-events-none absolute left-5 top-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                  {t('dashboard.latestConstellation')}
                 </div>
-              ) : (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
-                    <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
-                  </div>
-                  <Link href="/sync" className="action-primary">{t('dashboard.syncSource')}</Link>
+                <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                  {t('dashboard.liveTraces', { count: routeActivities.length })}
                 </div>
-              )}
+              </div>
+
+              <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
+                {latestActivity ? (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="route-atlas-label">{t('dashboard.latest')}</div>
+                      <div className="mt-1 truncate text-lg font-semibold text-[var(--text-strong)]">{latestActivity.name || t('dashboard.untitledRun')}</div>
+                      <div className="mt-1 text-sm text-[var(--text-muted)]">
+                        {formatDate(latestActivity.start_date || latestActivity.startDate, dateLocale, t('common.unknownDate'))} · {latestLocation} · {String(effortForActivity(latestActivity)).toUpperCase()}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 text-right text-sm tabular-nums">
+                      <div>
+                        <div className="route-atlas-label">{t('common.distance')}</div>
+                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDistanceKm(latestActivity.distance)}</div>
+                      </div>
+                      <div>
+                        <div className="route-atlas-label">{t('common.pace')}</div>
+                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{latestPace}</div>
+                      </div>
+                      <div>
+                        <div className="route-atlas-label">{t('common.time')}</div>
+                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDuration(latestActivity.moving_time)}</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
+                      <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
+                    </div>
+                    <Link href="/sync" className="action-primary">{t('dashboard.syncSource')}</Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
