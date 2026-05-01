@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -100,6 +100,35 @@ function AnimatedRouteConstellation({
   width?: number
   height?: number
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [canvasSize, setCanvasSize] = useState({ width, height })
+
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+
+    const syncSize = () => {
+      const bounds = element.getBoundingClientRect()
+      const nextWidth = Math.max(Math.round(bounds.width), 320)
+      const nextHeight = Math.max(Math.round(bounds.height), 260)
+
+      setCanvasSize((current) =>
+        current.width === nextWidth && current.height === nextHeight ? current : { width: nextWidth, height: nextHeight }
+      )
+    }
+
+    syncSize()
+
+    const observer = new ResizeObserver(syncSize)
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [])
+
+  const viewWidth = canvasSize.width
+  const viewHeight = canvasSize.height
+  const routePadding = Math.max(34, Math.min(viewWidth, viewHeight) * 0.09)
+
   const animatedRoutes = useMemo(
     () =>
       activities
@@ -108,7 +137,7 @@ function AnimatedRouteConstellation({
         .map((activity, index) => {
           const route = routeForActivity(activity)
           const points = samplePoints(resolveRoutePoints(route), 420)
-          const path = pointsToPath(normalizeRoute(points, width, height, 54))
+          const path = pointsToPath(normalizeRoute(points, viewWidth, viewHeight, routePadding))
           const effortColor = getEffortColor(effortForActivity(activity))
 
           return {
@@ -120,101 +149,103 @@ function AnimatedRouteConstellation({
           }
         })
         .filter((route) => route.path.length > 0),
-    [activities, height, width]
+    [activities, routePadding, viewHeight, viewWidth]
   )
 
   const cycleSeconds = Math.max(animatedRoutes.length * 1.15, 7)
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label={ariaLabel}
-      className="block h-full w-full overflow-hidden"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <rect width={width} height={height} rx="18" fill="rgba(7,10,12,0.58)" />
-      <g opacity="0.8">
-        {Array.from({ length: Math.floor(width / 24) + 1 }, (_, index) => (
-          <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={height} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
-        ))}
-        {Array.from({ length: Math.floor(height / 24) + 1 }, (_, index) => (
-          <line key={`hy-${index}`} x1={0} y1={index * 24} x2={width} y2={index * 24} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
-        ))}
-      </g>
-
-      {animatedRoutes.length > 0 ? (
-        <>
-          <g>
-            {animatedRoutes.map((route, index) => (
-              <path
-                key={`ghost-${route.id}-${index}`}
-                d={route.path}
-                fill="none"
-                stroke={route.effortColor}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-                opacity="0.18"
-              />
-            ))}
-          </g>
-          <g>
-            {animatedRoutes.map((route, index) => {
-              const animationStyle = {
-                '--route-cycle': `${cycleSeconds}s`,
-                '--route-delay': `${index * 1.15}s`,
-                color: route.color,
-              } as CSSProperties
-
-              return (
-                <g key={`active-${route.id}-${index}`} style={animationStyle}>
-                  <path
-                    d={route.path}
-                    fill="none"
-                    stroke={route.color}
-                    strokeWidth="12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    pathLength={1}
-                    vectorEffect="non-scaling-stroke"
-                    className="route-constellation-glow"
-                  />
-                  <path
-                    d={route.path}
-                    fill="none"
-                    stroke={route.color}
-                    strokeWidth="5.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    pathLength={1}
-                    vectorEffect="non-scaling-stroke"
-                    className="route-constellation-runner"
-                  >
-                    <title>{route.title}</title>
-                  </path>
-                </g>
-              )
-            })}
-          </g>
-        </>
-      ) : (
-        <g>
-          <path
-            d={`M ${width * 0.22} ${height * 0.58} C ${width * 0.34} ${height * 0.34}, ${width * 0.48} ${height * 0.7}, ${width * 0.62} ${height * 0.46} S ${width * 0.82} ${height * 0.48}, ${width * 0.78} ${height * 0.65}`}
-            fill="none"
-            stroke="rgba(139,154,147,0.5)"
-            strokeDasharray="6 10"
-            strokeLinecap="round"
-            strokeWidth="5"
-          />
-          <text x={width / 2} y={height / 2 + 42} textAnchor="middle" fill="rgba(238,244,233,0.62)" fontSize="13" fontWeight="600">
-            {noShapeLabel}
-          </text>
+    <div ref={containerRef} className="h-full w-full">
+      <svg
+        viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+        role="img"
+        aria-label={ariaLabel}
+        className="block h-full w-full overflow-hidden"
+        preserveAspectRatio="none"
+      >
+        <rect width={viewWidth} height={viewHeight} rx="18" fill="rgba(7,10,12,0.58)" />
+        <g opacity="0.8">
+          {Array.from({ length: Math.floor(viewWidth / 24) + 1 }, (_, index) => (
+            <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={viewHeight} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+          ))}
+          {Array.from({ length: Math.floor(viewHeight / 24) + 1 }, (_, index) => (
+            <line key={`hy-${index}`} x1={0} y1={index * 24} x2={viewWidth} y2={index * 24} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+          ))}
         </g>
-      )}
-    </svg>
+
+        {animatedRoutes.length > 0 ? (
+          <>
+            <g>
+              {animatedRoutes.map((route, index) => (
+                <path
+                  key={`ghost-${route.id}-${index}`}
+                  d={route.path}
+                  fill="none"
+                  stroke={route.effortColor}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  opacity="0.18"
+                />
+              ))}
+            </g>
+            <g>
+              {animatedRoutes.map((route, index) => {
+                const animationStyle = {
+                  '--route-cycle': `${cycleSeconds}s`,
+                  '--route-delay': `${index * 1.15}s`,
+                  color: route.color,
+                } as CSSProperties
+
+                return (
+                  <g key={`active-${route.id}-${index}`} style={animationStyle}>
+                    <path
+                      d={route.path}
+                      fill="none"
+                      stroke={route.color}
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      pathLength={1}
+                      vectorEffect="non-scaling-stroke"
+                      className="route-constellation-glow"
+                    />
+                    <path
+                      d={route.path}
+                      fill="none"
+                      stroke={route.color}
+                      strokeWidth="5.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      pathLength={1}
+                      vectorEffect="non-scaling-stroke"
+                      className="route-constellation-runner"
+                    >
+                      <title>{route.title}</title>
+                    </path>
+                  </g>
+                )
+              })}
+            </g>
+          </>
+        ) : (
+          <g>
+            <path
+              d={`M ${viewWidth * 0.22} ${viewHeight * 0.58} C ${viewWidth * 0.34} ${viewHeight * 0.34}, ${viewWidth * 0.48} ${viewHeight * 0.7}, ${viewWidth * 0.62} ${viewHeight * 0.46} S ${viewWidth * 0.82} ${viewHeight * 0.48}, ${viewWidth * 0.78} ${viewHeight * 0.65}`}
+              fill="none"
+              stroke="rgba(139,154,147,0.5)"
+              strokeDasharray="6 10"
+              strokeLinecap="round"
+              strokeWidth="5"
+            />
+            <text x={viewWidth / 2} y={viewHeight / 2 + 42} textAnchor="middle" fill="rgba(238,244,233,0.62)" fontSize="13" fontWeight="600">
+              {noShapeLabel}
+            </text>
+          </g>
+        )}
+      </svg>
+    </div>
   )
 }
 
