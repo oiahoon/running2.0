@@ -164,16 +164,16 @@ export default function PostersPage() {
 
             return (
               <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-                <Image
-                  src={backgroundRunner.src}
-                  alt=""
-                  width={768}
-                  height={768}
-                  loading="lazy"
-                  className="pointer-events-none absolute bottom-3 right-3 z-0 h-[34%] w-[34%] rotate-2 object-contain opacity-[0.09] dark:opacity-[0.13]"
-                />
                 <div className="relative z-10 flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-4">
+                  <Image
+                    src={backgroundRunner.src}
+                    alt=""
+                    width={768}
+                    height={768}
+                    loading="lazy"
+                    className="pointer-events-none absolute bottom-2 right-1 z-20 h-[48%] w-[44%] rotate-2 object-contain opacity-[0.11] dark:opacity-[0.16]"
+                  />
+                  <div className="relative z-30 flex items-start justify-between gap-4">
                     <div>
                       <div className="route-atlas-label">RUN2 / {mode === 'month' ? t('posters.monthlyPoster') : t('posters.weeklyPoster')}</div>
                       <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--text-strong)]">{formatPeriodLabel(period.key, mode, dateLocale, t)}</h2>
@@ -183,7 +183,7 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 aspect-square overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
+                  <div className="relative z-10 mt-5 aspect-square overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
                     <RouteGlyph
                       route={{ encodedPolyline: routePolyline(representative) }}
                       ghostRoutes={period.items.slice(1, 8).map((activity) => ({ encodedPolyline: routePolyline(activity) }))}
@@ -195,7 +195,7 @@ export default function PostersPage() {
                     />
                   </div>
 
-                  <div className="mt-5 grid grid-cols-3 gap-3">
+                  <div className="relative z-30 mt-5 grid grid-cols-3 gap-3">
                     <div>
                       <div className="route-atlas-label">{t('common.distance')}</div>
                       <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{totalDistanceKm.toFixed(1)} km</div>
@@ -210,7 +210,7 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <p className={index === 0 ? 'mt-5 pr-28 text-sm leading-6 text-[var(--text-muted)] sm:pr-32' : 'mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
+                  <p className={index === 0 ? 'relative z-30 mt-5 pr-28 text-sm leading-6 text-[var(--text-muted)] sm:pr-32' : 'relative z-30 mt-5 text-sm leading-6 text-[var(--text-muted)]'}>
                     {t('posters.artifactCopy')}
                   </p>
                 </div>
