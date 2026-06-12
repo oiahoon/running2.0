@@ -817,9 +817,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "160315427667575e81cacd14cef381e6adc59468",
     "similar_activities": {
       "effort_count": 96,
@@ -964,9 +969,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "02bd86136c7c6b9a10c326938489bb31bab79d23",
     "available_zones": []
   },
@@ -1162,9 +1172,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "5ee38e03b8b8625e71fae46e217ee68a043cfd25",
     "available_zones": []
   },
@@ -1360,9 +1375,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "4a22430e1e0e4186822b6a201237947b34e87d3e",
     "available_zones": []
   },
@@ -1558,9 +1578,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "89908429e8e0144e5c0cbb419653d37dc20aa792",
     "available_zones": []
   },
@@ -1756,9 +1781,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "62358fbbb580083251cccfa2c10fb42c44e8c5f8",
     "available_zones": []
   },
@@ -1954,9 +1984,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "4a7d7e35ad972b32c8432f7564f428a612794766",
     "available_zones": []
   },
@@ -2078,9 +2113,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "f55eda0e32791c6310999d8c9bcc7fb2e61e3011",
     "available_zones": []
   },
@@ -2202,9 +2242,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "94be962508987b247a3900d013bd15de3c7ea579",
     "available_zones": []
   },
@@ -2326,9 +2371,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "0161b565198cf28768ef89f0241f67a70e0e7f8e",
     "available_zones": []
   },
@@ -2450,9 +2500,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "b588552b88197e90a5c5151114810d6c01a4e9d6",
     "available_zones": []
   },
@@ -2648,9 +2703,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "357f6e2c7c801aabaa4040dac6c5a9dceaf833e8",
     "available_zones": []
   },
@@ -2846,9 +2906,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "645249cb2d359fa6495dac339b4c4aa526308d7a",
     "available_zones": []
   },
@@ -3096,9 +3161,14 @@
       {
         "type": "calories",
         "visibility": "everyone"
+      },
+      {
+        "type": "weight_lifted",
+        "visibility": "everyone"
       }
     ],
     "hide_from_home": false,
+    "sport_image_visibility": "everyone",
     "embed_token": "368fdaf6bf60689b74f2ada05414819bc899e8b2",
     "available_zones": []
   }
