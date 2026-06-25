@@ -3,6 +3,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -14,6 +15,7 @@
     "sport_type": "Run",
     "workout_type": null,
     "id": 19021707863,
+    "id_str": "19021707863",
     "start_date": "2026-06-22T11:33:29Z",
     "start_date_local": "2026-06-22T19:33:29Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -283,11 +285,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 391,
@@ -315,11 +319,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 403,
@@ -347,11 +353,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 394,
@@ -379,11 +387,13 @@
         "name": "Lap 4",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 413,
@@ -411,11 +421,13 @@
         "name": "Lap 5",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 399,
@@ -443,11 +455,13 @@
         "name": "Lap 6",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 412,
@@ -475,11 +489,13 @@
         "name": "Lap 7",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 418,
@@ -507,11 +523,13 @@
         "name": "Lap 8",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 430,
@@ -539,11 +557,13 @@
         "name": "Lap 9",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 408,
@@ -571,11 +591,13 @@
         "name": "Lap 10",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 397,
@@ -603,11 +625,13 @@
         "name": "Lap 11",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 44,
@@ -637,11 +661,13 @@
         "name": "400m",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 154,
@@ -660,11 +686,13 @@
         "name": "1/2 mile",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 314,
@@ -683,11 +711,13 @@
         "name": "1K",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 391,
@@ -706,11 +736,13 @@
         "name": "1 mile",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 637,
@@ -729,11 +761,13 @@
         "name": "2 mile",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1278,
@@ -752,11 +786,13 @@
         "name": "5K",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 2001,
@@ -775,11 +811,13 @@
         "name": "10K",
         "activity": {
           "id": 19021707863,
+          "id_str": "19021707863",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 4069,
@@ -856,6 +894,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -866,6 +905,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 19021708675,
+    "id_str": "19021708675",
     "start_date": "2026-06-21T09:34:49Z",
     "start_date_local": "2026-06-21T17:34:49Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -965,11 +1005,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708675,
+          "id_str": "19021708675",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1050,
@@ -995,11 +1037,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 19021708675,
+          "id_str": "19021708675",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 339,
@@ -1059,6 +1103,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -1069,6 +1114,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 19021708729,
+    "id_str": "19021708729",
     "start_date": "2026-06-19T12:15:50Z",
     "start_date_local": "2026-06-19T20:15:50Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -1190,11 +1236,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708729,
+          "id_str": "19021708729",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1053,
@@ -1220,11 +1268,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 19021708729,
+          "id_str": "19021708729",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 933,
@@ -1250,11 +1300,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 19021708729,
+          "id_str": "19021708729",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 833,
@@ -1314,6 +1366,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -1324,6 +1377,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 19021708853,
+    "id_str": "19021708853",
     "start_date": "2026-06-18T10:39:32Z",
     "start_date_local": "2026-06-18T18:39:32Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -1555,11 +1609,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 791,
@@ -1585,11 +1641,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 969,
@@ -1615,11 +1673,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 795,
@@ -1645,11 +1705,13 @@
         "name": "Lap 4",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 32,
@@ -1675,11 +1737,13 @@
         "name": "Lap 5",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 417,
@@ -1705,11 +1769,13 @@
         "name": "Lap 6",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 256,
@@ -1735,11 +1801,13 @@
         "name": "Lap 7",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 34,
@@ -1765,11 +1833,13 @@
         "name": "Lap 8",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 143,
@@ -1795,11 +1865,13 @@
         "name": "Lap 9",
         "activity": {
           "id": 19021708853,
+          "id_str": "19021708853",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 444,
@@ -1859,6 +1931,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -1869,6 +1942,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 19021708672,
+    "id_str": "19021708672",
     "start_date": "2026-06-18T04:29:56Z",
     "start_date_local": "2026-06-18T12:29:56Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -1968,11 +2042,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708672,
+          "id_str": "19021708672",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 998,
@@ -1998,11 +2074,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 19021708672,
+          "id_str": "19021708672",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 733,
@@ -2062,6 +2140,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Elliptical",
@@ -2073,6 +2152,7 @@
     "sport_type": "Elliptical",
     "workout_type": 27,
     "id": 19021708814,
+    "id_str": "19021708814",
     "start_date": "2026-06-15T12:04:51Z",
     "start_date_local": "2026-06-15T20:04:51Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -2128,11 +2208,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708814,
+          "id_str": "19021708814",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1886,
@@ -2191,6 +2273,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Strength Training",
@@ -2202,6 +2285,7 @@
     "sport_type": "WeightTraining",
     "workout_type": 30,
     "id": 19021708789,
+    "id_str": "19021708789",
     "start_date": "2026-06-15T10:54:03Z",
     "start_date_local": "2026-06-15T18:54:03Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -2257,11 +2341,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 19021708789,
+          "id_str": "19021708789",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 4232,
@@ -2320,6 +2406,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -2331,6 +2418,7 @@
     "sport_type": "Run",
     "workout_type": null,
     "id": 18904151304,
+    "id_str": "18904151304",
     "start_date": "2026-06-13T11:39:07Z",
     "start_date_local": "2026-06-13T19:39:07Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -2600,11 +2688,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 441,
@@ -2632,11 +2722,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 438,
@@ -2664,11 +2756,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 433,
@@ -2696,11 +2790,13 @@
         "name": "Lap 4",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 443,
@@ -2728,11 +2824,13 @@
         "name": "Lap 5",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 427,
@@ -2760,11 +2858,13 @@
         "name": "Lap 6",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 425,
@@ -2792,11 +2892,13 @@
         "name": "Lap 7",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 417,
@@ -2824,11 +2926,13 @@
         "name": "Lap 8",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 434,
@@ -2856,11 +2960,13 @@
         "name": "Lap 9",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 395,
@@ -2888,11 +2994,13 @@
         "name": "Lap 10",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 374,
@@ -2920,11 +3028,13 @@
         "name": "Lap 11",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 40,
@@ -2954,11 +3064,13 @@
         "name": "400m",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 141,
@@ -2977,11 +3089,13 @@
         "name": "1/2 mile",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 292,
@@ -3000,11 +3114,13 @@
         "name": "1K",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 365,
@@ -3023,11 +3139,13 @@
         "name": "1 mile",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 597,
@@ -3046,11 +3164,13 @@
         "name": "2 mile",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1292,
@@ -3069,11 +3189,13 @@
         "name": "5K",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 2044,
@@ -3092,11 +3214,13 @@
         "name": "10K",
         "activity": {
           "id": 18904151304,
+          "id_str": "18904151304",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 4227,
@@ -3173,6 +3297,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -3183,6 +3308,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18904153024,
+    "id_str": "18904153024",
     "start_date": "2026-06-12T11:50:31Z",
     "start_date_local": "2026-06-12T19:50:31Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -3359,11 +3485,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 988,
@@ -3389,11 +3517,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 925,
@@ -3419,11 +3549,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1016,
@@ -3449,11 +3581,13 @@
         "name": "Lap 4",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1391,
@@ -3479,11 +3613,13 @@
         "name": "Lap 5",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1839,
@@ -3509,11 +3645,13 @@
         "name": "Lap 6",
         "activity": {
           "id": 18904153024,
+          "id_str": "18904153024",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 631,
@@ -3573,6 +3711,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Indoor Rowing",
@@ -3583,6 +3722,7 @@
     "type": "Rowing",
     "sport_type": "Rowing",
     "id": 18904152676,
+    "id_str": "18904152676",
     "start_date": "2026-06-11T15:06:11Z",
     "start_date_local": "2026-06-11T23:06:11Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -3638,11 +3778,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152676,
+          "id_str": "18904152676",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1540,
@@ -3701,6 +3843,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -3711,6 +3854,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18904152844,
+    "id_str": "18904152844",
     "start_date": "2026-06-10T12:58:25Z",
     "start_date_local": "2026-06-10T20:58:25Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -3810,11 +3954,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152844,
+          "id_str": "18904152844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 783,
@@ -3840,11 +3986,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904152844,
+          "id_str": "18904152844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 418,
@@ -3904,6 +4052,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Strength Training",
@@ -3915,6 +4064,7 @@
     "sport_type": "WeightTraining",
     "workout_type": 30,
     "id": 18904152693,
+    "id_str": "18904152693",
     "start_date": "2026-06-10T11:18:11Z",
     "start_date_local": "2026-06-10T19:18:11Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -3970,11 +4120,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152693,
+          "id_str": "18904152693",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 3945,
@@ -4033,6 +4185,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -4043,6 +4196,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18904152841,
+    "id_str": "18904152841",
     "start_date": "2026-06-10T10:24:12Z",
     "start_date_local": "2026-06-10T18:24:12Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -4142,11 +4296,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152841,
+          "id_str": "18904152841",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1008,
@@ -4172,11 +4328,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904152841,
+          "id_str": "18904152841",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 39,
@@ -4236,6 +4394,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -4246,6 +4405,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18904153038,
+    "id_str": "18904153038",
     "start_date": "2026-06-09T10:57:40Z",
     "start_date_local": "2026-06-09T18:57:40Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -4345,11 +4505,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904153038,
+          "id_str": "18904153038",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 903,
@@ -4375,11 +4537,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904153038,
+          "id_str": "18904153038",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 573,
@@ -4439,6 +4603,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Elliptical",
@@ -4450,6 +4615,7 @@
     "sport_type": "Elliptical",
     "workout_type": 27,
     "id": 18904152966,
+    "id_str": "18904152966",
     "start_date": "2026-06-08T11:50:17Z",
     "start_date_local": "2026-06-08T19:50:17Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -4505,11 +4671,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152966,
+          "id_str": "18904152966",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1595,
@@ -4568,6 +4736,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Strength Training",
@@ -4579,6 +4748,7 @@
     "sport_type": "WeightTraining",
     "workout_type": 30,
     "id": 18904152971,
+    "id_str": "18904152971",
     "start_date": "2026-06-08T10:34:42Z",
     "start_date_local": "2026-06-08T18:34:42Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -4634,11 +4804,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904152971,
+          "id_str": "18904152971",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 3936,
@@ -4697,6 +4869,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Outdoor Walking",
@@ -4707,6 +4880,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18904153394,
+    "id_str": "18904153394",
     "start_date": "2026-06-07T11:39:13Z",
     "start_date_local": "2026-06-07T19:39:13Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -4828,11 +5002,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18904153394,
+          "id_str": "18904153394",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 833,
@@ -4858,11 +5034,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18904153394,
+          "id_str": "18904153394",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 847,
@@ -4888,11 +5066,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 18904153394,
+          "id_str": "18904153394",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 754,
@@ -4952,6 +5132,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -4963,6 +5144,7 @@
     "sport_type": "Run",
     "workout_type": null,
     "id": 18811913844,
+    "id_str": "18811913844",
     "start_date": "2026-06-06T12:06:47Z",
     "start_date_local": "2026-06-06T20:06:47Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -5232,11 +5414,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 449,
@@ -5264,11 +5448,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 441,
@@ -5296,11 +5482,13 @@
         "name": "Lap 3",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 443,
@@ -5328,11 +5516,13 @@
         "name": "Lap 4",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 435,
@@ -5360,11 +5550,13 @@
         "name": "Lap 5",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 435,
@@ -5392,11 +5584,13 @@
         "name": "Lap 6",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 432,
@@ -5424,11 +5618,13 @@
         "name": "Lap 7",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 437,
@@ -5456,11 +5652,13 @@
         "name": "Lap 8",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 450,
@@ -5488,11 +5686,13 @@
         "name": "Lap 9",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 438,
@@ -5520,11 +5720,13 @@
         "name": "Lap 10",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 427,
@@ -5552,11 +5754,13 @@
         "name": "Lap 11",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 15,
@@ -5586,11 +5790,13 @@
         "name": "400m",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 169,
@@ -5609,11 +5815,13 @@
         "name": "1/2 mile",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 343,
@@ -5632,11 +5840,13 @@
         "name": "1K",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 427,
@@ -5655,11 +5865,13 @@
         "name": "1 mile",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 691,
@@ -5678,11 +5890,13 @@
         "name": "2 mile",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1399,
@@ -5701,11 +5915,13 @@
         "name": "5K",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 2181,
@@ -5724,11 +5940,13 @@
         "name": "10K",
         "activity": {
           "id": 18811913844,
+          "id_str": "18811913844",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 4390,
@@ -5805,6 +6023,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Indoor Rowing",
@@ -5815,6 +6034,7 @@
     "type": "Rowing",
     "sport_type": "Rowing",
     "id": 18812736280,
+    "id_str": "18812736280",
     "start_date": "2026-06-02T12:58:35Z",
     "start_date_local": "2026-06-02T20:58:35Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -5870,11 +6090,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736280,
+          "id_str": "18812736280",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 2581,
@@ -5933,6 +6155,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -5943,6 +6166,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18812736286,
+    "id_str": "18812736286",
     "start_date": "2026-06-02T11:58:28Z",
     "start_date_local": "2026-06-02T19:58:28Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -6042,11 +6266,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736286,
+          "id_str": "18812736286",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 832,
@@ -6072,11 +6298,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18812736286,
+          "id_str": "18812736286",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 413,
@@ -6136,6 +6364,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -6146,6 +6375,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18812736296,
+    "id_str": "18812736296",
     "start_date": "2026-06-02T11:41:48Z",
     "start_date_local": "2026-06-02T19:41:48Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -6245,11 +6475,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736296,
+          "id_str": "18812736296",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 683,
@@ -6275,11 +6507,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18812736296,
+          "id_str": "18812736296",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 172,
@@ -6339,6 +6573,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -6349,6 +6584,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18812736299,
+    "id_str": "18812736299",
     "start_date": "2026-06-02T10:49:13Z",
     "start_date_local": "2026-06-02T18:49:13Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -6448,11 +6684,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736299,
+          "id_str": "18812736299",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 709,
@@ -6478,11 +6716,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18812736299,
+          "id_str": "18812736299",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 285,
@@ -6542,6 +6782,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Hong Kong SAR",
@@ -6552,6 +6793,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18812736373,
+    "id_str": "18812736373",
     "start_date": "2026-05-30T03:09:20Z",
     "start_date_local": "2026-05-30T11:09:20Z",
     "timezone": "(GMT+08:00) Asia/Hong_Kong",
@@ -6651,11 +6893,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736373,
+          "id_str": "18812736373",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 1026,
@@ -6681,11 +6925,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18812736373,
+          "id_str": "18812736373",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 9,
@@ -6745,6 +6991,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Chengdu",
@@ -6755,6 +7002,7 @@
     "type": "Walk",
     "sport_type": "Walk",
     "id": 18812736389,
+    "id_str": "18812736389",
     "start_date": "2026-05-28T04:38:26Z",
     "start_date_local": "2026-05-28T12:38:26Z",
     "timezone": "(GMT+08:00) Asia/Shanghai",
@@ -6854,11 +7102,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736389,
+          "id_str": "18812736389",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 992,
@@ -6884,11 +7134,13 @@
         "name": "Lap 2",
         "activity": {
           "id": 18812736389,
+          "id_str": "18812736389",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 508,
@@ -6948,6 +7200,7 @@
     "resource_state": 3,
     "athlete": {
       "id": 111184551,
+      "id_str": "111184551",
       "resource_state": 1
     },
     "name": "Strength Training",
@@ -6959,6 +7212,7 @@
     "sport_type": "WeightTraining",
     "workout_type": 30,
     "id": 18812736357,
+    "id_str": "18812736357",
     "start_date": "2026-05-27T11:35:59Z",
     "start_date_local": "2026-05-27T19:35:59Z",
     "timezone": "(GMT+08:00) Antarctica/Casey",
@@ -7014,11 +7268,13 @@
         "name": "Lap 1",
         "activity": {
           "id": 18812736357,
+          "id_str": "18812736357",
           "visibility": "everyone",
           "resource_state": 1
         },
         "athlete": {
           "id": 111184551,
+          "id_str": "111184551",
           "resource_state": 1
         },
         "elapsed_time": 4748,
@@ -7071,135 +7327,6 @@
     "hide_from_home": false,
     "sport_image_visibility": "everyone",
     "embed_token": "f55eda0e32791c6310999d8c9bcc7fb2e61e3011",
-    "available_zones": []
-  },
-  {
-    "resource_state": 3,
-    "athlete": {
-      "id": 111184551,
-      "resource_state": 1
-    },
-    "name": "Strength Training",
-    "distance": 0.0,
-    "moving_time": 4388,
-    "elapsed_time": 4388,
-    "total_elevation_gain": 0,
-    "type": "WeightTraining",
-    "sport_type": "WeightTraining",
-    "workout_type": 30,
-    "id": 18812736361,
-    "start_date": "2026-05-25T11:38:50Z",
-    "start_date_local": "2026-05-25T19:38:50Z",
-    "timezone": "(GMT+08:00) Antarctica/Casey",
-    "utc_offset": 28800.0,
-    "location_city": null,
-    "location_state": null,
-    "location_country": null,
-    "achievement_count": 0,
-    "kudos_count": 0,
-    "comment_count": 0,
-    "athlete_count": 1,
-    "photo_count": 0,
-    "map": {
-      "id": "a18812736361",
-      "polyline": "",
-      "resource_state": 3,
-      "summary_polyline": ""
-    },
-    "trainer": true,
-    "commute": false,
-    "manual": false,
-    "private": false,
-    "visibility": "everyone",
-    "flagged": false,
-    "gear_id": null,
-    "start_latlng": [],
-    "end_latlng": [],
-    "average_speed": 0.0,
-    "max_speed": 0.0,
-    "has_heartrate": true,
-    "average_heartrate": 122.2,
-    "max_heartrate": 164.0,
-    "heartrate_opt_out": false,
-    "display_hide_heartrate_option": true,
-    "elev_high": 0.0,
-    "elev_low": 0.0,
-    "upload_id": 19923430840,
-    "upload_id_str": "19923430840",
-    "external_id": "2026-05-25-193407-Strength Training-huang yao shi?s Apple?Watch.fit",
-    "from_accepted_tag": false,
-    "pr_count": 0,
-    "total_photo_count": 0,
-    "has_kudoed": false,
-    "description": null,
-    "calories": 535.0,
-    "perceived_exertion": null,
-    "prefer_perceived_exertion": null,
-    "segment_efforts": [],
-    "laps": [
-      {
-        "id": 67282676889,
-        "resource_state": 2,
-        "name": "Lap 1",
-        "activity": {
-          "id": 18812736361,
-          "visibility": "everyone",
-          "resource_state": 1
-        },
-        "athlete": {
-          "id": 111184551,
-          "resource_state": 1
-        },
-        "elapsed_time": 4388,
-        "moving_time": 4388,
-        "start_date": "2026-05-25T11:38:50Z",
-        "start_date_local": "2026-05-25T19:38:50Z",
-        "distance": 0.0,
-        "average_speed": 0.0,
-        "max_speed": 0.0,
-        "lap_index": 1,
-        "split": 1,
-        "start_index": 0,
-        "end_index": 3742,
-        "total_elevation_gain": 0,
-        "device_watts": false,
-        "average_heartrate": 122.2,
-        "max_heartrate": 164.0
-      }
-    ],
-    "photos": {
-      "primary": null,
-      "count": 0
-    },
-    "stats_visibility": [
-      {
-        "type": "heart_rate",
-        "visibility": "everyone"
-      },
-      {
-        "type": "pace",
-        "visibility": "everyone"
-      },
-      {
-        "type": "power",
-        "visibility": "everyone"
-      },
-      {
-        "type": "speed",
-        "visibility": "everyone"
-      },
-      {
-        "type": "calories",
-        "visibility": "everyone"
-      },
-      {
-        "type": "weight_lifted",
-        "visibility": "everyone"
-      }
-    ],
-    "hide_from_home": false,
-    "sport_image_visibility": "everyone",
-    "embed_token": "94be962508987b247a3900d013bd15de3c7ea579",
     "available_zones": []
   }
 ]
