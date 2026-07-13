@@ -5,6 +5,7 @@ import { shouldShowOnMap, shouldShowTrack, getActivityConfig } from '@/lib/confi
 import { checkStaticMapExists } from '@/lib/utils/cdn'
 import ActivitySelector from '@/components/ActivitySelector'
 import { AtlasIcon } from '@/components/icons/AtlasIcon'
+import { RouteGlyph } from '@/components/routes/RouteGlyph'
 import { useI18n } from '@/lib/i18n'
 
 interface Activity {
@@ -580,6 +581,30 @@ function MapboxMap({ activities, height, selectedActivity }: {
   }, [displayActivities, bounds, height, hasMapboxToken])
 
   if (!hasMapboxToken && !isLoadingMap && !staticMapUrl) {
+    const previewActivity = displayActivities.length === 1 ? displayActivities[0] : null
+    const previewPolyline = previewActivity?.summary_polyline || previewActivity?.summaryPolyline
+
+    if (previewActivity && previewPolyline) {
+      return (
+        <div
+          className="overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--route-canvas)]"
+          style={{ height }}
+        >
+          <RouteGlyph
+            encodedPolyline={previewPolyline}
+            color={getActivityConfig(previewActivity.type).color}
+            width={480}
+            height={Math.max(height, 160)}
+            padding={height <= 240 ? 24 : 36}
+            maxPoints={height <= 240 ? 120 : 240}
+            strokeWidth={height <= 240 ? 4 : 5}
+            animate={false}
+            label={`${previewActivity.name} route shape`}
+          />
+        </div>
+      )
+    }
+
     if (height <= 240) {
       return (
         <div
