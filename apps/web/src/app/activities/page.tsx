@@ -117,8 +117,8 @@ export default function ActivitiesPage() {
           ) : null}
 
           {!isLoading && !error && activities.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+            <div className="overscroll-x-contain overflow-x-auto">
+              <table className="min-w-[44rem] whitespace-nowrap text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
                     <th className="py-2 pr-4 font-medium">{t('common.date')}</th>

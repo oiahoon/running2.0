@@ -155,10 +155,10 @@ function DesktopNavigation({ pathname }: { pathname: string }) {
   const { t } = useI18n()
 
   return (
-    <nav className="hidden min-w-0 flex-1 items-stretch min-[1380px]:flex" aria-label={t('shell.primaryNavigation')}>
+    <nav className="desktop-navigation hidden min-w-0 flex-1 items-stretch min-[1380px]:flex" aria-label={t('shell.primaryNavigation')}>
       {navGroups.map((group) => (
-        <div key={group.labelKey} className="flex items-center gap-1 border-l border-[var(--line)] px-4 first:border-l-0">
-          <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+        <div key={group.labelKey} className="desktop-nav-group flex items-center gap-1 border-l border-[var(--line)] px-4 first:border-l-0">
+          <span className="desktop-nav-group-label mr-2 shrink-0 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
             {t(group.labelKey)}
           </span>
           {group.items.map((item) => {
@@ -169,7 +169,7 @@ function DesktopNavigation({ pathname }: { pathname: string }) {
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 className={classNames(
-                  'relative inline-flex h-11 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-px after:scale-x-0 after:bg-[var(--route-green)] after:transition-transform focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)]',
+                  'desktop-nav-link relative inline-flex h-11 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-px after:scale-x-0 after:bg-[var(--route-green)] after:transition-transform focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)]',
                   isActive
                     ? 'text-[var(--text-strong)] after:scale-x-100'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'

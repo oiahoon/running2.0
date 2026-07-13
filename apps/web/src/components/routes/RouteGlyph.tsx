@@ -36,6 +36,7 @@ export interface RouteGlyphProps extends EffortInput {
   showGrid?: boolean
   showGlow?: boolean
   animate?: boolean
+  loop?: boolean
   strokeWidth?: number
   className?: string
   pathClassName?: string
@@ -59,6 +60,7 @@ function RouteGlyphComponent({
   showGrid = true,
   showGlow = true,
   animate = true,
+  loop = false,
   strokeWidth = 5,
   className,
   label = 'Route shape',
@@ -94,14 +96,14 @@ function RouteGlyphComponent({
       className={classNames('block h-full w-full overflow-hidden', className)}
       preserveAspectRatio="xMidYMid meet"
     >
-      <rect width={width} height={height} rx="18" fill="rgba(7,10,12,0.58)" />
+      <rect width={width} height={height} rx="18" fill="var(--route-canvas)" />
       {showGrid ? (
         <g opacity="0.8">
           {Array.from({ length: Math.floor(width / 24) + 1 }, (_, index) => (
-            <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={height} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+            <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={height} stroke="var(--route-grid)" strokeWidth="1" />
           ))}
           {Array.from({ length: Math.floor(height / 24) + 1 }, (_, index) => (
-            <line key={`hy-${index}`} x1={0} y1={index * 24} x2={width} y2={index * 24} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
+            <line key={`hy-${index}`} x1={0} y1={index * 24} x2={width} y2={index * 24} stroke="var(--route-grid)" strokeWidth="1" />
           ))}
         </g>
       ) : null}
@@ -111,7 +113,7 @@ function RouteGlyphComponent({
           key={`${ghostPath}-${index}`}
           d={ghostPath}
           fill="none"
-          stroke="rgba(139,154,147,0.34)"
+          stroke="var(--route-ghost)"
           strokeWidth={Math.max(strokeWidth - 1.5, 1.5)}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -129,8 +131,10 @@ function RouteGlyphComponent({
               strokeWidth={strokeWidth + 5}
               strokeLinecap="round"
               strokeLinejoin="round"
+              pathLength={1}
               opacity="0.16"
               vectorEffect="non-scaling-stroke"
+              className={animate && loop ? 'route-glyph-glow-loop' : undefined}
             />
           ) : null}
           <path
@@ -142,7 +146,7 @@ function RouteGlyphComponent({
             strokeLinejoin="round"
             pathLength={1}
             vectorEffect="non-scaling-stroke"
-            className={animate ? 'route-glyph-path' : undefined}
+            className={animate ? (loop ? 'route-glyph-path-loop' : 'route-glyph-path') : undefined}
           />
         </>
       ) : (
@@ -150,7 +154,7 @@ function RouteGlyphComponent({
           <path
             d={`M ${width * 0.22} ${height * 0.58} C ${width * 0.34} ${height * 0.34}, ${width * 0.48} ${height * 0.7}, ${width * 0.62} ${height * 0.46} S ${width * 0.82} ${height * 0.48}, ${width * 0.78} ${height * 0.65}`}
             fill="none"
-            stroke="rgba(139,154,147,0.5)"
+            stroke="var(--route-empty)"
             strokeDasharray="6 10"
             strokeLinecap="round"
             strokeWidth={strokeWidth}
@@ -159,7 +163,7 @@ function RouteGlyphComponent({
             x={width / 2}
             y={height / 2 + 42}
             textAnchor="middle"
-            fill="rgba(238,244,233,0.62)"
+            fill="var(--route-empty)"
             fontSize="13"
             fontWeight="600"
           >

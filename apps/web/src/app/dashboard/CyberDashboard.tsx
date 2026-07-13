@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -62,6 +62,16 @@ function formatActivityDate(value: string | undefined, dateLocale: string, unkno
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return unknownLabel
   return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function formatLedgerDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
+  if (!value) return unknownLabel
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return unknownLabel
+  const isCjkLocale = dateLocale.startsWith('zh') || dateLocale.startsWith('ja')
+  return date.toLocaleDateString(dateLocale, isCjkLocale
+    ? { month: 'short', day: 'numeric' }
+    : { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function formatWeekday(value: string | undefined, dateLocale: string) {
@@ -148,6 +158,33 @@ function TotalMetric({ label, value, icon: Icon }: { label: string; value: strin
   )
 }
 
+function DesktopRunnerMuse() {
+  const [shouldRender, setShouldRender] = useState(false)
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia('(min-width: 1280px)')
+    const updateVisibility = () => setShouldRender(desktopQuery.matches)
+    updateVisibility()
+    desktopQuery.addEventListener('change', updateVisibility)
+    return () => desktopQuery.removeEventListener('change', updateVisibility)
+  }, [])
+
+  if (!shouldRender) return null
+
+  return (
+    <Image
+      src={runnerMuseCameos.dashboardHero.src}
+      alt=""
+      width={410}
+      height={615}
+      sizes="205px"
+      loading="eager"
+      fetchPriority="high"
+      className="hero-runner-float pointer-events-none absolute z-20 hidden object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] xl:-bottom-[230px] xl:left-0 xl:block xl:h-[290px] xl:w-[205px]"
+    />
+  )
+}
+
 export function CyberDashboard() {
   const { t, dateLocale } = useI18n()
   const currentYear = new Date().getFullYear()
@@ -214,7 +251,7 @@ export function CyberDashboard() {
         <div className="relative min-w-0 px-1 pb-10 pt-3 sm:px-2 lg:px-5 lg:pt-7 xl:px-8">
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(450px,1.15fr)_minmax(330px,0.85fr)]">
             <div>
-              <h1 className="max-w-[620px] text-[2.35rem] font-black leading-[1.02] tracking-[-0.055em] text-[var(--text-strong)] sm:text-[clamp(2.6rem,3vw,2.85rem)]">
+              <h1 className="dashboard-display-title max-w-[620px] text-[var(--text-strong)]">
                 {t('dashboard.headline')}
               </h1>
               <p className="mt-4 max-w-[590px] text-sm leading-6 text-[var(--text-muted)] sm:mt-5 sm:text-base sm:leading-7">
@@ -272,6 +309,7 @@ export function CyberDashboard() {
                     padding={64}
                     maxPoints={420}
                     strokeWidth={6}
+                    loop
                     label={`${selectedActivity.name || selectedLocation} ${t('dashboard.routeShape')}`}
                   />
                 </div>
@@ -292,14 +330,7 @@ export function CyberDashboard() {
               </div>
             )}
 
-            <Image
-              src={runnerMuseCameos.dashboardHero.src}
-              alt=""
-              width={410}
-              height={615}
-              sizes="205px"
-              className="hero-runner-float pointer-events-none absolute z-20 hidden object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] xl:-bottom-[230px] xl:left-0 xl:block xl:h-[290px] xl:w-[205px]"
-            />
+            <DesktopRunnerMuse />
           </div>
         </div>
 
@@ -342,7 +373,7 @@ export function CyberDashboard() {
             </select>
           </div>
 
-          <div className="mt-8 hidden grid-cols-[88px_minmax(144px,1fr)_62px_62px_58px] gap-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] md:grid 2xl:grid-cols-[88px_minmax(180px,1fr)_78px_76px_70px] 2xl:gap-3">
+          <div className="mt-8 hidden grid-cols-[88px_minmax(144px,1fr)_62px_62px_68px] gap-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] md:grid 2xl:grid-cols-[88px_minmax(180px,1fr)_78px_76px_70px] 2xl:gap-3">
             <span>{t('common.date')}</span>
             <span>{t('dashboard.routeColumn')}</span>
             <span className="text-right">{t('common.distance')}</span>
@@ -371,7 +402,7 @@ export function CyberDashboard() {
                   aria-pressed={isSelected}
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-xs text-[var(--text-strong)]">{formatActivityDate(activityDate(activity), dateLocale, t('common.unknownDate'))}</span>
+                    <span className="block truncate text-xs text-[var(--text-strong)]">{formatLedgerDate(activityDate(activity), dateLocale, t('common.unknownDate'))}</span>
                     <span className="mt-1 block text-[11px] text-[var(--text-muted)]">{formatWeekday(activityDate(activity), dateLocale)}</span>
                   </span>
                   <span className="grid min-w-0 grid-cols-[60px_1fr] items-center gap-3">

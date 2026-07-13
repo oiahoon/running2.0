@@ -182,6 +182,7 @@ export default function ActivityPosterPage() {
               padding={62}
               strokeWidth={8}
               maxPoints={520}
+              loop
               label={`${activity.name || 'Activity'} poster route`}
             />
           </div>

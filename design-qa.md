@@ -4,12 +4,12 @@
 
 - Source visual truth: `/Users/huangyuyao/OwnWork/running2.0/output/product-design-2026-07-13/selected-option-3.png`
 - Implementation URL: `http://localhost:3000/dashboard`
-- Implementation screenshot: `/tmp/run2-round2-after-09-master-dashboard-desktop.jpg`
-- Full-view comparison: `/tmp/run2-round2-master-reference-vs-final.jpg`
+- Implementation screenshot: `/tmp/run2-round3-after-round1/06-loop-hold-dark-en-desktop.jpg`
+- Full-view comparison: `/tmp/run2-round3-after-round1/10-reference-vs-final.png`
 - Focused header comparison: `/tmp/run2-header-comparison.png`
 - Focused workbench comparison: `/tmp/run2-body-comparison.png`
 - Viewport: 1440 × 1024 desktop, dark theme, first route selected
-- Responsive evidence: `/tmp/run2-round2-after-04-dashboard-mobile.jpg` and `/tmp/run2-round2-after-07-activities-mobile.jpg` at 390 × 844; `/tmp/run2-round2-after-05-dashboard-tablet-transition.jpg` at 1024 × 834
+- Responsive evidence: `/tmp/run2-round3-after-round1/01-dashboard-light-ja-mobile.jpg` and `/tmp/run2-round3-after-round1/02-activities-light-ja-mobile.jpg` at 390 × 844; `/tmp/run2-round3-after-round1/03-dashboard-light-ja-desktop.jpg` at 1440 × 1024
 - Map fallback evidence: `/tmp/run2-round2-after-08-master-map-gallery.jpg` at 390 × 844 on the merged `master` data state
 - Empty-state evidence: `/tmp/run2-review-empty-filter.jpg` at 390 × 844
 - Browser: Codex in-app browser
@@ -39,9 +39,9 @@ No actionable P0, P1, or P2 findings remain.
 - Image quality and asset fidelity: the existing production runner asset is reused at full quality and positioned to match the concept. Brand art and route shapes use the project's supplied components and real GPS data; no placeholder imagery, CSS art, or replacement illustration was added.
 - Copy and content: headline, supporting copy, grouped navigation, ledger title/copy, filters, column labels, and the data note match the selected concept. Counts, dates, city/activity names, metrics, and route geometry intentionally come from the real local dataset.
 - Icons: existing Heroicons and the project's route/brand icon components remain consistent in weight and alignment. No emoji or text-glyph icon replacements are present.
-- States and interactions: row selection updates the left inspector and route canvas; `New Routes` changes the result total to 8; year selection remains a native select; mobile navigation opens with all eight product destinations; selected, hover, focus-visible, loading, and empty states are implemented. A zero-result filter no longer leaks a route from another year or effort, and `Clear filters` returns to the latest available year and `All`.
-- Accessibility and viewport resilience: semantic headings, navigation labels, current-page markers, pressed-state filters/rows, labeled year select, focus rings, reduced-motion handling, and route image labels remain. The mobile drawer traps Tab in both directions, responds to Escape, locks background scrolling, marks the app surface inert/hidden, and restores focus to the menu button. Desktop, 1294px, and 390px widths have no horizontal overflow; mobile controls are at least 44px tall.
-- Runtime efficiency: route geometry is memoized and dashboard thumbnails are point-capped; route gallery cards use deferred rendering and an intersection sentinel instead of a page-wide scroll listener; static route images are used when present and a real GPS route glyph preserves trajectory context when neither an image nor Mapbox is available; hidden runner art is no longer eagerly loaded on mobile/tablet. The default map gallery now requests a 650-byte summary plus 20 visible records instead of loading the 1.25MB, 500-record map payload before the user enters full-map mode.
+- States and interactions: row selection updates the left inspector and route canvas; the featured trajectory now uses a 7.6-second draw, hold, fade, and restart loop; `New Routes` changes the result total to 8; year selection remains a native select; mobile navigation opens with all eight product destinations; selected, hover, focus-visible, loading, and empty states are implemented. A zero-result filter no longer leaks a route from another year or effort, and `Clear filters` returns to the latest available year and `All`.
+- Accessibility and viewport resilience: semantic headings, navigation labels, current-page markers, pressed-state filters/rows, labeled year select, focus rings, route image labels, and explicit reduced-motion fallback remain. The mobile drawer traps Tab in both directions, responds to Escape, locks background scrolling, marks the app surface inert/hidden, and restores focus to the menu button. English, Chinese, and Japanese layouts pass at desktop and 390px widths without document overflow; mobile controls are at least 44px tall and wide tables scroll within their panel instead of collapsing CJK labels vertically.
+- Runtime efficiency: route geometry is memoized and dashboard thumbnails are point-capped; route gallery cards use deferred rendering and an intersection sentinel instead of a page-wide scroll listener; static route images are used when present and a real GPS route glyph preserves trajectory context when neither an image nor Mapbox is available; hidden runner art is no longer eagerly loaded on mobile/tablet. The default map gallery now requests a 650-byte summary plus 20 visible records instead of loading the 1.25MB, 500-record map payload before the user enters full-map mode. Full-map and waterfall renderers are split into separate client chunks and load only for the selected view; non-featured statistics routes remain static to avoid competing motion and repeated animation work.
 
 ## Comparison history
 
@@ -83,6 +83,23 @@ No actionable P0, P1, or P2 findings remain.
 - [P2] Route and statistics rendering repeated avoidable geometry/filter work. Route paths, ghost geometry, effort groups, date filters, and the year spiral path are now memoized or hoisted; long gallery sections use `content-visibility`.
 - [P2] Missing Mapbox configuration produced repeated fallback messaging in gallery cards. Existing local/CDN static maps now render directly; when the latest upstream sync contains no static map assets, the same card renders its real GPS trajectory with the shared route glyph instead of degrading to repeated setup copy.
 - Final evidence: 1440px desktop, 1024px transition, and 390px dashboard/activity/map surfaces have no horizontal overflow; the runner is hidden at 1024px; real trajectory previews and corrected paces render in the mobile gallery; route selection still updates the inspector.
+
+### Pass 6 — passed after multilingual theme and layout review
+
+- [P1] Japanese group labels wrapped vertically in the 1440px desktop navigation. The Japanese mid-desktop treatment now removes redundant group captions while preserving dividers, every destination, active state, and utility action.
+- [P1] Japanese activity-table headers and values collapsed into vertical glyph stacks at 390px. The table now preserves readable rows with an internal horizontal scroller and no document overflow.
+- [P2] Light-theme route canvases were muddied by a fixed dark SVG overlay. Canvas, grid, ghost, and empty-state colors now come from theme tokens, producing a clean paper-map surface in light mode without changing the ink-black dark treatment.
+- [P2] Chinese and Japanese display headlines inherited Latin weight and tracking, creating overly dense three- to four-line mobile blocks. CJK-specific weight, tracking, leading, and mobile sizing restore hierarchy and whitespace; the Japanese dashboard headline now occupies two lines.
+- [P2] Fully localized Chinese and Japanese dates and long effort labels truncated in the desktop ledger. Year-redundant CJK ledger dates are compacted to month/day and the effort column has sufficient width.
+- Evidence: `/tmp/run2-round3-after-round1/01-dashboard-light-ja-mobile.jpg`, `/tmp/run2-round3-after-round1/02-activities-light-ja-mobile.jpg`, `/tmp/run2-round3-after-round1/03-dashboard-light-ja-desktop.jpg`, and `/tmp/run2-round3-after-round1/04-dashboard-dark-en-desktop.jpg`.
+
+### Pass 7 — passed after motion and performance review
+
+- [P1] The 900ms one-shot trajectory could finish before the user focused on it. Featured dashboard and activity-detail routes now draw over a 7.6-second loop with a long readable draw phase, a complete-route hold, a soft fade, and a short reset pause.
+- [P2] The glow path initially revealed a faint full-route silhouette during drawing. Giving it the same normalized path length synchronizes glow and stroke, so the undisclosed route remains invisible until the animated head reaches it.
+- [P2] Multiple statistics glyphs animated together and the map page bundled both major renderers up front. Statistics samples are now static; map and waterfall renderers are dynamically loaded only for the active view.
+- Reduced-motion users receive the complete route immediately with no loop or fade. Featured motion uses only stroke offset and opacity, while thumbnails remain static.
+- Evidence: drawing `/tmp/run2-round3-after-round1/08-loop-drawing-v2-dark-en-desktop.jpg`, completed hold `/tmp/run2-round3-after-round1/06-loop-hold-dark-en-desktop.jpg`, fade `/tmp/run2-round3-after-round1/07-loop-fade-dark-en-desktop.jpg`, and map-view verification `/tmp/run2-round3-after-round1/09-map-dark-en-desktop.jpg`.
 
 ## Implementation checklist
 

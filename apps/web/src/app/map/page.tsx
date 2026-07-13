@@ -1,9 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useActivities, useActivitySummary } from '@/lib/hooks/useActivities'
-import RunningMap from '@/components/maps/RunningMap'
-import WaterfallMapView from '@/components/maps/WaterfallMapView'
 import { formatDistance, formatDuration, ActivityType } from '@/lib/database/models/Activity'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
@@ -22,6 +21,16 @@ interface Activity {
 }
 
 type ViewMode = 'map' | 'waterfall'
+
+const RunningMap = dynamic(() => import('@/components/maps/RunningMap'), {
+  ssr: false,
+  loading: () => <div className="h-[620px] animate-pulse rounded-lg bg-[var(--bg-2)]" aria-hidden="true" />,
+})
+
+const WaterfallMapView = dynamic(() => import('@/components/maps/WaterfallMapView'), {
+  ssr: false,
+  loading: () => <div className="h-[480px] animate-pulse rounded-lg bg-[var(--bg-2)]" aria-hidden="true" />,
+})
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (

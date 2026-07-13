@@ -27,6 +27,9 @@
   --route-purple: #7b5fd6;
   --route-red: #d84f4f;
   --route-canvas: #eef3f7;
+  --route-grid: rgba(15, 23, 42, 0.08);
+  --route-ghost: rgba(100, 116, 139, 0.44);
+  --route-empty: rgba(71, 85, 105, 0.66);
   --radius-lg: 16px;
   --radius-md: 10px;
 }
@@ -56,6 +59,9 @@
   --route-purple: #aa7dff;
   --route-red: #ff5c5c;
   --route-canvas: #081113;
+  --route-grid: rgba(139, 154, 147, 0.12);
+  --route-ghost: rgba(139, 154, 147, 0.34);
+  --route-empty: rgba(238, 244, 233, 0.62);
 }
 
 @layer base {
@@ -205,7 +211,11 @@
 
   .section-subtitle {
     color: var(--text-muted);
-    @apply mt-1 text-sm;
+    @apply mt-1 text-sm leading-6;
+  }
+
+  .dashboard-display-title {
+    @apply text-[2.35rem] font-black leading-[1.02] tracking-[-0.055em] sm:text-[clamp(2.6rem,3vw,2.85rem)];
   }
 
   .route-atlas-label {
@@ -236,7 +246,7 @@
 
   .route-ledger-row {
     display: grid;
-    grid-template-columns: 5.5rem minmax(9rem, 1fr) 3.875rem 3.875rem 3.625rem;
+    grid-template-columns: 5.5rem minmax(9rem, 1fr) 3.875rem 3.875rem 4.25rem;
     align-items: center;
     width: 100%;
     min-height: 82px;
@@ -269,7 +279,21 @@
   .route-glyph-path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: draw-route 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation: draw-route 1600ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .route-glyph-path-loop,
+  .route-glyph-glow-loop {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .route-glyph-path-loop {
+    animation: draw-route-loop 7.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .route-glyph-glow-loop {
+    animation: draw-route-glow-loop 7.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
   .route-constellation-runner,
@@ -301,6 +325,30 @@
   }
 }
 
+html:lang(zh) .dashboard-display-title,
+html:lang(zh-CN) .dashboard-display-title,
+html:lang(ja) .dashboard-display-title {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+@media (min-width: 1380px) and (max-width: 1599px) {
+  html:lang(ja) .desktop-nav-group {
+    gap: 0.125rem;
+    padding-inline: 0.625rem;
+  }
+
+  html:lang(ja) .desktop-nav-group-label {
+    display: none;
+  }
+
+  html:lang(ja) .desktop-nav-link {
+    padding-inline: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
 @media (max-width: 767px) {
   .action-primary,
   .action-secondary,
@@ -327,8 +375,67 @@
   }
 }
 
+@media (max-width: 639px) {
+  html:lang(zh) .dashboard-display-title,
+  html:lang(zh-CN) .dashboard-display-title,
+  html:lang(ja) .dashboard-display-title {
+    font-size: 2.15rem;
+    line-height: 1.06;
+  }
+}
+
 @keyframes draw-route {
   to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-route-loop {
+  0%,
+  6% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  12% {
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+
+  64%,
+  82% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  94%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-route-glow-loop {
+  0%,
+  6% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  12% {
+    opacity: 0.04;
+    stroke-dashoffset: 1;
+  }
+
+  64%,
+  82% {
+    opacity: 0.16;
+    stroke-dashoffset: 0;
+  }
+
+  94%,
+  100% {
+    opacity: 0;
     stroke-dashoffset: 0;
   }
 }
@@ -387,5 +494,17 @@
 
   .hero-runner-float {
     animation: none !important;
+  }
+
+  .route-glyph-path-loop {
+    animation: none !important;
+    opacity: 1 !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .route-glyph-glow-loop {
+    animation: none !important;
+    opacity: 0.16 !important;
+    stroke-dashoffset: 0 !important;
   }
 }

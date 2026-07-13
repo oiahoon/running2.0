@@ -297,6 +297,7 @@ function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
             padding={26}
             strokeWidth={4}
             maxPoints={140}
+            animate={false}
             label={`${activity.name || 'Route'} diversity sample`}
           />
         </div>
