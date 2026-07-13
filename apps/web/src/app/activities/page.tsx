@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import Link from 'next/link'
 import { formatDuration, formatPace, type ActivityFilters, type ActivityType } from '@/lib/database/models/Activity'
@@ -23,14 +23,15 @@ export default function ActivitiesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<'all' | ActivityType>('all')
   const [currentPage, setCurrentPage] = useState(1)
+  const deferredSearchTerm = useDeferredValue(searchTerm)
   const pageSize = 20
 
   const filters = useMemo<ActivityFilters>(
     () => ({
-      search: searchTerm || undefined,
+      search: deferredSearchTerm || undefined,
       type: selectedType === 'all' ? getDefaultActivityTypes() : [selectedType],
     }),
-    [searchTerm, selectedType]
+    [deferredSearchTerm, selectedType]
   )
 
   const { data, isLoading, error } = useActivities(filters, currentPage, pageSize)
@@ -57,6 +58,7 @@ export default function ActivitiesPage() {
           <div className="panel-body grid grid-cols-1 gap-3 md:grid-cols-3">
             <input
               value={searchTerm}
+              aria-label={t('activities.searchPlaceholder')}
               onChange={(e) => {
                 setSearchTerm(e.target.value)
                 setCurrentPage(1)
@@ -117,7 +119,7 @@ export default function ActivitiesPage() {
           ) : null}
 
           {!isLoading && !error && activities.length > 0 ? (
-            <div className="overscroll-x-contain overflow-x-auto">
+            <div className="data-scroll-region overscroll-x-contain overflow-x-auto" role="region" aria-label={t('activities.table')} tabIndex={0}>
               <table className="min-w-[44rem] whitespace-nowrap text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">

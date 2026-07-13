@@ -272,10 +272,10 @@ export function CyberDashboard() {
             </div>
           </div>
 
-          <div className="relative mt-6 flex min-h-[500px] flex-col overflow-visible rounded-[18px] border border-[var(--line-strong)] bg-[var(--route-canvas)] sm:mt-8 lg:block">
+          <div className="relative mt-6 flex min-h-[500px] flex-col overflow-visible rounded-[18px] border border-[var(--line-strong)] bg-[var(--route-canvas)] sm:mt-8 md:block">
             {selectedActivity ? (
               <>
-                <div className="relative z-10 order-2 w-full border-t border-[var(--line)] p-5 sm:p-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[280px] lg:border-b-0 lg:border-r lg:border-t-0">
+                <div className="relative z-10 order-2 w-full border-t border-[var(--line)] p-5 sm:p-6 md:absolute md:inset-y-0 md:left-0 md:w-[240px] md:border-b-0 md:border-r md:border-t-0 lg:w-[280px]">
                   <div className="route-atlas-label text-[var(--route-green)]">{t('dashboard.latestActivity')}</div>
                   <h2 className="mt-4 truncate text-3xl font-semibold tracking-tight text-[var(--text-strong)]">{selectedLocation}</h2>
                   <p className="mt-2 text-sm text-[var(--text-muted)]">
@@ -299,7 +299,7 @@ export function CyberDashboard() {
                   </Link>
                 </div>
 
-                <div className="order-1 h-[300px] p-4 sm:h-[390px] sm:p-7 lg:ml-[280px] lg:h-[498px]">
+                <div className="order-1 h-[300px] p-4 sm:h-[390px] sm:p-7 md:ml-[240px] md:h-[498px] lg:ml-[280px]">
                   <RouteGlyph
                     key={selectedActivity.id}
                     encodedPolyline={resolvePolyline(selectedActivity)}

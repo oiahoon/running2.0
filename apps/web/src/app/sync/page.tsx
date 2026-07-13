@@ -172,7 +172,7 @@ export default function SyncPage() {
           </section>
 
           <section className="panel">
-            <div className="panel-header flex items-center justify-between">
+            <div className="panel-header flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('sync.history')}</h3>
               {latestSync ? <span className="text-xs text-[var(--text-muted)]">{t('sync.latestAt', { time: new Date(latestSync.timestamp).toLocaleString(dateLocale) })}</span> : null}
             </div>
@@ -180,8 +180,8 @@ export default function SyncPage() {
               {syncRecords.length === 0 ? (
                 <p className="px-5 py-4 text-sm text-[var(--text-muted)]">{t('sync.noHistory')}</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                <div className="data-scroll-region overscroll-x-contain overflow-x-auto" role="region" aria-label={t('sync.history')} tabIndex={0}>
+                  <table className="min-w-[46rem] whitespace-nowrap text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-left text-[var(--text-muted)] dark:border-white/10">
                         <th className="px-5 py-2 font-medium">{t('common.time')}</th>

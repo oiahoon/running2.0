@@ -194,7 +194,7 @@ function ConsistencyHeatmap({ data, year, dateLocale }: { data: DailyStat[]; yea
 
   return (
     <div className="space-y-3">
-      <div ref={scrollRef} className="w-full overflow-x-auto pb-2">
+      <div ref={scrollRef} className="data-scroll-region w-full overflow-x-auto pb-2" role="region" aria-label={t('stats.heatmap')} tabIndex={0}>
         <div className="grid min-w-full w-fit grid-cols-[2rem_auto] gap-x-2 gap-y-1">
           <div />
           <div

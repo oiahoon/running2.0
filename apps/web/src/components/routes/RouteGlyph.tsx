@@ -12,6 +12,7 @@ import {
   type RoutePoint,
   samplePoints,
 } from '../../lib/routes'
+import { useI18n } from '../../lib/i18n'
 
 const EMPTY_GHOST_ROUTES: Array<RouteData | null | undefined> = []
 
@@ -63,8 +64,11 @@ function RouteGlyphComponent({
   loop = false,
   strokeWidth = 5,
   className,
-  label = 'Route shape',
+  emptyLabel,
+  showEmptyLabel = true,
+  label,
 }: RouteGlyphProps) {
+  const { t } = useI18n()
   const routePoints = suppliedPoints ?? route?.points
   const routeEncodedPolyline = encodedPolyline ?? route?.encodedPolyline
   const path = useMemo(() => {
@@ -76,6 +80,8 @@ function RouteGlyphComponent({
   }, [height, maxPoints, padding, routeEncodedPolyline, routePoints, width])
   const routeColor = color ?? getEffortColor(effort)
   const hasRoute = path.length > 0
+  const resolvedLabel = label || t('dashboard.routeShape')
+  const resolvedEmptyLabel = emptyLabel || t('route.noShape')
 
   const ghostPaths = useMemo(
     () => ghostRoutes
@@ -92,7 +98,7 @@ function RouteGlyphComponent({
     <svg
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label={hasRoute ? label : 'No route shape available'}
+      aria-label={hasRoute ? resolvedLabel : resolvedEmptyLabel}
       className={classNames('block h-full w-full overflow-hidden', className)}
       preserveAspectRatio="xMidYMid meet"
     >
@@ -123,6 +129,19 @@ function RouteGlyphComponent({
 
       {hasRoute ? (
         <>
+          {loop ? (
+            <path
+              d={path}
+              fill="none"
+              stroke={routeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.1"
+              vectorEffect="non-scaling-stroke"
+              className="route-glyph-loop-trail"
+            />
+          ) : null}
           {showGlow ? (
             <path
               d={path}
@@ -159,16 +178,18 @@ function RouteGlyphComponent({
             strokeLinecap="round"
             strokeWidth={strokeWidth}
           />
-          <text
-            x={width / 2}
-            y={height / 2 + 42}
-            textAnchor="middle"
-            fill="var(--route-empty)"
-            fontSize="13"
-            fontWeight="600"
-          >
-            No route shape
-          </text>
+          {showEmptyLabel ? (
+            <text
+              x={width / 2}
+              y={height / 2 + 42}
+              textAnchor="middle"
+              fill="var(--route-empty)"
+              fontSize="13"
+              fontWeight="600"
+            >
+              {resolvedEmptyLabel}
+            </text>
+          ) : null}
         </g>
       )}
     </svg>

@@ -279,7 +279,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Bars3Icon className="h-6 w-6" />
             </button>
 
-            <Run2Logo showTagline={false} className="shrink-0 pr-2" />
+            <Run2Logo compact showTagline={false} className="shrink-0 min-[360px]:hidden" />
+            <Run2Logo showTagline={false} className="hidden shrink-0 pr-2 min-[360px]:flex" />
 
             <DesktopNavigation pathname={pathname} />
 
@@ -288,7 +289,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="mt-0.5 hidden truncate text-xs text-[var(--text-muted)] md:block">{pageMeta.subtitle}</div>
             </div>
 
-            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <div className="hidden shrink-0 items-center gap-2 lg:flex">
               <Link href="/sync" className="action-secondary h-10">{t('shell.quickSync')}</Link>
               <Link href="/map" className="action-primary h-10">{t('shell.quickMap')}</Link>
             </div>

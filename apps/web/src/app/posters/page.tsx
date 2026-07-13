@@ -163,7 +163,7 @@ export default function PostersPage() {
               Math.max(fingerprints.length, 1)
 
             return (
-              <article key={period.key} className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+              <article key={period.key} className="relative overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)] xl:aspect-[4/5]">
                 <div className="relative z-10 flex h-full flex-col">
                   <Image
                     src={backgroundRunner.src}
@@ -183,7 +183,7 @@ export default function PostersPage() {
                     </div>
                   </div>
 
-                  <div className="relative z-10 mt-5 aspect-square overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
+                  <div className="relative z-10 mt-5 aspect-[16/10] shrink-0 overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--bg)]">
                     <RouteGlyph
                       route={{ encodedPolyline: routePolyline(representative) }}
                       ghostRoutes={period.items.slice(1, 8).map((activity) => ({ encodedPolyline: routePolyline(activity) }))}
