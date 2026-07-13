@@ -27,7 +27,17 @@ export function Run2Mark({ className, title = 'RUN2 Atlas' }: { className?: stri
   )
 }
 
-export function Run2Logo({ compact = false, className, onClick }: { compact?: boolean; className?: string; onClick?: () => void }) {
+export function Run2Logo({
+  compact = false,
+  showTagline = true,
+  className,
+  onClick,
+}: {
+  compact?: boolean
+  showTagline?: boolean
+  className?: string
+  onClick?: () => void
+}) {
   const { t } = useI18n()
 
   return (
@@ -36,7 +46,7 @@ export function Run2Logo({ compact = false, className, onClick }: { compact?: bo
       {compact ? null : (
         <div>
           <div className="text-lg font-semibold tracking-tight text-[var(--text-strong)]">{t('app.brand')}</div>
-          <div className="text-xs text-[var(--text-muted)]">{t('app.tagline')}</div>
+          {showTagline ? <div className="text-xs text-[var(--text-muted)]">{t('app.tagline')}</div> : null}
         </div>
       )}
     </Link>

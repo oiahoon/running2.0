@@ -1,23 +1,22 @@
 'use client'
 
-import { useMemo } from 'react'
-import type { CSSProperties } from 'react'
+import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import {
+  ArrowTopRightOnSquareIcon,
+  ArrowTrendingUpIcon,
+  ClockIcon,
+  HeartIcon,
+  MapIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline'
+import { RouteGlyph } from '@/components/routes'
 import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities'
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
-import { RouteTile } from '@/components/routes'
 import { useI18n } from '@/lib/i18n'
 import { runnerMuseCameos } from '@/lib/runnerMuses'
-import {
-  RouteData,
-  getEffortColor,
-  inferRouteEffort,
-  normalizeRoute,
-  pointsToPath,
-  resolveRoutePoints,
-  samplePoints,
-} from '@/lib/routes'
+import { type RouteData, getEffortColor, inferRouteEffort } from '@/lib/routes'
 
 type ActivityLike = {
   id: number
@@ -37,11 +36,39 @@ type ActivityLike = {
   locationCity?: string
 }
 
-function formatDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
+type RouteFilter = 'all' | 'easy' | 'tempo' | 'long' | 'new'
+
+const filters: Array<{ value: RouteFilter; labelKey: string }> = [
+  { value: 'all', labelKey: 'common.all' },
+  { value: 'easy', labelKey: 'dashboard.filterEasy' },
+  { value: 'tempo', labelKey: 'dashboard.filterTempo' },
+  { value: 'long', labelKey: 'dashboard.filterLong' },
+  { value: 'new', labelKey: 'dashboard.filterNew' },
+]
+
+function activityDate(activity?: ActivityLike) {
+  return activity?.start_date_local || activity?.start_date || activity?.startDate
+}
+
+function parsedYear(activity: ActivityLike) {
+  const value = activityDate(activity)
+  if (!value) return undefined
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.getFullYear()
+}
+
+function formatActivityDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
   if (!value) return unknownLabel
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return unknownLabel
-  return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })
+  return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function formatWeekday(value: string | undefined, dateLocale: string) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString(dateLocale, { weekday: 'short' })
 }
 
 function formatDistanceKm(distanceMeters?: number) {
@@ -69,168 +96,59 @@ function effortForActivity(activity?: ActivityLike) {
   })
 }
 
-function HeroMetric({ label, value, sublabel }: { label: string; value: string | number; sublabel?: string }) {
+function LoadingRouteLedger() {
+  const { t } = useI18n()
+
   return (
-    <div className="border-t border-[var(--line)] py-3">
+    <section className="dashboard-ledger-shell min-h-[calc(100vh-7.25rem)]">
+      <div className="grid min-h-[620px] place-items-center">
+        <div className="text-center">
+          <div className="route-atlas-label">{t('dashboard.loadingLabel')}</div>
+          <p className="mt-3 text-lg text-[var(--text-muted)]">{t('dashboard.loadingCopy')}</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function SummaryMetric({ label, value, note }: { label: string; value: string | number; note?: string }) {
+  return (
+    <div className="min-w-0 border-t border-[var(--line)] pt-4">
       <div className="route-atlas-label">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tabular-nums text-[var(--text-strong)]">{value}</div>
-      {sublabel ? <div className="mt-1 text-xs text-[var(--text-muted)]">{sublabel}</div> : null}
+      <div className="mt-2 whitespace-nowrap text-[clamp(1rem,1.3vw,1.3rem)] font-semibold tabular-nums tracking-tight text-[var(--text-strong)]">
+        {value}
+      </div>
+      {note ? <div className="mt-1 text-[10px] text-[var(--text-muted)]">{note}</div> : null}
     </div>
   )
 }
 
-const constellationColors = [
-  'var(--route-green)',
-  'var(--route-cyan)',
-  'var(--route-lime)',
-  'var(--route-purple)',
-  'var(--route-orange)',
-  'var(--route-red)',
-]
-function AnimatedRouteConstellation({
-  activities,
-  noShapeLabel,
-  ariaLabel,
-  width = 760,
-  height = 560,
+function DetailMetric({
+  icon: Icon,
+  label,
+  value,
 }: {
-  activities: ActivityLike[]
-  noShapeLabel: string
-  ariaLabel: string
-  width?: number
-  height?: number
+  icon: typeof MapIcon
+  label: string
+  value: string
 }) {
-  const animatedRoutes = useMemo(
-    () =>
-      activities
-        .filter((activity) => resolvePolyline(activity))
-        .slice(0, 14)
-        .map((activity, index) => {
-          const route = routeForActivity(activity)
-          const points = samplePoints(resolveRoutePoints(route), 420)
-          const path = pointsToPath(normalizeRoute(points, width, height, 54))
-          const effortColor = getEffortColor(effortForActivity(activity))
-
-          return {
-            id: activity.id,
-            path,
-            title: activity.name || `${activity.type || 'Run'} route`,
-            color: constellationColors[index % constellationColors.length] || effortColor,
-            effortColor,
-          }
-        })
-        .filter((route) => route.path.length > 0),
-    [activities, height, width]
-  )
-
-  const cycleSeconds = Math.max(animatedRoutes.length * 1.15, 7)
-
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label={ariaLabel}
-      className="block h-full w-full overflow-hidden"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <rect width={width} height={height} rx="18" fill="rgba(7,10,12,0.58)" />
-      <g opacity="0.8">
-        {Array.from({ length: Math.floor(width / 24) + 1 }, (_, index) => (
-          <line key={`vx-${index}`} x1={index * 24} y1={0} x2={index * 24} y2={height} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
-        ))}
-        {Array.from({ length: Math.floor(height / 24) + 1 }, (_, index) => (
-          <line key={`hy-${index}`} x1={0} y1={index * 24} x2={width} y2={index * 24} stroke="rgba(139,154,147,0.12)" strokeWidth="1" />
-        ))}
-      </g>
-
-      {animatedRoutes.length > 0 ? (
-        <>
-          <g>
-            {animatedRoutes.map((route, index) => (
-              <path
-                key={`ghost-${route.id}-${index}`}
-                d={route.path}
-                fill="none"
-                stroke={route.effortColor}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-                opacity="0.18"
-              />
-            ))}
-          </g>
-          <g>
-            {animatedRoutes.map((route, index) => {
-              const animationStyle = {
-                '--route-cycle': `${cycleSeconds}s`,
-                '--route-delay': `${index * 1.15}s`,
-                color: route.color,
-              } as CSSProperties
-
-              return (
-                <g key={`active-${route.id}-${index}`} style={animationStyle}>
-                  <path
-                    d={route.path}
-                    fill="none"
-                    stroke={route.color}
-                    strokeWidth="12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    pathLength={1}
-                    vectorEffect="non-scaling-stroke"
-                    className="route-constellation-glow"
-                  />
-                  <path
-                    d={route.path}
-                    fill="none"
-                    stroke={route.color}
-                    strokeWidth="5.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    pathLength={1}
-                    vectorEffect="non-scaling-stroke"
-                    className="route-constellation-runner"
-                  >
-                    <title>{route.title}</title>
-                  </path>
-                </g>
-              )
-            })}
-          </g>
-        </>
-      ) : (
-        <g>
-          <path
-            d={`M ${width * 0.22} ${height * 0.58} C ${width * 0.34} ${height * 0.34}, ${width * 0.48} ${height * 0.7}, ${width * 0.62} ${height * 0.46} S ${width * 0.82} ${height * 0.48}, ${width * 0.78} ${height * 0.65}`}
-            fill="none"
-            stroke="rgba(139,154,147,0.5)"
-            strokeDasharray="6 10"
-            strokeLinecap="round"
-            strokeWidth="5"
-          />
-          <text x={width / 2} y={height / 2 + 42} textAnchor="middle" fill="rgba(238,244,233,0.62)" fontSize="13" fontWeight="600">
-            {noShapeLabel}
-          </text>
-        </g>
-      )}
-    </svg>
+    <div className="grid grid-cols-[1.25rem_1fr_auto] items-center gap-2 border-t border-[var(--line)] py-3 first:border-t-0">
+      <Icon className="h-4 w-4 text-[var(--route-green)]" aria-hidden="true" />
+      <span className="route-atlas-label">{label}</span>
+      <span className="text-sm font-semibold tabular-nums text-[var(--text-strong)]">{value}</span>
+    </div>
   )
 }
 
-function LoadingRouteWall() {
-  const { t } = useI18n()
-
+function TotalMetric({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof MapIcon }) {
   return (
-    <div className="space-y-6">
-      <section className="panel route-atlas-surface overflow-hidden">
-        <div className="panel-body grid min-h-[520px] place-items-center">
-          <div className="text-center">
-            <div className="route-atlas-label">{t('dashboard.loadingLabel')}</div>
-            <p className="mt-3 text-lg text-[var(--text-muted)]">{t('dashboard.loadingCopy')}</p>
-          </div>
-        </div>
-      </section>
+    <div className="min-w-0 border-l border-[var(--line)] px-3 first:border-l-0 first:pl-0 last:pr-0">
+      <div className="flex items-center gap-2">
+        <Icon className="h-5 w-5 shrink-0 text-[var(--route-green)]" aria-hidden="true" />
+        <div className="route-atlas-label truncate">{label}</div>
+      </div>
+      <div className="mt-2 truncate text-xl font-semibold tabular-nums tracking-tight text-[var(--text-strong)]">{value}</div>
     </div>
   )
 }
@@ -239,174 +157,244 @@ export function CyberDashboard() {
   const { t, dateLocale } = useI18n()
   const currentYear = new Date().getFullYear()
   const { data: statsData, isLoading: statsLoading } = useActivityStats(currentYear)
-  const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(36)
+  const { data: recentActivities = [], isLoading: recentLoading } = useRecentActivities(100)
+  const [activeFilter, setActiveFilter] = useState<RouteFilter>('all')
+  const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
 
   const routeActivities = useMemo(
-    () => (recentActivities as ActivityLike[]).filter((activity) => resolvePolyline(activity)).slice(0, 14),
+    () => (recentActivities as ActivityLike[]).filter((activity) => resolvePolyline(activity)),
     [recentActivities]
   )
 
-  const latestActivity = (recentActivities as ActivityLike[])[0]
+  const yearOptions = useMemo(() => {
+    const years = new Set(routeActivities.map(parsedYear).filter((year): year is number => Boolean(year)))
+    years.add(currentYear)
+    return Array.from(years).sort((a, b) => b - a)
+  }, [currentYear, routeActivities])
+
+  const filteredRoutes = useMemo(() => {
+    const inYear = routeActivities.filter((activity) => parsedYear(activity) === selectedYear)
+    if (activeFilter === 'all') return inYear
+    if (activeFilter === 'new') return inYear.slice(0, 8)
+    if (activeFilter === 'tempo') {
+      return inYear.filter((activity) => ['tempo', 'hard', 'steady'].includes(effortForActivity(activity)))
+    }
+    return inYear.filter((activity) => effortForActivity(activity) === activeFilter)
+  }, [activeFilter, routeActivities, selectedYear])
+
+  const visibleRoutes = filteredRoutes.slice(0, 5)
+  const selectedActivity =
+    filteredRoutes.find((activity) => activity.id === selectedActivityId) ||
+    filteredRoutes[0] ||
+    routeActivities[0]
 
   const basicStats = statsData?.basicStats
   const records = statsData?.personalRecords
   const totalDistanceKm = Number(basicStats?.total_distance || 0)
   const runCount = Number(basicStats?.total_activities || 0)
-  const routeCount = routeActivities.length
+  const routeCount = routeActivities.filter((activity) => parsedYear(activity) === currentYear).length
   const longestRunMeters = Number(records?.longestRun?.distance || 0)
-  const latestPace = latestActivity?.average_speed ? formatPace(latestActivity.average_speed) : '--:--/km'
-  const latestLocation = latestActivity?.location_city || latestActivity?.locationCity || t('page.routes.title')
+  const totalTime = formatDuration(Number(basicStats?.total_time || 0))
+  const totalElevation = `${Math.round(Number(basicStats?.total_elevation || 0))} m`
+  const selectedEffort = effortForActivity(selectedActivity)
+  const selectedEffortColor = getEffortColor(selectedEffort)
+  const selectedLocation = selectedActivity?.location_city || selectedActivity?.locationCity || selectedActivity?.name || t('page.routes.title')
+  const selectedActivityLabel = selectedActivity?.name && selectedActivity.name !== selectedLocation
+    ? selectedActivity.name
+    : t(`dashboard.effort.${selectedEffort}`)
+  const todayLabel = new Date().toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })
 
-  if (statsLoading || recentLoading) {
-    return <LoadingRouteWall />
-  }
+  if (statsLoading || recentLoading) return <LoadingRouteLedger />
 
   return (
-    <div className="space-y-6">
-      <section className="panel route-atlas-surface overflow-visible">
-        <div className="grid gap-6 overflow-visible p-5 lg:p-7">
-          <div className="relative z-10 max-w-[1060px]">
-            <div className="route-atlas-label">{t('dashboard.kicker')}</div>
-            <h1 className="mt-4 text-[clamp(48px,6.2vw,88px)] font-black leading-[0.92] tracking-tight text-[var(--text-strong)]">
-              {t('dashboard.headline')}
-            </h1>
-          </div>
-
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(300px,0.82fr)_minmax(520px,1.18fr)]">
-            <div className="relative min-h-[330px] overflow-visible pb-4 sm:pb-6 lg:min-h-[420px] lg:pb-0">
-              <p className="relative z-20 max-w-xl text-base leading-7 text-[var(--text-muted)] sm:text-lg lg:max-w-md">
+    <section className="dashboard-ledger-shell xl:-mx-8 xl:-mb-8 xl:-mt-5">
+      <div className="grid min-h-[calc(100vh-4.5rem)] xl:grid-cols-[minmax(0,1.63fr)_minmax(500px,1fr)]">
+        <div className="relative min-w-0 px-1 pb-10 pt-3 sm:px-2 lg:px-5 lg:pt-7 xl:px-8">
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(450px,1.15fr)_minmax(330px,0.85fr)]">
+            <div>
+              <h1 className="max-w-[620px] text-[clamp(2.6rem,3vw,2.85rem)] font-black leading-[1.02] tracking-[-0.055em] text-[var(--text-strong)]">
+                {t('dashboard.headline')}
+              </h1>
+              <p className="mt-5 max-w-[590px] text-sm leading-6 text-[var(--text-muted)] sm:text-base sm:leading-7">
                 {t('dashboard.copy')}
               </p>
-
-              <div className="relative z-20 mt-8 grid grid-cols-2 gap-x-6 gap-y-2 sm:max-w-xl lg:max-w-[390px]">
-                <HeroMetric label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
-                <HeroMetric label={t('dashboard.runs')} value={runCount} />
-                <HeroMetric label={t('dashboard.recentRoutes')} value={routeCount} sublabel={t('dashboard.withGpsShape')} />
-                <HeroMetric label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '--'} />
-              </div>
-
-              <div aria-hidden="true" className="hero-runner-float pointer-events-none relative z-10 mx-auto mt-2 h-64 w-56 sm:h-72 sm:w-64 lg:absolute lg:-bottom-44 lg:right-0 lg:mx-0 lg:mt-0 xl:-bottom-48 xl:-right-4 xl:h-80 xl:w-72">
-                <Image
-                  src={runnerMuseCameos.dashboardHero.src}
-                  alt=""
-                  width={768}
-                  height={1152}
-                  priority
-                  className="h-full w-full rotate-2 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.25)]"
-                />
-              </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="relative aspect-[19/14] overflow-hidden rounded-3xl border border-[var(--line)] bg-[rgba(7,10,12,0.72)]">
-                <AnimatedRouteConstellation
-                  activities={routeActivities}
-                  noShapeLabel={t('route.noShape')}
-                  ariaLabel={t('dashboard.latestConstellation')}
-                />
-                <div className="pointer-events-none absolute left-5 top-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                  {t('dashboard.latestConstellation')}
-                </div>
-                <div className="pointer-events-none absolute bottom-5 right-5 rounded-full border border-[var(--line)] bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                  {t('dashboard.liveTraces', { count: routeActivities.length })}
-                </div>
+            <div>
+              <div className="mb-5 flex items-center justify-between border-b border-[var(--line)] pb-2">
+                <span className="font-mono text-xs font-semibold tracking-[0.16em] text-[var(--text-muted)]">{currentYear}</span>
               </div>
-
-              <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
-                {latestActivity ? (
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="route-atlas-label">{t('dashboard.latest')}</div>
-                      <div className="mt-1 truncate text-lg font-semibold text-[var(--text-strong)]">{latestActivity.name || t('dashboard.untitledRun')}</div>
-                      <div className="mt-1 text-sm text-[var(--text-muted)]">
-                        {formatDate(latestActivity.start_date || latestActivity.startDate, dateLocale, t('common.unknownDate'))} · {latestLocation} · {String(effortForActivity(latestActivity)).toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 text-right text-sm tabular-nums">
-                      <div>
-                        <div className="route-atlas-label">{t('common.distance')}</div>
-                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDistanceKm(latestActivity.distance)}</div>
-                      </div>
-                      <div>
-                        <div className="route-atlas-label">{t('common.pace')}</div>
-                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{latestPace}</div>
-                      </div>
-                      <div>
-                        <div className="route-atlas-label">{t('common.time')}</div>
-                        <div className="mt-1 font-semibold text-[var(--text-strong)]">{formatDuration(latestActivity.moving_time)}</div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
-                      <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
-                    </div>
-                    <Link href="/sync" className="action-primary">{t('dashboard.syncSource')}</Link>
-                  </div>
-                )}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4">
+                <SummaryMetric label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
+                <SummaryMetric label={t('dashboard.runs')} value={runCount} />
+                <SummaryMetric label={t('dashboard.recentRoutes')} value={routeCount} note={t('dashboard.withGpsShape')} />
+                <SummaryMetric label={t('dashboard.longest')} value={longestRunMeters > 0 ? formatDistanceKm(longestRunMeters) : '—'} />
               </div>
             </div>
+          </div>
+
+          <div className="relative mt-8 min-h-[500px] overflow-visible rounded-[18px] border border-[var(--line-strong)] bg-[var(--route-canvas)]">
+            {selectedActivity ? (
+              <>
+                <div className="relative z-10 w-full border-b border-[var(--line)] p-5 sm:p-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[280px] lg:border-b-0 lg:border-r">
+                  <div className="route-atlas-label text-[var(--route-green)]">{t('dashboard.latestActivity')}</div>
+                  <h2 className="mt-4 truncate text-3xl font-semibold tracking-tight text-[var(--text-strong)]">{selectedLocation}</h2>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">
+                    {formatActivityDate(activityDate(selectedActivity), dateLocale, t('common.unknownDate'))}
+                  </p>
+                  <p className="mt-3 text-sm font-semibold capitalize" style={{ color: selectedEffortColor }}>
+                    {selectedActivityLabel}
+                  </p>
+
+                  <div className="mt-7">
+                    <DetailMetric icon={MapIcon} label={t('common.distance')} value={formatDistanceKm(selectedActivity.distance)} />
+                    <DetailMetric icon={MapPinIcon} label={t('common.pace')} value={formatPace(selectedActivity.average_speed)} />
+                    <DetailMetric icon={ClockIcon} label={t('common.time')} value={formatDuration(selectedActivity.moving_time)} />
+                    <DetailMetric icon={ArrowTrendingUpIcon} label={t('stats.elevation')} value={`+${Math.round(Number(selectedActivity.total_elevation_gain || 0))} m`} />
+                    <DetailMetric icon={HeartIcon} label={t('activityDetail.heartRate')} value={selectedActivity.average_heartrate ? `${Math.round(selectedActivity.average_heartrate)} bpm` : '—'} />
+                  </div>
+
+                  <Link href={`/activities/${selectedActivity.id}`} className="action-secondary mt-5 w-full gap-2">
+                    {t('dashboard.viewActivity')}
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </div>
+
+                <div className="h-[390px] p-4 sm:h-[460px] sm:p-7 lg:ml-[280px] lg:h-[498px]">
+                  <RouteGlyph
+                    route={routeForActivity(selectedActivity)}
+                    effort={selectedEffort}
+                    width={720}
+                    height={520}
+                    padding={64}
+                    maxPoints={420}
+                    strokeWidth={6}
+                    label={`${selectedActivity.name || selectedLocation} ${t('dashboard.routeShape')}`}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="grid min-h-[560px] place-items-center px-6 text-center">
+                <div>
+                  <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
+                  <Link href="/sync" className="action-primary mt-5">{t('dashboard.syncSource')}</Link>
+                </div>
+              </div>
+            )}
+
+            <Image
+              src={runnerMuseCameos.dashboardHero.src}
+              alt=""
+              width={768}
+              height={1152}
+              priority
+              className="hero-runner-float pointer-events-none absolute -bottom-[168px] -left-5 z-20 hidden h-[235px] w-[165px] object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] sm:block lg:-bottom-[230px] lg:left-0 lg:h-[290px] lg:w-[205px]"
+            />
           </div>
         </div>
-      </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="panel">
-          <div className="panel-header flex items-center justify-between gap-3">
+        <aside className="flex min-w-0 flex-col border-t border-[var(--line-strong)] px-1 pb-5 pt-8 sm:px-2 lg:px-5 xl:border-l xl:border-t-0 xl:px-7 xl:pt-10">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.recentShapes')}</h2>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.recentShapesCopy')}</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">{t('dashboard.recentRoutes')}</h2>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">{t('dashboard.recentLedgerCopy')}</p>
             </div>
-            <Link href="/routes" className="action-secondary shrink-0">{t('dashboard.openGallery')}</Link>
+            <div className="shrink-0 pt-1 text-xs tabular-nums text-[var(--text-muted)]">
+              {t('dashboard.showingCount', { shown: visibleRoutes.length, total: filteredRoutes.length })}
+            </div>
           </div>
-          <div className="panel-body">
-            {routeActivities.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {routeActivities.slice(0, 6).map((activity) => (
-                  <RouteTile
-                    key={activity.id}
-                    activityId={activity.id}
-                    title={activity.name || `${activity.type || t('activity.type.Run')} route`}
-                    distanceLabel={formatDistanceKm(activity.distance)}
-                    dateLabel={formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}
-                    paceLabel={activity.average_speed ? formatPace(activity.average_speed) : undefined}
-                    effort={effortForActivity(activity)}
-                    route={routeForActivity(activity)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-[var(--line)] p-8 text-center text-[var(--text-muted)]">
-                {t('dashboard.emptyRouteWall')}
+
+          <div className="mt-7 flex flex-wrap gap-2">
+            {filters.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => {
+                  setActiveFilter(filter.value)
+                  setSelectedActivityId(null)
+                }}
+                className={activeFilter === filter.value ? 'ledger-filter ledger-filter-active' : 'ledger-filter'}
+                aria-pressed={activeFilter === filter.value}
+              >
+                {t(filter.labelKey)}
+              </button>
+            ))}
+            <select
+              aria-label={t('common.year')}
+              value={selectedYear}
+              onChange={(event) => {
+                setSelectedYear(Number(event.target.value))
+                setSelectedActivityId(null)
+              }}
+              className="ledger-filter bg-[var(--surface)]"
+            >
+              {yearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
+            </select>
+          </div>
+
+          <div className="mt-8 hidden grid-cols-[88px_minmax(144px,1fr)_62px_62px_58px] gap-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] md:grid 2xl:grid-cols-[88px_minmax(180px,1fr)_78px_76px_70px] 2xl:gap-3">
+            <span>{t('common.date')}</span>
+            <span>{t('dashboard.routeColumn')}</span>
+            <span className="text-right">{t('common.distance')}</span>
+            <span className="text-right">{t('common.pace')}</span>
+            <span className="text-right">{t('dashboard.effortColumn')}</span>
+          </div>
+
+          <div className="mt-2 min-h-[430px]">
+            {visibleRoutes.length > 0 ? visibleRoutes.map((activity) => {
+              const effort = effortForActivity(activity)
+              const isSelected = selectedActivity?.id === activity.id
+              const effortColor = getEffortColor(effort)
+              return (
+                <button
+                  key={activity.id}
+                  type="button"
+                  onClick={() => setSelectedActivityId(activity.id)}
+                  className={isSelected ? 'route-ledger-row route-ledger-row-active' : 'route-ledger-row'}
+                  aria-pressed={isSelected}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs text-[var(--text-strong)]">{formatActivityDate(activityDate(activity), dateLocale, t('common.unknownDate'))}</span>
+                    <span className="mt-1 block text-[11px] text-[var(--text-muted)]">{formatWeekday(activityDate(activity), dateLocale)}</span>
+                  </span>
+                  <span className="grid min-w-0 grid-cols-[60px_1fr] items-center gap-3">
+                    <span className="block h-12 w-[60px] overflow-hidden">
+                      <RouteGlyph route={routeForActivity(activity)} effort={effort} width={96} height={64} padding={8} strokeWidth={3} showGrid={false} showGlow={false} animate={false} />
+                    </span>
+                    <span className="min-w-0 text-left">
+                      <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{activity.name || activity.location_city || t('dashboard.untitledRun')}</span>
+                      <span className="mt-1 block truncate text-xs capitalize" style={{ color: effortColor }}>{t(`dashboard.effort.${effort}`)}</span>
+                    </span>
+                  </span>
+                  <span className="text-right text-xs tabular-nums text-[var(--text-strong)]">{formatDistanceKm(activity.distance)}</span>
+                  <span className="text-right text-xs tabular-nums text-[var(--text-strong)]">{formatPace(activity.average_speed)}</span>
+                  <span className="text-right text-xs font-semibold capitalize" style={{ color: effortColor }}>{t(`dashboard.effort.${effort}`)}</span>
+                </button>
+              )
+            }) : (
+              <div className="grid min-h-[320px] place-items-center border-y border-dashed border-[var(--line)] px-6 text-center text-sm text-[var(--text-muted)]">
+                {t('dashboard.noFilterMatches')}
               </div>
             )}
           </div>
-        </div>
 
-        <div className="panel relative overflow-visible">
-          <div className="panel-header">
-            <h2 className="text-lg font-semibold text-[var(--text-strong)]">{t('dashboard.shortcuts')}</h2>
+          <div className="mt-auto border-y border-[var(--line)] py-6">
+            <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 sm:gap-y-0">
+              <TotalMetric icon={MapIcon} label={t('dashboard.runs')} value={runCount} />
+              <TotalMetric icon={MapPinIcon} label={t('common.distance')} value={`${totalDistanceKm.toFixed(1)} km`} />
+              <TotalMetric icon={ClockIcon} label={t('common.time')} value={totalTime} />
+              <TotalMetric icon={ArrowTrendingUpIcon} label={t('stats.elevation')} value={totalElevation} />
+            </div>
           </div>
-          <div className="panel-body relative isolate grid gap-2 overflow-visible">
-            <Image
-              src={runnerMuseCameos.dashboardShortcutLead.src}
-              alt=""
-              width={768}
-              height={768}
-              loading="eager"
-              className="pointer-events-none absolute -bottom-8 -right-8 z-0 h-64 w-56 -rotate-3 object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.24)] sm:h-72 sm:w-60 lg:-bottom-10 lg:-right-10"
-            />
-            <Link href="/activities" className="action-secondary relative z-10 justify-start">{t('dashboard.browseRuns')}</Link>
-            <Link href="/routes" className="action-secondary relative z-10 justify-start">{t('dashboard.openGallery')}</Link>
-            <Link href="/posters" className="action-secondary relative z-10 justify-start">{t('dashboard.generatePosters')}</Link>
-            <Link href="/stats" className="action-secondary relative z-10 justify-start">{t('dashboard.openStatsLab')}</Link>
-            <Link href="/map" className="action-secondary relative z-10 justify-start">{t('dashboard.inspectRouteMap')}</Link>
-            <Link href="/sync" className="action-primary relative z-10 justify-start">{t('dashboard.syncLatestData')}</Link>
+
+          <div className="flex flex-col gap-2 pt-5 text-[11px] text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
+            <span>{t('dashboard.distanceNote')}</span>
+            <span>{t('dashboard.dataAsOf', { date: todayLabel })}</span>
           </div>
-        </div>
-      </section>
-    </div>
+        </aside>
+      </div>
+    </section>
   )
 }

@@ -95,6 +95,10 @@ function LanguageToggle() {
   )
 }
 
+function isCurrentRoute(pathname: string, href: string) {
+  return pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`))
+}
+
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   const { t } = useI18n()
 
@@ -110,7 +114,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
             <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{t(group.labelKey)}</div>
             <div className="mt-2 space-y-1">
               {group.items.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = isCurrentRoute(pathname, item.href)
                 return (
                   <Link
                     key={item.nameKey}
@@ -146,6 +150,40 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   )
 }
 
+function DesktopNavigation({ pathname }: { pathname: string }) {
+  const { t } = useI18n()
+
+  return (
+    <nav className="hidden min-w-0 flex-1 items-stretch min-[1380px]:flex" aria-label={t('shell.primaryNavigation')}>
+      {navGroups.map((group) => (
+        <div key={group.labelKey} className="flex items-center gap-1 border-l border-[var(--line)] px-4 first:border-l-0">
+          <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+            {t(group.labelKey)}
+          </span>
+          {group.items.map((item) => {
+            const isActive = isCurrentRoute(pathname, item.href)
+            return (
+              <Link
+                key={item.nameKey}
+                href={item.href}
+                aria-current={isActive ? 'page' : undefined}
+                className={classNames(
+                  'relative inline-flex h-11 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-px after:scale-x-0 after:bg-[var(--route-green)] after:transition-transform',
+                  isActive
+                    ? 'text-[var(--text-strong)] after:scale-x-100'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'
+                )}
+              >
+                {t(item.nameKey)}
+              </Link>
+            )
+          })}
+        </div>
+      ))}
+    </nav>
+  )
+}
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
@@ -159,7 +197,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 min-[1380px]:hidden" role="dialog" aria-modal="true">
           <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label={t('shell.closeSidebar')} />
           <aside className="relative h-full w-[86%] max-w-[320px] border-r border-slate-200 bg-[var(--sidebar-bg)] shadow-2xl dark:border-white/10">
             <div className="absolute right-3 top-3">
@@ -172,29 +210,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <aside className="hidden border-r border-slate-200 bg-[var(--sidebar-bg)] dark:border-white/10 lg:block lg:w-[290px]">
-        <SidebarContent pathname={pathname} />
-      </aside>
-
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-[var(--header-bg)]/95 backdrop-blur dark:border-white/10">
-          <div className="mx-auto flex h-[84px] w-full max-w-[1360px] items-center gap-4 px-4 sm:px-6 lg:px-10">
+        <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--header-bg)]/95 backdrop-blur-xl">
+          <div className="flex h-[72px] w-full items-center gap-3 px-4 sm:px-6">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="action-ghost lg:hidden"
+              className="action-ghost min-[1380px]:hidden"
               aria-label={t('shell.openSidebar')}
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
 
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[28px] font-semibold leading-none tracking-tight text-[var(--text-strong)]">{pageMeta.title}</div>
-              <div className="mt-1 truncate text-sm text-[var(--text-muted)]">{pageMeta.subtitle}</div>
+            <Run2Logo showTagline={false} className="shrink-0 pr-2" />
+
+            <DesktopNavigation pathname={pathname} />
+
+            <div className="min-w-0 flex-1 min-[1380px]:hidden">
+              <div className="truncate text-sm font-semibold tracking-tight text-[var(--text-strong)]">{pageMeta.title}</div>
+              <div className="mt-0.5 hidden truncate text-xs text-[var(--text-muted)] sm:block">{pageMeta.subtitle}</div>
             </div>
 
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link href="/sync" className="action-secondary">{t('shell.quickSync')}</Link>
-              <Link href="/map" className="action-primary">{t('shell.quickMap')}</Link>
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+              <Link href="/sync" className="action-secondary h-10">{t('shell.quickSync')}</Link>
+              <Link href="/map" className="action-primary h-10">{t('shell.quickMap')}</Link>
             </div>
 
             <LanguageToggle />
@@ -203,7 +241,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="flex-1">
-          <div className="mx-auto w-full max-w-[1360px] px-4 pb-8 pt-6 sm:px-6 lg:px-10">{children}</div>
+          <div className="mx-auto w-full max-w-[1600px] px-4 pb-8 pt-5 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
     </div>
