@@ -106,6 +106,7 @@ function DistanceField({ data, dateLocale }: { data: MonthlyStat[]; dateLocale: 
 }
 
 function EffortMix({ activities }: { activities: ActivityLike[] }) {
+  const { t } = useI18n()
   const items = useMemo(() => {
     const totals = new Map(effortOrder.map((effort) => [effort, { count: 0, distanceKm: 0 }]))
     activities.forEach((activity) => {
@@ -127,7 +128,7 @@ function EffortMix({ activities }: { activities: ActivityLike[] }) {
       {items.map((item) => (
         <div key={item.effort}>
           <div className="mb-1 flex items-center justify-between text-sm">
-            <span className="font-medium capitalize text-[var(--text-strong)]">{item.effort}</span>
+            <span className="font-medium text-[var(--text-strong)]">{t(`dashboard.effort.${item.effort}`)}</span>
             <span className="text-[var(--text-muted)]">{formatDistanceKm(item.distanceKm)} · {item.count}</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-[var(--bg)]">
@@ -298,7 +299,7 @@ function RouteDiversity({ activities }: { activities: ActivityLike[] }) {
             strokeWidth={4}
             maxPoints={140}
             animate={false}
-            label={`${activity.name || 'Route'} diversity sample`}
+            label={t('stats.routeSampleLabel', { name: activity.name || t('dashboard.routeShape') })}
           />
         </div>
       ))}

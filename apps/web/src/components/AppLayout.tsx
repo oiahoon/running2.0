@@ -244,6 +244,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
+      <a href="#main-content" className="skip-link">{t('shell.skipToContent')}</a>
       {sidebarOpen && (
         <div
           ref={sidebarDialogRef}
@@ -279,8 +280,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Bars3Icon className="h-6 w-6" />
             </button>
 
-            <Run2Logo compact showTagline={false} className="shrink-0 min-[360px]:hidden" />
-            <Run2Logo showTagline={false} className="hidden shrink-0 pr-2 min-[360px]:flex" />
+            <Run2Logo compact showTagline={false} className="min-h-11 shrink-0 min-[440px]:hidden" />
+            <Run2Logo showTagline={false} className="hidden min-h-11 shrink-0 pr-2 min-[440px]:flex" />
 
             <DesktopNavigation pathname={pathname} />
 
@@ -299,7 +300,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1">
+        <main id="main-content" className="min-w-0 flex-1" tabIndex={-1}>
           <div className="mx-auto w-full max-w-[1600px] px-4 pb-8 pt-5 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>

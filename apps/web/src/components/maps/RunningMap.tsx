@@ -587,7 +587,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
     if (previewActivity && previewPolyline) {
       return (
         <div
-          className="overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--route-canvas)]"
+          className="route-map-frame overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--route-canvas)]"
           style={{ height }}
         >
           <RouteGlyph
@@ -599,7 +599,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
             maxPoints={height <= 240 ? 120 : 240}
             strokeWidth={height <= 240 ? 4 : 5}
             animate={false}
-            label={`${previewActivity.name} route shape`}
+            label={`${previewActivity.name} ${t('dashboard.routeShape')}`}
           />
         </div>
       )
@@ -608,7 +608,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
     if (height <= 240) {
       return (
         <div
-          className="grid place-items-center rounded-lg border border-[var(--line)] bg-[var(--bg)] text-center"
+          className="route-map-frame grid place-items-center rounded-lg border border-[var(--line)] bg-[var(--bg)] text-center"
           style={{ height }}
         >
           <div className="px-4">
@@ -621,17 +621,17 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
     return (
       <div 
-        className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
+        className="route-map-frame overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--route-canvas)]"
         style={{ height }}
       >
         <div className="h-full flex flex-col">
           <div className="bg-white dark:bg-gray-900 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                Activity Routes
+                {t('map.activityRoutes')}
               </h3>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {displayActivities.length} activities
+                {t('map.activitiesCount', { count: displayActivities.length })}
               </span>
             </div>
           </div>
@@ -640,13 +640,15 @@ function MapboxMap({ activities, height, selectedActivity }: {
             <div className="text-center mb-4">
               <AtlasIcon name="map" className="mx-auto mb-2 h-8 w-8 text-[var(--route-green)]" />
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Interactive map requires Mapbox token
+                {t('map.tokenRequired')}
               </p>
             </div>
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {displayActivities.slice(0, 10).map((activity) => {
                 const location = formatLocation(activity)
+                const activityTypeKey = `activity.type.${activity.type}`
+                const translatedActivityType = t(activityTypeKey)
                 return (
                   <div key={activity.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border hover:shadow-sm transition-shadow">
                     <div className="flex-1 min-w-0 pr-3">
@@ -655,7 +657,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
                       </p>
                       <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {activity.type}
+                          {translatedActivityType === activityTypeKey ? activity.type : translatedActivityType}
                         </span>
                         <span>{(activity.distance / 1000).toFixed(1)}km</span>
                       </div>
@@ -710,7 +712,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   return (
     <div 
-      className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden relative"
+      className="route-map-frame relative overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--route-canvas)]"
       style={{ height }}
     >
       {isLoadingMap ? (
@@ -784,6 +786,10 @@ export default function RunningMap({
     if (selectedActivityId === null) return mapEnabledActivities[0] ?? null
     return mapEnabledActivities.find((activity) => activity.id === selectedActivityId) ?? mapEnabledActivities[0] ?? null
   }, [mapEnabledActivities, selectedActivityId])
+  const selectedActivityTypeKey = selectedActivity ? `activity.type.${selectedActivity.type}` : ''
+  const selectedActivityType = selectedActivity
+    ? (t(selectedActivityTypeKey) === selectedActivityTypeKey ? selectedActivity.type : t(selectedActivityTypeKey))
+    : ''
 
   // Preload adjacent maps when selected activity changes
   useEffect(() => {
@@ -820,16 +826,16 @@ export default function RunningMap({
     <div className="space-y-4">
       {/* Controls */}
       {showControls && mapEnabledActivities.length > 1 && (
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex w-full items-center sm:w-auto">
             <ActivitySelector
               selectedActivity={selectedActivity}
               onActivitySelect={(activity) => setSelectedActivityId(activity?.id ?? null)}
-              className="min-w-64"
+              className="w-full sm:min-w-64"
             />
           </div>
           
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm text-[var(--text-muted)]">
             {selectedActivity 
               ? t('map.routeSelected', { name: selectedActivity.name })
               : t('map.noRouteSelected')
@@ -847,15 +853,15 @@ export default function RunningMap({
       
       {/* Activity Info for Single View */}
       {showActivityInfo && selectedActivity && (
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+        <div className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4">
+          <h4 className="mb-3 font-medium text-[var(--text-strong)]">
             <AtlasIcon name="pin" className="mr-2 inline h-4 w-4 text-[var(--route-green)]" /> {selectedActivity.name}
           </h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:gap-4">
             <div>
               <span className="text-gray-500 dark:text-gray-400">{t('common.type')}:</span>
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {selectedActivity.type}
+                {selectedActivityType}
               </span>
             </div>
             <div>

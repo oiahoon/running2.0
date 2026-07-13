@@ -147,13 +147,13 @@ export default function SyncPage() {
                 <div className="panel-header flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('sync.sourceHealth', { source: source.name })}</h3>
                   <span className={source.status === 'connected' ? 'rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-700 ring-1 ring-emerald-400/30 dark:text-emerald-300' : 'rounded-full bg-gray-500/15 px-2 py-0.5 text-xs text-gray-700 ring-1 ring-gray-400/30 dark:text-gray-300'}>
-                    {source.status}
+                    {t(`sync.status.${source.status}`)}
                   </span>
                 </div>
                 <div className="panel-body grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <MetricItem label={t('sync.totalActivities')} value={source.totalActivities.toLocaleString()} />
                   <MetricItem label={t('sync.lastSync')} value={source.lastSync ? new Date(source.lastSync).toLocaleString(dateLocale) : t('common.never')} />
-                  <MetricItem label={t('sync.latestStatus')} value={latestSync ? latestSync.status : t('sync.noRecords')} />
+                  <MetricItem label={t('sync.latestStatus')} value={latestSync ? t(`sync.status.${latestSync.status}`) : t('sync.noRecords')} />
                 </div>
               </div>
             ))}
@@ -199,7 +199,7 @@ export default function SyncPage() {
                           <td className="px-5 py-2 text-[var(--text-muted)]">{new Date(record.timestamp).toLocaleString(dateLocale)}</td>
                           <td className="px-5 py-2">{record.source}</td>
                           <td className="px-5 py-2">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>{record.status}</span>
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(record.status)}`}>{t(`sync.status.${record.status}`)}</span>
                           </td>
                           <td className="px-5 py-2">{record.activitiesProcessed}</td>
                           <td className="px-5 py-2">{record.activitiesCreated}</td>

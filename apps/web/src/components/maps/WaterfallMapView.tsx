@@ -45,8 +45,8 @@ function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height
           defaultView="single"
         />
       ) : (
-        <div className="h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-          <div className="text-gray-400 dark:text-gray-500">
+        <div className="flex h-full items-center justify-center bg-[var(--route-canvas)]">
+          <div className="text-[var(--text-muted)]">
             <AtlasIcon name="map" className="mx-auto mb-2 h-7 w-7" />
             <div className="text-sm">{t('map.loadingMap')}</div>
           </div>
@@ -200,13 +200,13 @@ export default function WaterfallMapView({
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden animate-pulse">
-              <div className="h-48 bg-gray-200 dark:bg-gray-700"></div>
+            <div key={i} className="animate-pulse overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] motion-reduce:animate-none">
+              <div className="h-48 bg-[var(--bg-2)]"></div>
               <div className="p-4">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                <div className="mb-2 h-4 w-3/4 rounded bg-[var(--bg-2)]"></div>
+                <div className="h-3 w-1/2 rounded bg-[var(--bg-2)]"></div>
               </div>
             </div>
           ))}
@@ -253,14 +253,14 @@ export default function WaterfallMapView({
       </div>
 
       {/* Waterfall Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {allActivities.map((activity) => {
           const config = getActivityConfig(activity.type)
           
           return (
             <div
               key={activity.id}
-              className="route-gallery-card group overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-900"
+              className="route-gallery-card group overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] transition-[border-color,background-color] hover:border-[var(--route-green)] hover:bg-[var(--surface-raised)]"
             >
               {/* Map */}
               <div className="h-48 relative overflow-hidden">
@@ -289,7 +289,7 @@ export default function WaterfallMapView({
 
               {/* Activity Details */}
               <div className="p-4">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h3 className="mb-2 truncate font-medium text-[var(--text-strong)] transition-colors group-hover:text-[var(--route-green)]">
                   {activity.name}
                 </h3>
                 

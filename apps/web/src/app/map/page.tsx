@@ -105,7 +105,7 @@ export default function MapPage() {
 
   return (
     <div className="space-y-6">
-      <section className="panel">
+      <section className="panel route-atlas-surface">
         <div className="panel-body py-6 sm:py-7">
           <h2 className="section-title">{t('map.title')}</h2>
           <p className="section-subtitle">{t('map.copy')}</p>
@@ -121,19 +121,19 @@ export default function MapPage() {
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{t('common.view')}</label>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setViewMode('map')} className={viewMode === 'map' ? 'action-primary !py-2 !px-2' : 'action-secondary !py-2 !px-2'}>{t('map.map')}</button>
-                <button onClick={() => setViewMode('waterfall')} className={viewMode === 'waterfall' ? 'action-primary !py-2 !px-2' : 'action-secondary !py-2 !px-2'}>{t('map.gallery')}</button>
+                <button aria-pressed={viewMode === 'map'} onClick={() => setViewMode('map')} className={viewMode === 'map' ? 'action-primary !px-2 !py-2' : 'action-secondary !px-2 !py-2'}>{t('map.map')}</button>
+                <button aria-pressed={viewMode === 'waterfall'} onClick={() => setViewMode('waterfall')} className={viewMode === 'waterfall' ? 'action-primary !px-2 !py-2' : 'action-secondary !px-2 !py-2'}>{t('map.gallery')}</button>
               </div>
             </div>
 
             <div className="lg:col-span-2">
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{t('map.activityTypes')}</label>
-              <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-slate-300/70 bg-white p-2.5 dark:border-white/15 dark:bg-white/5">
+              <div className="grid grid-cols-2 gap-x-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1.5">
                 {availableTypes.map((type: ActivityType) => {
                   const config = getActivityConfig(type)
                   const translatedType = t(`activity.type.${type}`)
                   return (
-                    <label key={type} className="flex items-center gap-2 text-sm text-[var(--text-strong)]">
+                    <label key={type} className="flex min-h-11 items-center gap-2 text-sm text-[var(--text-strong)]">
                       <input
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
@@ -180,7 +180,7 @@ export default function MapPage() {
                 setSelectedTypes(getDefaultActivityTypes() as ActivityType[])
                 setDateRange({})
               }}
-              className="action-secondary"
+              className="action-secondary w-full sm:w-auto"
             >
               {t('map.resetFilters')}
             </button>
@@ -202,7 +202,7 @@ export default function MapPage() {
           <div className="panel-header">
             <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('map.spatialReview')}</h3>
           </div>
-          <div className="panel-body">
+          <div className="panel-body p-3 sm:p-5">
             <RunningMap activities={activitiesWithLocation} height={620} showControls={true} defaultView="single" />
           </div>
         </section>
@@ -211,7 +211,7 @@ export default function MapPage() {
           <div className="panel-header">
             <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('map.routeGallery')}</h3>
           </div>
-          <div className="panel-body">
+          <div className="panel-body p-3 sm:p-5">
             <WaterfallMapView
               key={`${JSON.stringify(selectedTypes)}-${dateRange.start}-${dateRange.end}`}
               filters={queryFilters}

@@ -130,8 +130,8 @@ export default function PostersPage() {
               className="pointer-events-none absolute -top-5 right-28 z-20 hidden h-56 w-44 -rotate-2 object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)] md:block lg:-top-8 lg:right-40 lg:h-64 lg:w-52"
             />
             <div className="relative z-30 flex gap-2 self-end">
-              <button onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>{t('posters.monthly')}</button>
-              <button onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>{t('posters.weekly')}</button>
+              <button aria-pressed={mode === 'month'} onClick={() => setMode('month')} className={mode === 'month' ? 'action-primary' : 'action-secondary'}>{t('posters.monthly')}</button>
+              <button aria-pressed={mode === 'week'} onClick={() => setMode('week')} className={mode === 'week' ? 'action-primary' : 'action-secondary'}>{t('posters.weekly')}</button>
             </div>
           </div>
         </div>
@@ -191,22 +191,23 @@ export default function PostersPage() {
                       padding={42}
                       strokeWidth={6}
                       maxPoints={360}
-                      label={`${formatPeriodLabel(period.key, mode, dateLocale, t)} route poster`}
+                      animate={false}
+                      label={t('posters.routePosterLabel', { period: formatPeriodLabel(period.key, mode, dateLocale, t) })}
                     />
                   </div>
 
-                  <div className="relative z-30 mt-5 grid grid-cols-3 gap-3">
+                  <div className="relative z-30 mt-5 grid grid-cols-3 gap-2 sm:gap-3">
                     <div>
                       <div className="route-atlas-label">{t('common.distance')}</div>
-                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{totalDistanceKm.toFixed(1)} km</div>
+                      <div className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums text-[var(--text-strong)] sm:text-2xl">{totalDistanceKm.toFixed(1)} km</div>
                     </div>
                     <div>
                       <div className="route-atlas-label">{t('common.time')}</div>
-                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{formatDuration(totalTime)}</div>
+                      <div className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums text-[var(--text-strong)] sm:text-2xl">{formatDuration(totalTime)}</div>
                     </div>
                     <div>
                       <div className="route-atlas-label">{t('posters.shape')}</div>
-                      <div className="mt-1 text-2xl font-semibold text-[var(--text-strong)]">{Math.round(averageComplexity * 100)}</div>
+                      <div className="mt-1 whitespace-nowrap text-xl font-semibold tabular-nums text-[var(--text-strong)] sm:text-2xl">{Math.round(averageComplexity * 100)}</div>
                     </div>
                   </div>
 

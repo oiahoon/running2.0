@@ -81,7 +81,7 @@ function ShareCard({ activity }: { activity: ActivityDetail }) {
       <h3 className="mt-3 text-2xl font-black leading-tight text-[var(--text-strong)]">{activity.name || t('activityDetail.untitled')}</h3>
       <p className="mt-1 text-sm text-[var(--text-muted)]">{formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}</p>
       <div className="mt-5 aspect-square overflow-hidden rounded-2xl border border-[var(--line)]">
-        <RouteGlyph route={{ encodedPolyline: routePolyline(activity) }} effort={effortForActivity(activity)} padding={30} maxPoints={220} />
+        <RouteGlyph route={{ encodedPolyline: routePolyline(activity) }} effort={effortForActivity(activity)} padding={30} maxPoints={220} animate={false} />
       </div>
       <div className="mt-5 grid grid-cols-3 gap-3 text-sm tabular-nums">
         <div>

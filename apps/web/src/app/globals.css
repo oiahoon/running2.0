@@ -67,6 +67,7 @@
 @layer base {
   html {
     font-family: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
     scroll-behavior: smooth;
   }
 
@@ -103,6 +104,7 @@
     background-size: 40px 40px, 40px 40px, auto;
     color: var(--text-strong);
     min-height: 100vh;
+    overflow-x: clip;
   }
 
   * {
@@ -147,7 +149,11 @@
 
 @layer components {
   .app-shell {
-    @apply flex min-h-screen;
+    @apply flex min-h-screen min-w-0;
+  }
+
+  .skip-link {
+    @apply fixed left-4 top-3 z-[70] -translate-y-20 rounded-md bg-[var(--route-green)] px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[var(--text-strong)] focus:ring-offset-2 focus:ring-offset-[var(--bg-0)];
   }
 
   .panel {
@@ -294,7 +300,7 @@
   .route-glyph-path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: draw-route 1600ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation: draw-route 2200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
 
   .route-glyph-path-loop,
@@ -304,11 +310,13 @@
   }
 
   .route-glyph-path-loop {
-    animation: draw-route-loop 7.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation: draw-route-loop 9.6s linear infinite;
+    will-change: stroke-dashoffset, opacity;
   }
 
   .route-glyph-glow-loop {
-    animation: draw-route-glow-loop 7.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation: draw-route-glow-loop 9.6s linear infinite;
+    will-change: stroke-dashoffset, opacity;
   }
 
   .route-constellation-runner,
@@ -337,6 +345,10 @@
   .route-gallery-card {
     content-visibility: auto;
     contain-intrinsic-size: 360px;
+  }
+
+  .route-map-frame {
+    min-height: 22rem;
   }
 }
 
@@ -388,6 +400,11 @@ html:lang(ja) .dashboard-display-title {
   .route-ledger-row > :nth-child(n + 3) {
     display: none;
   }
+
+  .route-map-frame {
+    height: 26rem !important;
+    min-height: 26rem;
+  }
 }
 
 @media (max-width: 639px) {
@@ -416,8 +433,8 @@ html:lang(ja) .dashboard-display-title {
     stroke-dashoffset: 0.98;
   }
 
-  68%,
-  86% {
+  72%,
+  90% {
     opacity: 1;
     stroke-dashoffset: 0;
   }
@@ -439,8 +456,8 @@ html:lang(ja) .dashboard-display-title {
     stroke-dashoffset: 0.98;
   }
 
-  68%,
-  86% {
+  72%,
+  90% {
     opacity: 0.16;
     stroke-dashoffset: 0;
   }
@@ -511,11 +528,13 @@ html:lang(ja) .dashboard-display-title {
     animation: none !important;
     opacity: 1 !important;
     stroke-dashoffset: 0 !important;
+    will-change: auto !important;
   }
 
   .route-glyph-glow-loop {
     animation: none !important;
     opacity: 0.16 !important;
     stroke-dashoffset: 0 !important;
+    will-change: auto !important;
   }
 }

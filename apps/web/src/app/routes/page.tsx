@@ -34,6 +34,9 @@ const filters: Array<{ id: RouteFilter; labelKey?: string }> = [
   { id: 'year' },
 ]
 
+const initialRouteCount = 18
+const routeBatchSize = 18
+
 function formatDate(value: string | undefined, dateLocale: string, unknownLabel: string) {
   if (!value) return unknownLabel
   const date = new Date(value)
@@ -63,18 +66,23 @@ function effortForActivity(activity: ActivityLike) {
 export default function RouteWallGalleryPage() {
   const { t, dateLocale } = useI18n()
   const [activeFilter, setActiveFilter] = useState<RouteFilter>('all')
+  const [visibleCount, setVisibleCount] = useState(initialRouteCount)
   const currentYear = new Date().getFullYear()
   const { data, isLoading, error } = useActivities({}, 1, 120)
   const activities = useMemo(() => (data?.activities || []) as ActivityLike[], [data?.activities])
 
-  const routeActivities = useMemo(
-    () => activities.filter((activity) => routePolyline(activity)),
+  const routeEntries = useMemo(
+    () => activities.reduce<Array<{ activity: ActivityLike; polyline: string; effort: ReturnType<typeof inferRouteEffort> }>>((entries, activity) => {
+      const polyline = routePolyline(activity)
+      if (!polyline) return entries
+      entries.push({ activity, polyline, effort: effortForActivity(activity) })
+      return entries
+    }, []),
     [activities]
   )
 
-  const filteredActivities = useMemo(() => {
-    return routeActivities.filter((activity, index) => {
-      const effort = effortForActivity(activity)
+  const filteredEntries = useMemo(() => {
+    return routeEntries.filter(({ activity, effort }, index) => {
       const startDate = new Date(activity.start_date || activity.startDate || '')
       if (activeFilter === 'all') return true
       if (activeFilter === 'new') return index < 18
@@ -82,7 +90,8 @@ export default function RouteWallGalleryPage() {
       if (activeFilter === 'tempo') return effort === 'tempo' || effort === 'hard' || effort === 'steady'
       return effort === activeFilter
     })
-  }, [activeFilter, currentYear, routeActivities])
+  }, [activeFilter, currentYear, routeEntries])
+  const visibleEntries = filteredEntries.slice(0, visibleCount)
 
   return (
     <div className="space-y-6">
@@ -97,7 +106,7 @@ export default function RouteWallGalleryPage() {
               </p>
             </div>
             <div className="text-sm text-[var(--text-muted)]">
-              {t('routes.countSummary', { routes: routeActivities.length, records: activities.length })}
+              {t('routes.countSummary', { routes: routeEntries.length, records: activities.length })}
             </div>
           </div>
         </div>
@@ -111,7 +120,11 @@ export default function RouteWallGalleryPage() {
               return (
                 <button
                   key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
+                  onClick={() => {
+                    setActiveFilter(filter.id)
+                    setVisibleCount(initialRouteCount)
+                  }}
+                  aria-pressed={active}
                   className={active ? 'action-primary' : 'action-secondary'}
                 >
                   {filter.id === 'year' ? String(currentYear) : t(filter.labelKey || 'common.all')}
@@ -136,7 +149,7 @@ export default function RouteWallGalleryPage() {
 
       {!isLoading && !error ? (
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {filteredActivities.map((activity) => (
+          {visibleEntries.map(({ activity, effort, polyline }) => (
             <RouteTile
               key={activity.id}
               activityId={activity.id}
@@ -144,14 +157,31 @@ export default function RouteWallGalleryPage() {
               distanceLabel={formatDistanceKm(activity.distance)}
               dateLabel={formatDate(activity.start_date || activity.startDate, dateLocale, t('common.unknownDate'))}
               paceLabel={activity.average_speed ? formatPace(activity.average_speed) : undefined}
-              effort={effortForActivity(activity)}
-              route={{ encodedPolyline: routePolyline(activity) }}
+              effort={effort}
+              encodedPolyline={polyline}
             />
           ))}
         </section>
       ) : null}
 
-      {!isLoading && !error && filteredActivities.length === 0 ? (
+      {!isLoading && !error && filteredEntries.length > initialRouteCount ? (
+        <div className="flex flex-col items-center gap-3 text-center">
+          <p className="text-sm text-[var(--text-muted)]">
+            {t('routes.showingCount', { shown: visibleEntries.length, total: filteredEntries.length })}
+          </p>
+          {visibleEntries.length < filteredEntries.length ? (
+            <button
+              type="button"
+              className="action-secondary min-w-40"
+              onClick={() => setVisibleCount((count) => Math.min(count + routeBatchSize, filteredEntries.length))}
+            >
+              {t('routes.showMore')}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {!isLoading && !error && filteredEntries.length === 0 ? (
         <section className="panel">
           <div className="panel-body rounded-2xl border border-dashed border-[var(--line)] text-center text-sm text-[var(--text-muted)]">
             {t('routes.empty')}

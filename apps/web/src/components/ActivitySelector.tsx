@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useActivities } from '@/lib/hooks/useActivities'
 import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
@@ -48,10 +48,19 @@ export default function ActivitySelector({
   const { t, dateLocale } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const listboxId = useId()
+  const triggerButtonRef = useRef<HTMLButtonElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const pageSize = 50 // Increase page size for better UX
 
   // Debounce search term
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
+  useEffect(() => {
+    if (!isOpen) return
+    const focusFrame = window.requestAnimationFrame(() => searchInputRef.current?.focus())
+    return () => window.cancelAnimationFrame(focusFrame)
+  }, [isOpen])
 
   // Fetch activities with GPS data only
   const { data, isLoading, error } = useActivities({
@@ -63,16 +72,23 @@ export default function ActivitySelector({
     shouldShowOnMap(activity.type) && activity.start_latitude && activity.start_longitude
   )
 
-  const totalCount = data?.totalCount || 0
+  const totalCount = data?.pagination?.total || data?.summary?.totalActivities || activities.length
+
+  const closeSelector = (restoreTriggerFocus = false) => {
+    setIsOpen(false)
+    if (restoreTriggerFocus) {
+      window.requestAnimationFrame(() => triggerButtonRef.current?.focus())
+    }
+  }
 
   const handleSelect = (activity: Activity) => {
     onActivitySelect(activity)
-    setIsOpen(false)
+    closeSelector(true)
   }
 
   const handleClear = () => {
     onActivitySelect(null)
-    setIsOpen(false)
+    closeSelector(true)
   }
 
   if (error) {
@@ -80,12 +96,31 @@ export default function ActivitySelector({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div
+      className={`relative ${className}`}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape' && isOpen) {
+          event.preventDefault()
+          event.stopPropagation()
+          closeSelector(true)
+        }
+      }}
+    >
       {/* Trigger Button */}
       <button
         type="button"
+        ref={triggerButtonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-full cursor-default rounded-md bg-white dark:bg-gray-800 py-2 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            setIsOpen(true)
+          }
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        className="relative min-h-11 w-full cursor-default rounded-md border border-[var(--line-strong)] bg-[var(--surface)] py-2 pl-3 pr-10 text-left text-[var(--text-strong)] outline-none transition hover:border-[var(--route-green)] focus-visible:ring-2 focus-visible:ring-[var(--route-green)] sm:text-sm"
       >
         <span className="block truncate">
           {selectedActivity ? (
@@ -108,30 +143,32 @@ export default function ActivitySelector({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-10 mt-1 max-h-96 w-full overflow-hidden rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute z-10 mt-1 max-h-96 w-full overflow-hidden rounded-md border border-[var(--line)] bg-[var(--surface)] shadow-lg focus:outline-none">
           {/* Search */}
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="border-b border-[var(--line)] p-2">
             <input
               type="text"
+              ref={searchInputRef}
+              aria-label={t('activitySelector.search')}
               placeholder={t('activitySelector.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-[var(--line-strong)] bg-[var(--surface-raised)] px-3 py-2 text-sm text-[var(--text-strong)] outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--route-green)]"
             />
           </div>
 
           {/* Clear Option */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
+          <div className="border-b border-[var(--line)]">
             <button
               onClick={handleClear}
-              className="w-full px-3 py-2 text-left text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="min-h-11 w-full px-3 py-2 text-left text-sm text-[var(--text-muted)] hover:bg-[var(--surface-raised)]"
             >
               {t('activitySelector.clear')}
             </button>
           </div>
 
           {/* Activities List */}
-          <div className="max-h-60 overflow-y-auto">
+          <div id={listboxId} role="listbox" aria-label={t('activitySelector.select')} className="max-h-60 overflow-y-auto">
             {isLoading ? (
               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                 {t('activities.loading')}
@@ -146,8 +183,10 @@ export default function ActivitySelector({
                     <button
                       key={activity.id}
                       onClick={() => handleSelect(activity)}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                        isSelected ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'
+                      role="option"
+                      aria-selected={isSelected}
+                      className={`min-h-11 w-full px-3 py-2 text-left text-sm hover:bg-[var(--surface-raised)] ${
+                        isSelected ? 'bg-[var(--route-green)]/10 text-[var(--route-green)]' : 'text-[var(--text-strong)]'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -165,7 +204,7 @@ export default function ActivitySelector({
                 })}
                 
                 {/* Show count info */}
-                <div className="border-t border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800">
+                <div className="border-t border-[var(--line)] bg-[var(--surface-raised)] p-2">
                   <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                     {t('activitySelector.showing', { shown: activities.length, total: totalCount })}
                     {debouncedSearchTerm ? t('activitySelector.matching', { term: debouncedSearchTerm }) : ''}
@@ -185,7 +224,7 @@ export default function ActivitySelector({
       {isOpen && (
         <div
           className="fixed inset-0 z-0"
-          onClick={() => setIsOpen(false)}
+          onClick={() => closeSelector(true)}
         />
       )}
     </div>

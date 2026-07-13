@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { memo, useMemo } from 'react'
 import { RouteData, RouteEffort, calculateRouteFingerprint, getEffortColor } from '@/lib/routes'
 import { useI18n } from '@/lib/i18n'
 import { RouteGlyph } from './RouteGlyph'
@@ -16,6 +17,7 @@ export interface RouteTileProps {
   dateLabel?: string
   paceLabel?: string
   route?: RouteData | null
+  encodedPolyline?: string
   className?: string
 }
 
@@ -26,13 +28,18 @@ function RouteTileContent({
   dateLabel,
   paceLabel,
   route,
+  encodedPolyline,
 }: Omit<RouteTileProps, 'activityId' | 'href' | 'className'>) {
   const { t } = useI18n()
   const effortColor = getEffortColor(effort)
   const effortKey = `dashboard.effort.${String(effort || 'unknown').toLowerCase()}`
   const translatedEffort = t(effortKey)
   const effortLabel = translatedEffort === effortKey ? t('dashboard.effort.unknown') : translatedEffort
-  const fingerprint = calculateRouteFingerprint(route)
+  const routeData = useMemo(
+    () => route ?? (encodedPolyline ? { encodedPolyline } : undefined),
+    [encodedPolyline, route]
+  )
+  const fingerprint = useMemo(() => calculateRouteFingerprint(routeData), [routeData])
   const shapeKey = fingerprint ? `route.shape.${fingerprint.shapeLabel}` : 'dashboard.routeShape'
   const translatedShape = t(shapeKey)
   const shapeLabel = translatedShape === shapeKey ? t('dashboard.routeShape') : translatedShape
@@ -41,7 +48,7 @@ function RouteTileContent({
     <>
       <div className="aspect-[4/3] overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg)]">
         <RouteGlyph
-          route={route}
+          route={routeData}
           effort={effort}
           maxPoints={120}
           padding={20}
@@ -75,7 +82,7 @@ function RouteTileContent({
   )
 }
 
-export function RouteTile({
+export const RouteTile = memo(function RouteTile({
   activityId,
   href,
   title,
@@ -84,6 +91,7 @@ export function RouteTile({
   dateLabel,
   paceLabel,
   route,
+  encodedPolyline,
   className,
 }: RouteTileProps) {
   const destination = href ?? (activityId ? `/activities/${activityId}` : undefined)
@@ -103,6 +111,7 @@ export function RouteTile({
           dateLabel={dateLabel}
           paceLabel={paceLabel}
           route={route}
+          encodedPolyline={encodedPolyline}
         />
       </Link>
     )
@@ -117,7 +126,8 @@ export function RouteTile({
         dateLabel={dateLabel}
         paceLabel={paceLabel}
         route={route}
+        encodedPolyline={encodedPolyline}
       />
     </div>
   )
-}
+})
