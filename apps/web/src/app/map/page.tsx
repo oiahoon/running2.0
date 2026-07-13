@@ -1,11 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useActivities } from '@/lib/hooks/useActivities'
+import { useActivities, useActivitySummary } from '@/lib/hooks/useActivities'
 import RunningMap from '@/components/maps/RunningMap'
 import WaterfallMapView from '@/components/maps/WaterfallMapView'
 import { formatDistance, formatDuration, ActivityType } from '@/lib/database/models/Activity'
-import { getActivityConfig } from '@/lib/config/activities'
+import { getActivityConfig, shouldShowOnMap } from '@/lib/config/activities'
 import { getDefaultActivityTypes } from '@/lib/config/activityTypes'
 import { ActivityIcon } from '@/components/icons/AtlasIcon'
 import { useI18n } from '@/lib/i18n'
@@ -25,11 +25,9 @@ type ViewMode = 'map' | 'waterfall'
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel">
-      <div className="panel-body">
-        <div className="metric-label">{label}</div>
-        <div className="mt-2 text-xl font-semibold text-[var(--text-strong)]">{value}</div>
-      </div>
+    <div className="min-w-0 bg-[var(--surface)] px-3 py-4 xl:px-5">
+      <div className="metric-label truncate">{label}</div>
+      <div className="mt-2 truncate text-lg font-semibold tabular-nums text-[var(--text-strong)] sm:text-xl">{value}</div>
     </div>
   )
 }
@@ -40,31 +38,35 @@ export default function MapPage() {
   const [dateRange, setDateRange] = useState<{ start?: Date; end?: Date }>({})
   const [viewMode, setViewMode] = useState<ViewMode>('waterfall')
 
-  const { data, isLoading, error } = useActivities(
-    {
+  const queryFilters = useMemo(
+    () => ({
       type: selectedTypes.length > 0 ? selectedTypes : undefined,
       startDate: dateRange.start,
       endDate: dateRange.end,
-    },
-    1,
-    500
+    }),
+    [dateRange.end, dateRange.start, selectedTypes]
   )
 
-  const activities = useMemo<Activity[]>(() => data?.activities || [], [data?.activities])
+  const availableSummaryQuery = useActivitySummary()
+  const filteredSummaryQuery = useActivitySummary(queryFilters)
+  const mapActivitiesQuery = useActivities(queryFilters, 1, 500, { enabled: viewMode === 'map' })
+  const isLoading = availableSummaryQuery.isLoading || filteredSummaryQuery.isLoading || (viewMode === 'map' && mapActivitiesQuery.isLoading)
+  const error = availableSummaryQuery.error || filteredSummaryQuery.error || (viewMode === 'map' ? mapActivitiesQuery.error : null)
+
+  const activities = useMemo<Activity[]>(() => mapActivitiesQuery.data?.activities || [], [mapActivitiesQuery.data?.activities])
   const activitiesWithLocation = useMemo(
     () => activities.filter((activity: Activity) => activity.start_latitude && activity.start_longitude),
     [activities]
   )
-  const availableTypes = useMemo(() => [...new Set(activities.map((a: Activity) => a.type))].sort(), [activities])
+  const availableTypes = useMemo(
+    () => (availableSummaryQuery.data?.summary?.typeDistribution || [])
+      .map((item: { type: ActivityType }) => item.type)
+      .filter((type: ActivityType) => shouldShowOnMap(type))
+      .sort(),
+    [availableSummaryQuery.data?.summary?.typeDistribution]
+  )
 
-  const sourceSummary = useMemo(() => {
-    const totalDistanceMeters = activities.reduce((sum: number, a: Activity) => sum + (a.distance || 0), 0)
-    const totalTimeSeconds = activities.reduce((sum: number, a: Activity) => sum + (a.moving_time || 0), 0)
-    return {
-      totalDistanceMeters,
-      totalTimeSeconds,
-    }
-  }, [activities])
+  const sourceSummary = filteredSummaryQuery.data?.summary
 
   if (isLoading) {
     return (
@@ -127,8 +129,9 @@ export default function MapPage() {
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
                         onChange={(e) => {
-                          if (e.target.checked) setSelectedTypes([...selectedTypes, type])
-                          else setSelectedTypes(selectedTypes.filter((t) => t !== type))
+                          setSelectedTypes((currentTypes) => e.target.checked
+                            ? [...currentTypes, type]
+                            : currentTypes.filter((currentType) => currentType !== type))
                         }}
                         className="rounded border-slate-300 bg-transparent dark:border-white/20"
                       />
@@ -175,11 +178,13 @@ export default function MapPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-1">
-          <Metric label={t('common.activities')} value={String(activities.length)} />
-          <Metric label={t('map.withGps')} value={String(activitiesWithLocation.length)} />
-          <Metric label={t('common.distance')} value={formatDistance(sourceSummary.totalDistanceMeters)} />
-          <Metric label={t('common.duration')} value={formatDuration(sourceSummary.totalTimeSeconds)} />
+        <div className="panel overflow-hidden">
+          <div className="grid grid-cols-2 gap-px bg-[var(--line)] sm:grid-cols-4 xl:grid-cols-1">
+            <Metric label={t('common.activities')} value={String(sourceSummary?.totalActivities || 0)} />
+            <Metric label={t('map.withGps')} value={String(sourceSummary?.withGps || 0)} />
+            <Metric label={t('common.distance')} value={formatDistance(Number(sourceSummary?.totalDistance || 0))} />
+            <Metric label={t('common.duration')} value={formatDuration(Number(sourceSummary?.totalTime || 0))} />
+          </div>
         </div>
       </section>
 
@@ -200,7 +205,7 @@ export default function MapPage() {
           <div className="panel-body">
             <WaterfallMapView
               key={`${JSON.stringify(selectedTypes)}-${dateRange.start}-${dateRange.end}`}
-              filters={{ type: selectedTypes.length > 0 ? selectedTypes : undefined, startDate: dateRange.start, endDate: dateRange.end }}
+              filters={queryFilters}
             />
           </div>
         </section>

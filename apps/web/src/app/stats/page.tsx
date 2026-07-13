@@ -37,6 +37,12 @@ type DailyStat = {
 }
 
 const effortOrder = ['recovery', 'easy', 'steady', 'tempo', 'long', 'hard', 'unknown']
+const yearSpiralPath = Array.from({ length: 180 }, (_, index) => {
+  const progress = index / 179
+  const angle = progress * Math.PI * 2 * 2.35 - Math.PI / 2
+  const radius = 22 + progress * 118
+  return `${index === 0 ? 'M' : 'L'} ${(150 + Math.cos(angle) * radius).toFixed(2)} ${(150 + Math.sin(angle) * radius).toFixed(2)}`
+}).join(' ')
 
 function formatDistanceKm(valueKm?: number) {
   return `${Number(valueKm || 0).toFixed(1)} km`
@@ -100,13 +106,19 @@ function DistanceField({ data, dateLocale }: { data: MonthlyStat[]; dateLocale: 
 }
 
 function EffortMix({ activities }: { activities: ActivityLike[] }) {
-  const items = effortOrder
-    .map((effort) => {
-      const matching = activities.filter((activity) => effortForActivity(activity) === effort)
-      const distanceKm = matching.reduce((sum, activity) => sum + Number(activity.distance || 0) / 1000, 0)
-      return { effort, count: matching.length, distanceKm }
+  const items = useMemo(() => {
+    const totals = new Map(effortOrder.map((effort) => [effort, { count: 0, distanceKm: 0 }]))
+    activities.forEach((activity) => {
+      const effort = effortForActivity(activity)
+      const item = totals.get(effort)
+      if (!item) return
+      item.count += 1
+      item.distanceKm += Number(activity.distance || 0) / 1000
     })
-    .filter((item) => item.count > 0)
+    return effortOrder
+      .map((effort) => ({ effort, ...(totals.get(effort) || { count: 0, distanceKm: 0 }) }))
+      .filter((item) => item.count > 0)
+  }, [activities])
 
   const total = Math.max(items.reduce((sum, item) => sum + item.distanceKm, 0), 1)
 
@@ -323,12 +335,7 @@ function YearSpiral({ activities }: { activities: ActivityLike[] }) {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
       <svg viewBox="0 0 300 300" className="aspect-square w-full rounded-2xl border border-[var(--line)] bg-[var(--bg)]">
         <path
-          d={Array.from({ length: 180 }, (_, index) => {
-            const progress = index / 179
-            const angle = progress * Math.PI * 2 * 2.35 - Math.PI / 2
-            const radius = 22 + progress * 118
-            return `${index === 0 ? 'M' : 'L'} ${(150 + Math.cos(angle) * radius).toFixed(2)} ${(150 + Math.sin(angle) * radius).toFixed(2)}`
-          }).join(' ')}
+          d={yearSpiralPath}
           fill="none"
           stroke="rgba(139,154,147,0.22)"
           strokeWidth="1"
@@ -373,14 +380,14 @@ export default function StatsPage() {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const { data: yearStats, isLoading } = useActivityStats(selectedYear)
-  const { data: activitiesData } = useActivities(
-    {
+  const activityFilters = useMemo(
+    () => ({
       startDate: new Date(`${selectedYear}-01-01T00:00:00`),
       endDate: new Date(`${selectedYear}-12-31T23:59:59`),
-    },
-    1,
-    500
+    }),
+    [selectedYear]
   )
+  const { data: activitiesData } = useActivities(activityFilters, 1, 500)
 
   const yearOptions = useMemo(() => {
     const options: number[] = []

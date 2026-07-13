@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const minDistance = searchParams.get('minDistance')
     const maxDistance = searchParams.get('maxDistance')
     const search = searchParams.get('search')
+    const summaryOnly = searchParams.get('summaryOnly') === 'true'
     
     // Build WHERE clause
     const conditions: string[] = []
@@ -61,10 +62,24 @@ export async function GET(request: NextRequest) {
     
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
     
-    // Get total count
-    const countQuery = `SELECT COUNT(*) as total FROM activities ${whereClause}`
-    const countResult = db.prepare(countQuery).get(...params) as { total: number }
-    const total = countResult.total
+    const aggregateQuery = `
+      SELECT
+        COUNT(*) as total,
+        COALESCE(SUM(distance), 0) as total_distance,
+        COALESCE(SUM(moving_time), 0) as total_time,
+        COALESCE(SUM(
+          CASE WHEN start_latitude IS NOT NULL AND start_longitude IS NOT NULL THEN 1 ELSE 0 END
+        ), 0) as with_gps
+      FROM activities
+      ${whereClause}
+    `
+    const aggregateResult = db.prepare(aggregateQuery).get(...params) as {
+      total: number
+      total_distance: number
+      total_time: number
+      with_gps: number
+    }
+    const total = aggregateResult.total
     
     // Calculate pagination
     const offset = (page - 1) * limit
@@ -89,7 +104,7 @@ export async function GET(request: NextRequest) {
       LIMIT ? OFFSET ?
     `
     
-    const activities = db.prepare(activitiesQuery).all(...params, limit, offset)
+    const activities = summaryOnly ? [] : db.prepare(activitiesQuery).all(...params, limit, offset)
     
     // Map database fields to TypeScript interface
     const mappedActivities = activities.map((activity: any) => ({
@@ -148,6 +163,9 @@ export async function GET(request: NextRequest) {
       },
       summary: {
         totalActivities: total,
+        totalDistance: aggregateResult.total_distance,
+        totalTime: aggregateResult.total_time,
+        withGps: aggregateResult.with_gps,
         typeDistribution: typeSummary,
       },
       filters: {

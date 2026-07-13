@@ -11,11 +11,9 @@ const typeOptions: Array<'all' | ActivityType> = ['all', 'Run', 'Walk', 'Hike', 
 
 function KPI({ label, value }: { label: string; value: string }) {
   return (
-    <div className="panel">
-        <div className="panel-body">
-          <div className="metric-label">{label}</div>
-        <div className="mt-2 text-xl font-semibold text-[var(--text-strong)]">{value}</div>
-      </div>
+    <div className="min-w-0 bg-[var(--surface)] px-3 py-4 xl:px-5">
+      <div className="metric-label truncate">{label}</div>
+      <div className="mt-2 truncate text-lg font-semibold tabular-nums text-[var(--text-strong)] sm:text-xl">{value}</div>
     </div>
   )
 }
@@ -95,10 +93,12 @@ export default function ActivitiesPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-1">
-          <KPI label={t('activities.recordsPage')} value={String(activities.length)} />
-          <KPI label={t('activities.distancePage')} value={`${totalDistanceKm.toFixed(1)} km`} />
-          <KPI label={t('activities.durationPage')} value={formatDuration(totalDuration)} />
+        <div className="panel overflow-hidden">
+          <div className="grid grid-cols-3 gap-px bg-[var(--line)] xl:grid-cols-1">
+            <KPI label={t('activities.recordsPage')} value={String(activities.length)} />
+            <KPI label={t('activities.distancePage')} value={`${totalDistanceKm.toFixed(1)} km`} />
+            <KPI label={t('activities.durationPage')} value={formatDuration(totalDuration)} />
+          </div>
         </div>
       </section>
 
