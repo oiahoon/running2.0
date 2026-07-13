@@ -291,9 +291,13 @@
   }
 
   .hero-runner-float {
-    animation: hero-runner-float 4.2s ease-in-out infinite;
+    animation: hero-runner-float 6.4s ease-in-out infinite;
     transform-origin: 52% 82%;
-    will-change: transform;
+  }
+
+  .route-gallery-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 360px;
   }
 }
 
@@ -307,6 +311,11 @@
 
   .action-ghost {
     min-width: 44px;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  select {
+    min-height: 44px;
   }
 
   .route-ledger-row {
@@ -358,11 +367,11 @@
   }
 
   34% {
-    transform: translate3d(0, -8px, 0) scale(1.012);
+    transform: translate3d(0, -5px, 0);
   }
 
   68% {
-    transform: translate3d(4px, -3px, 0) scale(0.998);
+    transform: translate3d(2px, -2px, 0);
   }
 }
 

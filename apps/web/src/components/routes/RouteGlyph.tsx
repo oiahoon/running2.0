@@ -1,10 +1,9 @@
 'use client'
 
-import { useId } from 'react'
+import { memo, useMemo } from 'react'
 import {
   type EffortInput,
   getEffortColor,
-  inferRouteEffort,
   normalizeRoute,
   pointsToPath,
   resolveRoutePoints,
@@ -13,6 +12,8 @@ import {
   type RoutePoint,
   samplePoints,
 } from '../../lib/routes'
+
+const EMPTY_GHOST_ROUTES: Array<RouteData | null | undefined> = []
 
 function classNames(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(' ')
@@ -44,9 +45,11 @@ export interface RouteGlyphProps extends EffortInput {
   label?: string
 }
 
-export function RouteGlyph({
+function RouteGlyphComponent({
   route,
-  ghostRoutes = [],
+  points: suppliedPoints,
+  encodedPolyline,
+  ghostRoutes = EMPTY_GHOST_ROUTES,
   effort = 'unknown',
   color,
   width = 320,
@@ -60,18 +63,28 @@ export function RouteGlyph({
   className,
   label = 'Route shape',
 }: RouteGlyphProps) {
-  const points = samplePoints(resolveRoutePoints(route), maxPoints)
-  const path = pointsToPath(normalizeRoute(points, width, height, padding))
+  const routePoints = suppliedPoints ?? route?.points
+  const routeEncodedPolyline = encodedPolyline ?? route?.encodedPolyline
+  const path = useMemo(() => {
+    const points = samplePoints(
+      resolveRoutePoints(routePoints?.length ? { points: routePoints } : { encodedPolyline: routeEncodedPolyline }),
+      maxPoints
+    )
+    return pointsToPath(normalizeRoute(points, width, height, padding))
+  }, [height, maxPoints, padding, routeEncodedPolyline, routePoints, width])
   const routeColor = color ?? getEffortColor(effort)
   const hasRoute = path.length > 0
 
-  const ghostPaths = ghostRoutes
-    .slice(0, 6)
-    .map((ghostRoute) => {
-      const ghostPoints = samplePoints(resolveRoutePoints(ghostRoute), Math.min(maxPoints, 160))
-      return pointsToPath(normalizeRoute(ghostPoints, width, height, padding))
-    })
-    .filter(Boolean)
+  const ghostPaths = useMemo(
+    () => ghostRoutes
+      .slice(0, 6)
+      .map((ghostRoute) => {
+        const ghostPoints = samplePoints(resolveRoutePoints(ghostRoute), Math.min(maxPoints, 160))
+        return pointsToPath(normalizeRoute(ghostPoints, width, height, padding))
+      })
+      .filter(Boolean),
+    [ghostRoutes, height, maxPoints, padding, width]
+  )
 
   return (
     <svg
@@ -157,3 +170,6 @@ export function RouteGlyph({
     </svg>
   )
 }
+
+export const RouteGlyph = memo(RouteGlyphComponent)
+RouteGlyph.displayName = 'RouteGlyph'

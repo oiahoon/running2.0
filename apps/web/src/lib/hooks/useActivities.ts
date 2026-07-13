@@ -4,11 +4,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { ActivityFilters } from '@/lib/database/models/Activity';
 
+function appendActivityFilters(params: URLSearchParams, filters: ActivityFilters) {
+  if (filters.type?.length) params.append('type', filters.type.join(','));
+  if (filters.source?.length) params.append('source', filters.source.join(','));
+  if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
+  if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
+  if (filters.minDistance) params.append('minDistance', filters.minDistance.toString());
+  if (filters.maxDistance) params.append('maxDistance', filters.maxDistance.toString());
+  if (filters.search) params.append('search', filters.search);
+}
+
 // Hook for fetching activities
 export function useActivities(
   filters: ActivityFilters = {},
   page = 1,
-  limit = 20
+  limit = 20,
+  options: { enabled?: boolean } = {}
 ) {
   return useQuery({
     queryKey: ['activities', filters, page, limit],
@@ -19,28 +30,7 @@ export function useActivities(
       params.append('page', page.toString());
       params.append('limit', limit.toString());
       
-      // Add filters
-      if (filters.type?.length) {
-        params.append('type', filters.type.join(','));
-      }
-      if (filters.source?.length) {
-        params.append('source', filters.source.join(','));
-      }
-      if (filters.startDate) {
-        params.append('startDate', filters.startDate.toISOString());
-      }
-      if (filters.endDate) {
-        params.append('endDate', filters.endDate.toISOString());
-      }
-      if (filters.minDistance) {
-        params.append('minDistance', filters.minDistance.toString());
-      }
-      if (filters.maxDistance) {
-        params.append('maxDistance', filters.maxDistance.toString());
-      }
-      if (filters.search) {
-        params.append('search', filters.search);
-      }
+      appendActivityFilters(params, filters);
       
       const response = await fetch(`/api/activities?${params}`);
       if (!response.ok) {
@@ -51,6 +41,23 @@ export function useActivities(
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    enabled: options.enabled ?? true,
+  });
+}
+
+export function useActivitySummary(filters: ActivityFilters = {}) {
+  return useQuery({
+    queryKey: ['activities', 'summary', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams({ summaryOnly: 'true' });
+      appendActivityFilters(params, filters);
+
+      const response = await fetch(`/api/activities?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch activity summary');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 

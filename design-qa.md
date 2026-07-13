@@ -4,12 +4,13 @@
 
 - Source visual truth: `/Users/huangyuyao/OwnWork/running2.0/output/product-design-2026-07-13/selected-option-3.png`
 - Implementation URL: `http://localhost:3000/dashboard`
-- Implementation screenshot: `/tmp/run2-review-after-desktop.jpg`
-- Full-view comparison: `/tmp/run2-reference-vs-final.jpg`
+- Implementation screenshot: `/tmp/run2-round2-after-06-dashboard-desktop.jpg`
+- Full-view comparison: `/tmp/run2-round2-reference-vs-final.jpg`
 - Focused header comparison: `/tmp/run2-header-comparison.png`
 - Focused workbench comparison: `/tmp/run2-body-comparison.png`
 - Viewport: 1440 × 1024 desktop, dark theme, first route selected
-- Responsive evidence: `/tmp/run2-review-after-mobile.jpg` and `/tmp/run2-review-after-mobile-menu.jpg` at 390 × 844; intermediate breakpoint checked at 1294 × 800
+- Responsive evidence: `/tmp/run2-round2-after-04-dashboard-mobile.jpg` and `/tmp/run2-round2-after-07-activities-mobile.jpg` at 390 × 844; `/tmp/run2-round2-after-05-dashboard-tablet-transition.jpg` at 1024 × 834
+- Map fallback evidence: `/tmp/run2-round2-after-03-map-static-gallery.jpg` at 390 × 844
 - Empty-state evidence: `/tmp/run2-review-empty-filter.jpg` at 390 × 844
 - Browser: Codex in-app browser
 
@@ -40,6 +41,7 @@ No actionable P0, P1, or P2 findings remain.
 - Icons: existing Heroicons and the project's route/brand icon components remain consistent in weight and alignment. No emoji or text-glyph icon replacements are present.
 - States and interactions: row selection updates the left inspector and route canvas; `New Routes` changes the result total to 8; year selection remains a native select; mobile navigation opens with all eight product destinations; selected, hover, focus-visible, loading, and empty states are implemented. A zero-result filter no longer leaks a route from another year or effort, and `Clear filters` returns to the latest available year and `All`.
 - Accessibility and viewport resilience: semantic headings, navigation labels, current-page markers, pressed-state filters/rows, labeled year select, focus rings, reduced-motion handling, and route image labels remain. The mobile drawer traps Tab in both directions, responds to Escape, locks background scrolling, marks the app surface inert/hidden, and restores focus to the menu button. Desktop, 1294px, and 390px widths have no horizontal overflow; mobile controls are at least 44px tall.
+- Runtime efficiency: route geometry is memoized and dashboard thumbnails are point-capped; route gallery cards use deferred rendering and an intersection sentinel instead of a page-wide scroll listener; static route images remain available without a Mapbox token; hidden runner art is no longer eagerly loaded on mobile/tablet. The default map gallery now requests a 650-byte summary plus 20 visible records instead of loading the 1.25MB, 500-record map payload before the user enters full-map mode.
 
 ## Comparison history
 
@@ -71,6 +73,16 @@ No actionable P0, P1, or P2 findings remain.
 - [P2] Several mobile controls measured 36–42px. Shared actions and ledger filters now measure at least 44px on mobile.
 - [P2] Ledger route subtitles repeated the dedicated effort column. They now show the activity type or activity name beneath a city-first title, preserving effort only in its own column.
 - Final browser evidence: 1430px content width with `scrollWidth === clientWidth`, 390px viewport with `scrollWidth === clientWidth`, no error-level console output, English/Chinese/Japanese empty-state copy rendered, and drawer focus returning to `Open sidebar` after Escape.
+
+### Pass 5 — passed after responsive and performance review
+
+- [P1] At 1024px the runner illustration overlapped the `Recent Routes` transition region. The cameo now appears only at the full desktop split and is lazy-loaded; the 1024px capture has a clear heading/filter boundary.
+- [P1] Waterfall cards passed minutes into a pace formatter that expects metres per second, producing values such as `1:19/km`. Cards now pass `distance / duration`; verified values begin at `12:32/km`, `18:34/km`, and `16:47/km`.
+- [P1] The route gallery requested 500 complete activities before the map was opened. Summary aggregation now comes from the API, while the heavy query is enabled only in full-map mode. The equivalent filtered response fell from 1,250,176 bytes to a 650-byte summary, with 20 records loaded for the visible gallery.
+- [P2] Dashboard, activity archive, and map metric cards consumed excessive vertical space on narrow screens. They now use compact two- or three-column strips, the selected route is map-first on mobile, and all inspected form controls measure 44px.
+- [P2] Route and statistics rendering repeated avoidable geometry/filter work. Route paths, ghost geometry, effort groups, date filters, and the year spiral path are now memoized or hoisted; long gallery sections use `content-visibility`.
+- [P2] Missing Mapbox configuration produced repeated fallback messaging in gallery cards. Existing local/CDN static maps now render directly, with a compact unavailable state only when no real map asset exists.
+- Final evidence: 1440px desktop, 1024px transition, and 390px dashboard/activity/map surfaces have no horizontal overflow; the runner is hidden at 1024px; static maps and corrected paces render in the mobile gallery; route selection still updates the inspector.
 
 ## Implementation checklist
 

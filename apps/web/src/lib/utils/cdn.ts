@@ -24,14 +24,6 @@ const CDN_CONFIG = {
   }
 }
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
-function getErrorName(error: unknown): string {
-  return error instanceof Error ? error.name : ''
-}
-
 /**
  * Get the optimal CDN URL for static map images
  */
@@ -49,14 +41,11 @@ export function getStaticMapUrl(activityId: string, options: {
   const branch = 'master'
   const mapPath = `apps/web/public/maps/${activityId}.png`
   
-  console.log(`CDN Config - User: ${githubUser}, Prefer: ${preferCDN}`)
-  
   // Try preferred CDN first
   switch (preferCDN) {
     case 'jsdelivr':
       if (CDN_CONFIG.jsdelivr.enabled) {
         const url = `${CDN_CONFIG.jsdelivr.baseUrl}/${githubUser}/${repoName}@${branch}/${mapPath}`
-        console.log(`Generated jsDelivr URL: ${url}`)
         return url
       }
       break
@@ -103,14 +92,12 @@ export async function checkStaticMapExists(activityId: string): Promise<{
   // Check cache first
   const cached = cdnCheckCache.get(activityId)
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    console.log(`Using cached CDN check for activity ${activityId}`)
     return cached.result
   }
   
   // Check if there's an ongoing request for this activity
   const ongoing = ongoingChecks.get(activityId)
   if (ongoing) {
-    console.log(`⏳ Waiting for ongoing CDN check for activity ${activityId}`)
     return ongoing
   }
   
@@ -137,6 +124,19 @@ export async function checkStaticMapExists(activityId: string): Promise<{
 /**
  * Perform the actual CDN check
  */
+async function urlExists(url: string, timeoutMs: number): Promise<boolean> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { method: 'HEAD', signal: controller.signal })
+    return response.ok
+  } catch {
+    return false
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 async function performCdnCheck(activityId: string): Promise<{
   exists: boolean
   url: string
@@ -148,151 +148,48 @@ async function performCdnCheck(activityId: string): Promise<{
   const preferLocal = process.env.NODE_ENV === 'development' && 
                      process.env.NEXT_PUBLIC_PREFER_LOCAL_MAPS === 'true'
   
-  console.log(`Environment: ${process.env.NODE_ENV}, preferCDN: ${preferCDN}, preferLocal: ${preferLocal}`)
-  
   // Always try CDN first in production or when explicitly preferred
   if (preferCDN || isProduction) {
     const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
-    console.log(`Trying CDN first (production mode): ${cdnUrl}`)
-    
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 20000) // 20 seconds for CDN
-      
-      const response = await fetch(cdnUrl, { 
-        method: 'HEAD',
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
-      
-      console.log(`CDN response: ${response.status} ${response.statusText}`)
-      
-      if (response.ok) {
-        return {
-          exists: true,
-          url: cdnUrl,
-          source: 'cdn'
-        }
-      } else {
-        console.log(`CDN returned ${response.status}, will try local fallback`)
-      }
-    } catch (error) {
-      if (getErrorName(error) !== 'AbortError') {
-        console.log(`CDN request failed for ${activityId}:`, getErrorMessage(error))
-      } else {
-        console.log(`CDN request timeout for ${activityId}`)
-      }
+    if (await urlExists(cdnUrl, 20000)) {
+      return { exists: true, url: cdnUrl, source: 'cdn' }
     }
-    
+
     // In CDN-first mode, still try local as fallback
     if (!preferLocal) {
       const localUrl = `/maps/${activityId}.png`
-      console.log(`Trying local as CDN fallback: ${localUrl}`)
-      
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000) // Shorter timeout for local
-        
-        const response = await fetch(localUrl, { 
-          method: 'HEAD',
-          signal: controller.signal
-        })
-        
-        clearTimeout(timeoutId)
-        
-        console.log(`Local fallback response: ${response.status} ${response.statusText}`)
-        
-        if (response.ok) {
-          return {
-            exists: true,
-            url: localUrl,
-            source: 'local'
-          }
-        }
-      } catch (error) {
-        console.log(`Local fallback failed for ${activityId}:`, getErrorMessage(error))
+      if (await urlExists(localUrl, 3000)) {
+        return { exists: true, url: localUrl, source: 'local' }
       }
     }
-    
+
     // Neither CDN nor local worked
-    return {
-      exists: false,
-      url: cdnUrl,
-      source: 'cdn'
-    }
+    return { exists: false, url: cdnUrl, source: 'cdn' }
   }
-  
+
   // Development mode with local preference
   if (preferLocal) {
-    console.log(`Development mode: trying local first`)
-    
     const localUrl = `/maps/${activityId}.png`
-    console.log(`Testing local URL: ${localUrl}`)
-    
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-      
-      const response = await fetch(localUrl, { 
-        method: 'HEAD',
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
-      
-      console.log(`Local response: ${response.status} ${response.statusText}`)
-      
-      if (response.ok) {
-        return {
-          exists: true,
-          url: localUrl,
-          source: 'local'
-        }
-      }
-    } catch (error) {
-      console.log(`Local check failed for ${activityId}:`, getErrorMessage(error))
+    if (await urlExists(localUrl, 5000)) {
+      return { exists: true, url: localUrl, source: 'local' }
     }
-    
+
     // Fallback to CDN in development
     const cdnUrl = getStaticMapUrl(activityId, { preferCDN: 'jsdelivr', fallbackToLocal: false })
-    console.log(`Development fallback to CDN: ${cdnUrl}`)
-    
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15000)
-      
-      const response = await fetch(cdnUrl, { 
-        method: 'HEAD',
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
-      
-      console.log(`CDN fallback response: ${response.status} ${response.statusText}`)
-      
-      return {
-        exists: response.ok,
-        url: response.ok ? cdnUrl : localUrl,
-        source: response.ok ? 'cdn' : 'local'
-      }
-    } catch (error) {
-      console.log(`CDN fallback failed for ${activityId}:`, getErrorMessage(error))
-      return {
-        exists: false,
-        url: localUrl,
-        source: 'local'
-      }
+    if (await urlExists(cdnUrl, 15000)) {
+      return { exists: true, url: cdnUrl, source: 'cdn' }
     }
+    return { exists: false, url: localUrl, source: 'local' }
   }
-  
-  // Default fallback (shouldn't reach here in normal cases)
-  console.log(`Unexpected code path reached for ${activityId}`)
-  return {
-    exists: false,
-    url: `/maps/${activityId}.png`,
-    source: 'local'
+
+  // Development defaults should still discover maps in public/maps without
+  // requiring an environment override.
+  const localUrl = `/maps/${activityId}.png`
+  if (await urlExists(localUrl, 3000)) {
+    return { exists: true, url: localUrl, source: 'local' }
   }
+
+  return { exists: false, url: localUrl, source: 'local' }
 }
 
 /**
@@ -304,14 +201,8 @@ export function preloadStaticMaps(activityIds: string[], maxConcurrent = 3): Pro
     
     return new Promise<void>((resolve) => {
       const img = new Image()
-      img.onload = () => {
-        console.log(`Preloaded map for activity ${activityId}`)
-        resolve()
-      }
-      img.onerror = () => {
-        console.log(`Failed to preload map for activity ${activityId}`)
-        resolve() // Don't fail the whole batch
-      }
+      img.onload = () => resolve()
+      img.onerror = () => resolve() // Don't fail the whole batch
       img.src = mapUrl
     })
   })

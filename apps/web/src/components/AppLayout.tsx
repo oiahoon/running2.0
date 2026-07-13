@@ -270,7 +270,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         aria-hidden={sidebarOpen ? true : undefined}
       >
         <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--header-bg)]/95 backdrop-blur-xl">
-          <div className="flex h-[72px] w-full items-center gap-3 px-4 sm:px-6">
+          <div className="flex h-16 w-full items-center gap-3 px-4 sm:h-[72px] sm:px-6">
             <button
               onClick={() => setSidebarOpen(true)}
               className="action-ghost min-[1380px]:hidden"

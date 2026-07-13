@@ -133,6 +133,7 @@ function hasStartLocation(activity: Activity): boolean {
 
 // Preload adjacent activity maps for better UX
 const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number) => {
+  cleanupImageCache()
   const preloadPromises: Promise<void>[] = []
   
   // Preload previous and next 2 activities
@@ -167,7 +168,6 @@ const preloadAdjacentMaps = async (activities: Activity[], currentIndex: number)
                 image: img,
                 timestamp: Date.now()
               })
-              console.log('Preloaded adjacent map:', mapCheck.url)
             }
             
             img.onerror = () => {
@@ -200,26 +200,18 @@ async function getStaticMapUrl(activity: Activity, width: number, height: number
   // Use externalId for static map filename (Strava activity ID)
   const activityId = getActivityId(activity)
   
-  console.log(`Checking static map for activity ${activityId}`)
-  
   try {
     // Check if static map exists (tries CDN first, then local)
     const mapCheck = await checkStaticMapExists(activityId.toString())
     
-    console.log(`Static map check result for ${activityId}:`, mapCheck)
-    
     if (mapCheck.exists) {
-      console.log(`Using ${mapCheck.source} map for activity ${activityId}:`, mapCheck.url)
       return mapCheck.url
-    } else {
-      console.log(`Static map not found for activity ${activityId}`)
     }
   } catch (error) {
     // Static map doesn't exist, will fallback to API
     console.error(`Static map check failed for activity ${activityId}:`, error)
   }
   
-  console.log(`Falling back to Mapbox API for activity ${activityId}`)
   return null
 }
 
@@ -231,25 +223,18 @@ async function createCachedMapboxUrl(
   height: number,
   token: string
 ): Promise<string> {
-  console.log(`Creating map URL for ${activities.length} activities`)
-  
   // For single activity, try static map first
   if (activities.length === 1) {
-    console.log(`Single activity detected, trying static map first`)
     const staticUrl = await getStaticMapUrl(activities[0], width, height)
     if (staticUrl) {
-      console.log(`Static map found, returning: ${staticUrl}`)
       return staticUrl
     }
-    console.log(`Static map not found, continuing to Mapbox API`)
   }
   
   // For single activity with polyline, try localStorage cache
   if (activities.length === 1 && getSummaryPolyline(activities[0])) {
     const activity = activities[0]
     const activityId = getActivityId(activity)
-    
-    console.log(`Checking cache for activity ${activityId}`)
     
     // Check cache first (client-side, we'll use a simpler approach)
     const cacheKey = `map-${activityId}-${width}x${height}`
@@ -259,13 +244,11 @@ async function createCachedMapboxUrl(
       // Check if cached URL is still valid (not older than 1 day)
       const cacheTime = localStorage.getItem(`${cacheKey}-time`)
       if (cacheTime && Date.now() - parseInt(cacheTime) < 24 * 60 * 60 * 1000) {
-        console.log(`Using cached map URL for activity ${activityId}`)
         return cachedUrl
       }
     }
     
     // Generate new URL
-    console.log(`Generating new Mapbox URL for activity ${activityId}`)
     const newUrl = createSafeMapboxUrl(activities, bounds, width, height, token)
     
     // Cache the URL (but don't cache static map paths)
@@ -278,7 +261,6 @@ async function createCachedMapboxUrl(
   }
   
   // For other cases, use regular URL generation
-  console.log(`Using regular Mapbox URL for ${activities.length} activities`)
   return createSafeMapboxUrl(activities, bounds, width, height, token)
 }
 
@@ -463,36 +445,40 @@ function MapboxMap({ activities, height, selectedActivity }: {
       return
     }
 
+    cleanupImageCache()
+    let isCancelled = false
+    let pollTimeoutId: ReturnType<typeof setTimeout> | undefined
+
     // Check if image is already cached
     const cached = imagePreloadCache.get(staticMapUrl)
     if (cached) {
       if (cached.loaded) {
-        console.log('Using cached map image:', staticMapUrl)
         setIsLoadingMap(false)
         return
       } else if (cached.loading) {
-        console.log('⏳ Map image already loading:', staticMapUrl)
         setIsLoadingMap(true)
         
         // Wait for existing load to complete
         const checkLoaded = () => {
+          if (isCancelled) return
           const current = imagePreloadCache.get(staticMapUrl)
           if (current && (current.loaded || current.error)) {
             setIsLoadingMap(false)
           } else {
-            setTimeout(checkLoaded, 100)
+            pollTimeoutId = setTimeout(checkLoaded, 100)
           }
         }
         checkLoaded()
-        return
+        return () => {
+          isCancelled = true
+          if (pollTimeoutId) clearTimeout(pollTimeoutId)
+        }
       } else if (cached.error) {
-        console.log('Using cached error state for:', staticMapUrl)
         setIsLoadingMap(false)
         return
       }
     }
 
-    let isCancelled = false
     const img = new Image()
     
     // Mark as loading in cache
@@ -506,8 +492,6 @@ function MapboxMap({ activities, height, selectedActivity }: {
     
     const handleLoad = () => {
       if (!isCancelled) {
-        console.log('Map image loaded and cached:', staticMapUrl)
-        
         // Update cache
         imagePreloadCache.set(staticMapUrl, {
           loaded: true,
@@ -557,7 +541,7 @@ function MapboxMap({ activities, height, selectedActivity }: {
 
   // Generate map URL with debouncing
   useEffect(() => {
-    if (!hasMapboxToken || !bounds || displayActivities.length === 0) {
+    if (!bounds || displayActivities.length === 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingMap(false)
       return
@@ -571,16 +555,15 @@ function MapboxMap({ activities, height, selectedActivity }: {
       
       try {
         const mapWidth = Math.min(600, height * 1.5)
-        const url = await createCachedMapboxUrl(
-          displayActivities,
-          bounds,
-          mapWidth,
-          height,
-          hasMapboxToken
-        )
+        const url = hasMapboxToken
+          ? await createCachedMapboxUrl(displayActivities, bounds, mapWidth, height, hasMapboxToken)
+          : displayActivities.length === 1
+            ? await getStaticMapUrl(displayActivities[0], mapWidth, height)
+            : null
         
         if (!isCancelled) {
-          setStaticMapUrl(url)
+          setStaticMapUrl(url || '')
+          if (!url) setIsLoadingMap(false)
         }
       } catch (error) {
         if (!isCancelled) {
@@ -596,7 +579,21 @@ function MapboxMap({ activities, height, selectedActivity }: {
     }
   }, [displayActivities, bounds, height, hasMapboxToken])
 
-  if (!hasMapboxToken) {
+  if (!hasMapboxToken && !isLoadingMap && !staticMapUrl) {
+    if (height <= 240) {
+      return (
+        <div
+          className="grid place-items-center rounded-lg border border-[var(--line)] bg-[var(--bg)] text-center"
+          style={{ height }}
+        >
+          <div className="px-4">
+            <AtlasIcon name="map" className="mx-auto mb-2 h-8 w-8 text-[var(--route-green)]" />
+            <p className="text-sm text-[var(--text-muted)]">{t('map.noMap')}</p>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div 
         className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden"
@@ -691,19 +688,6 @@ function MapboxMap({ activities, height, selectedActivity }: {
       className="bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden relative"
       style={{ height }}
     >
-      {/* Debug info for development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute top-2 left-2 z-10 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
-          URL: {staticMapUrl.substring(0, 50)}...
-          <br />
-          Loading: {isLoadingMap ? 'Yes' : 'No'}
-          <br />
-          Activities: {displayActivities.length}
-          <br />
-          Static: {staticMapUrl.startsWith('/maps/') ? 'Yes' : 'No'}
-        </div>
-      )}
-      
       {isLoadingMap ? (
         <div className="h-full flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

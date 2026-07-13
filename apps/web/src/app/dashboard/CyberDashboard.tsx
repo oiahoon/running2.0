@@ -16,7 +16,7 @@ import { useActivityStats, useRecentActivities } from '@/lib/hooks/useActivities
 import { formatDuration, formatPace } from '@/lib/database/models/Activity'
 import { useI18n } from '@/lib/i18n'
 import { runnerMuseCameos } from '@/lib/runnerMuses'
-import { type RouteData, getEffortColor, inferRouteEffort } from '@/lib/routes'
+import { getEffortColor, inferRouteEffort } from '@/lib/routes'
 
 type ActivityLike = {
   id: number
@@ -77,11 +77,6 @@ function formatDistanceKm(distanceMeters?: number) {
 
 function resolvePolyline(activity?: ActivityLike) {
   return activity?.summary_polyline || activity?.summaryPolyline || ''
-}
-
-function routeForActivity(activity?: ActivityLike): RouteData | null {
-  const encodedPolyline = resolvePolyline(activity)
-  return encodedPolyline ? { encodedPolyline } : null
 }
 
 function effortForActivity(activity?: ActivityLike) {
@@ -219,10 +214,10 @@ export function CyberDashboard() {
         <div className="relative min-w-0 px-1 pb-10 pt-3 sm:px-2 lg:px-5 lg:pt-7 xl:px-8">
           <div className="grid items-start gap-4 lg:grid-cols-[minmax(450px,1.15fr)_minmax(330px,0.85fr)]">
             <div>
-              <h1 className="max-w-[620px] text-[clamp(2.6rem,3vw,2.85rem)] font-black leading-[1.02] tracking-[-0.055em] text-[var(--text-strong)]">
+              <h1 className="max-w-[620px] text-[2.35rem] font-black leading-[1.02] tracking-[-0.055em] text-[var(--text-strong)] sm:text-[clamp(2.6rem,3vw,2.85rem)]">
                 {t('dashboard.headline')}
               </h1>
-              <p className="mt-5 max-w-[590px] text-sm leading-6 text-[var(--text-muted)] sm:text-base sm:leading-7">
+              <p className="mt-4 max-w-[590px] text-sm leading-6 text-[var(--text-muted)] sm:mt-5 sm:text-base sm:leading-7">
                 {t('dashboard.copy')}
               </p>
             </div>
@@ -231,7 +226,7 @@ export function CyberDashboard() {
               <div className="mb-5 flex items-center justify-between border-b border-[var(--line)] pb-2">
                 <span className="font-mono text-xs font-semibold tracking-[0.16em] text-[var(--text-muted)]">{currentYear}</span>
               </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-4 sm:gap-y-5">
                 <SummaryMetric label={t('dashboard.yearDistance', { year: currentYear })} value={`${totalDistanceKm.toFixed(1)} km`} />
                 <SummaryMetric label={t('dashboard.runs')} value={runCount} />
                 <SummaryMetric label={t('dashboard.recentRoutes')} value={routeCount} note={t('dashboard.withGpsShape')} />
@@ -240,10 +235,10 @@ export function CyberDashboard() {
             </div>
           </div>
 
-          <div className="relative mt-8 min-h-[500px] overflow-visible rounded-[18px] border border-[var(--line-strong)] bg-[var(--route-canvas)]">
+          <div className="relative mt-6 flex min-h-[500px] flex-col overflow-visible rounded-[18px] border border-[var(--line-strong)] bg-[var(--route-canvas)] sm:mt-8 lg:block">
             {selectedActivity ? (
               <>
-                <div className="relative z-10 w-full border-b border-[var(--line)] p-5 sm:p-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[280px] lg:border-b-0 lg:border-r">
+                <div className="relative z-10 order-2 w-full border-t border-[var(--line)] p-5 sm:p-6 lg:absolute lg:inset-y-0 lg:left-0 lg:w-[280px] lg:border-b-0 lg:border-r lg:border-t-0">
                   <div className="route-atlas-label text-[var(--route-green)]">{t('dashboard.latestActivity')}</div>
                   <h2 className="mt-4 truncate text-3xl font-semibold tracking-tight text-[var(--text-strong)]">{selectedLocation}</h2>
                   <p className="mt-2 text-sm text-[var(--text-muted)]">
@@ -267,9 +262,10 @@ export function CyberDashboard() {
                   </Link>
                 </div>
 
-                <div className="h-[390px] p-4 sm:h-[460px] sm:p-7 lg:ml-[280px] lg:h-[498px]">
+                <div className="order-1 h-[300px] p-4 sm:h-[390px] sm:p-7 lg:ml-[280px] lg:h-[498px]">
                   <RouteGlyph
-                    route={routeForActivity(selectedActivity)}
+                    key={selectedActivity.id}
+                    encodedPolyline={resolvePolyline(selectedActivity)}
                     effort={selectedEffort}
                     width={720}
                     height={520}
@@ -281,7 +277,7 @@ export function CyberDashboard() {
                 </div>
               </>
             ) : (
-              <div className="grid min-h-[560px] place-items-center px-6 text-center">
+              <div className="grid min-h-[480px] place-items-center px-6 text-center sm:min-h-[560px]">
                 <div>
                   <div className="route-atlas-label">{hasRouteActivities ? t('dashboard.noFilterMatches') : t('dashboard.noRoutesYet')}</div>
                   <p className="mt-2 text-sm text-[var(--text-muted)]">
@@ -299,10 +295,10 @@ export function CyberDashboard() {
             <Image
               src={runnerMuseCameos.dashboardHero.src}
               alt=""
-              width={768}
-              height={1152}
-              priority
-              className="hero-runner-float pointer-events-none absolute -bottom-[168px] -left-5 z-20 hidden h-[235px] w-[165px] object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] sm:block lg:-bottom-[230px] lg:left-0 lg:h-[290px] lg:w-[205px]"
+              width={410}
+              height={615}
+              sizes="205px"
+              className="hero-runner-float pointer-events-none absolute z-20 hidden object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] xl:-bottom-[230px] xl:left-0 xl:block xl:h-[290px] xl:w-[205px]"
             />
           </div>
         </div>
@@ -380,7 +376,7 @@ export function CyberDashboard() {
                   </span>
                   <span className="grid min-w-0 grid-cols-[60px_1fr] items-center gap-3">
                     <span className="block h-12 w-[60px] overflow-hidden">
-                      <RouteGlyph route={routeForActivity(activity)} effort={effort} width={96} height={64} padding={8} strokeWidth={3} showGrid={false} showGlow={false} animate={false} />
+                      <RouteGlyph encodedPolyline={resolvePolyline(activity)} effort={effort} width={96} height={64} padding={8} maxPoints={72} strokeWidth={3} showGrid={false} showGlow={false} animate={false} />
                     </span>
                     <span className="min-w-0 text-left">
                       <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{routeTitle}</span>

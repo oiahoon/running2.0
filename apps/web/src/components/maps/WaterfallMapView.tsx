@@ -11,16 +11,18 @@ import { useI18n } from '@/lib/i18n'
 // Lazy loading component for maps
 function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height?: number }) {
   const { t } = useI18n()
-  const [isVisible, setIsVisible] = useState(false)
-  const [hasLoaded, setHasLoaded] = useState(false)
+  const [shouldLoad, setShouldLoad] = useState(false)
   const elementRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const element = elementRef.current
+    if (!element) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasLoaded) {
-          setIsVisible(true)
-          setHasLoaded(true)
+        if (entry.isIntersecting) {
+          setShouldLoad(true)
+          observer.disconnect()
         }
       },
       {
@@ -29,22 +31,13 @@ function LazyRunningMap({ activity, height = 192 }: { activity: Activity; height
       }
     )
 
-    const element = elementRef.current
-
-    if (element) {
-      observer.observe(element)
-    }
-
-    return () => {
-      if (element) {
-        observer.unobserve(element)
-      }
-    }
-  }, [hasLoaded])
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <div ref={elementRef} className="h-full">
-      {isVisible ? (
+      {shouldLoad ? (
         <RunningMap
           activities={[activity]}
           height={height}
@@ -100,6 +93,7 @@ export default function WaterfallMapView({
   const [isInitialized, setIsInitialized] = useState(false)
   const pageSize = 20
   const filtersRef = useRef(filters)
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null)
 
   // Create a stable filter key for comparison
   const filterKey = JSON.stringify(filters)
@@ -110,7 +104,6 @@ export default function WaterfallMapView({
   // Reset when filters change
   useEffect(() => {
     if (filterKey !== prevFilterKeyRef.current) {
-      console.log('Filters changed, resetting state')
       // Filter changes intentionally reset the paged gallery state.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentPage(1)
@@ -125,8 +118,6 @@ export default function WaterfallMapView({
   // Handle new data - accumulate for infinite scroll with limits
   useEffect(() => {
     if (data?.activities) {
-      console.log(`Received ${data.activities.length} activities for page ${currentPage}`)
-      
       // Filter activities that have GPS data and should show on map
       const gpsActivities = data.activities.filter((activity: Activity) => 
         shouldShowOnMap(activity.type) && 
@@ -134,8 +125,6 @@ export default function WaterfallMapView({
         activity.start_longitude &&
         activity.summary_polyline // Only show activities with route data
       )
-      
-      console.log(`Filtered to ${gpsActivities.length} GPS activities`)
       
       if (currentPage === 1) {
         // Accumulate server pages into a bounded client-side gallery.
@@ -164,23 +153,23 @@ export default function WaterfallMapView({
   // Throttled infinite scroll handler
   const loadMore = useCallback(() => {
     if (!isLoadingMore && hasMore && !isLoading && isInitialized && allActivities.length < 100) {
-      console.log('Loading more activities...')
       setIsLoadingMore(true)
       setCurrentPage(prev => prev + 1)
     }
   }, [allActivities.length, isLoadingMore, hasMore, isLoading, isInitialized])
 
-  // Scroll event listener
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop 
-          >= document.documentElement.offsetHeight - 1000) {
-        loadMore()
-      }
-    }
+    const trigger = loadMoreTriggerRef.current
+    if (!trigger) return
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) loadMore()
+      },
+      { rootMargin: '1000px 0px' }
+    )
+    observer.observe(trigger)
+    return () => observer.disconnect()
   }, [loadMore])
 
   if (error) {
@@ -271,7 +260,7 @@ export default function WaterfallMapView({
           return (
             <div
               key={activity.id}
-              className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group"
+              className="route-gallery-card group overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-900"
             >
               {/* Map */}
               <div className="h-48 relative overflow-hidden">
@@ -321,7 +310,7 @@ export default function WaterfallMapView({
                     <div>
                       <span className="text-gray-500 dark:text-gray-400">{t('common.pace')}</span>
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {formatPace((activity.moving_time / 60) / (activity.distance / 1000))}
+                        {formatPace(activity.distance / activity.moving_time)}
                       </p>
                     </div>
                   )}
@@ -351,6 +340,8 @@ export default function WaterfallMapView({
           )
         })}
       </div>
+
+      <div ref={loadMoreTriggerRef} className="h-px" aria-hidden="true" />
 
       {/* Loading More Indicator */}
       {isLoadingMore && (
