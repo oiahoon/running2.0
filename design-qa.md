@@ -4,8 +4,8 @@
 
 - Source visual truth: `/Users/huangyuyao/OwnWork/running2.0/output/product-design-2026-07-13/selected-option-3.png`
 - Implementation URL: `http://localhost:3000/dashboard`
-- Implementation screenshot: `/tmp/run2-round2-after-06-dashboard-desktop.jpg`
-- Full-view comparison: `/tmp/run2-round2-reference-vs-final.jpg`
+- Implementation screenshot: `/tmp/run2-round2-after-09-master-dashboard-desktop.jpg`
+- Full-view comparison: `/tmp/run2-round2-master-reference-vs-final.jpg`
 - Focused header comparison: `/tmp/run2-header-comparison.png`
 - Focused workbench comparison: `/tmp/run2-body-comparison.png`
 - Viewport: 1440 × 1024 desktop, dark theme, first route selected
