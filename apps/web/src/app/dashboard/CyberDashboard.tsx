@@ -186,8 +186,8 @@ export function CyberDashboard() {
   const visibleRoutes = filteredRoutes.slice(0, 5)
   const selectedActivity =
     filteredRoutes.find((activity) => activity.id === selectedActivityId) ||
-    filteredRoutes[0] ||
-    routeActivities[0]
+    filteredRoutes[0]
+  const hasRouteActivities = routeActivities.length > 0
 
   const basicStats = statsData?.basicStats
   const records = statsData?.personalRecords
@@ -204,6 +204,12 @@ export function CyberDashboard() {
     ? selectedActivity.name
     : t(`dashboard.effort.${selectedEffort}`)
   const todayLabel = new Date().toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' })
+
+  function resetRouteFilters() {
+    setActiveFilter('all')
+    setSelectedYear(parsedYear(routeActivities[0]) || currentYear)
+    setSelectedActivityId(null)
+  }
 
   if (statsLoading || recentLoading) return <LoadingRouteLedger />
 
@@ -277,9 +283,15 @@ export function CyberDashboard() {
             ) : (
               <div className="grid min-h-[560px] place-items-center px-6 text-center">
                 <div>
-                  <div className="route-atlas-label">{t('dashboard.noRoutesYet')}</div>
-                  <p className="mt-2 text-sm text-[var(--text-muted)]">{t('dashboard.noRoutesCopy')}</p>
-                  <Link href="/sync" className="action-primary mt-5">{t('dashboard.syncSource')}</Link>
+                  <div className="route-atlas-label">{hasRouteActivities ? t('dashboard.noFilterMatches') : t('dashboard.noRoutesYet')}</div>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">
+                    {hasRouteActivities ? t('dashboard.noFilterMatchesCopy') : t('dashboard.noRoutesCopy')}
+                  </p>
+                  {hasRouteActivities ? (
+                    <button type="button" onClick={resetRouteFilters} className="action-secondary mt-5">{t('dashboard.clearFilters')}</button>
+                  ) : (
+                    <Link href="/sync" className="action-primary mt-5">{t('dashboard.syncSource')}</Link>
+                  )}
                 </div>
               </div>
             )}
@@ -347,6 +359,13 @@ export function CyberDashboard() {
               const effort = effortForActivity(activity)
               const isSelected = selectedActivity?.id === activity.id
               const effortColor = getEffortColor(effort)
+              const location = activity.location_city || activity.locationCity
+              const routeTitle = location || activity.name || t('dashboard.untitledRun')
+              const routeSubtitle = location && activity.name && activity.name !== location
+                ? activity.name
+                : activity.type
+                  ? t(`activity.type.${activity.type}`)
+                  : t('dashboard.routeShape')
               return (
                 <button
                   key={activity.id}
@@ -364,8 +383,8 @@ export function CyberDashboard() {
                       <RouteGlyph route={routeForActivity(activity)} effort={effort} width={96} height={64} padding={8} strokeWidth={3} showGrid={false} showGlow={false} animate={false} />
                     </span>
                     <span className="min-w-0 text-left">
-                      <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{activity.name || activity.location_city || t('dashboard.untitledRun')}</span>
-                      <span className="mt-1 block truncate text-xs capitalize" style={{ color: effortColor }}>{t(`dashboard.effort.${effort}`)}</span>
+                      <span className="block truncate text-sm font-semibold text-[var(--text-strong)]">{routeTitle}</span>
+                      <span className="mt-1 block truncate text-xs text-[var(--text-muted)]">{routeSubtitle}</span>
                     </span>
                   </span>
                   <span className="text-right text-xs tabular-nums text-[var(--text-strong)]">{formatDistanceKm(activity.distance)}</span>
@@ -374,8 +393,13 @@ export function CyberDashboard() {
                 </button>
               )
             }) : (
-              <div className="grid min-h-[320px] place-items-center border-y border-dashed border-[var(--line)] px-6 text-center text-sm text-[var(--text-muted)]">
-                {t('dashboard.noFilterMatches')}
+              <div className="grid min-h-[320px] place-items-center border-y border-dashed border-[var(--line)] px-6 text-center">
+                <div>
+                  <p className="text-sm text-[var(--text-muted)]">{t('dashboard.noFilterMatches')}</p>
+                  {hasRouteActivities ? (
+                    <button type="button" onClick={resetRouteFilters} className="action-secondary mt-4">{t('dashboard.clearFilters')}</button>
+                  ) : null}
+                </div>
               </div>
             )}
           </div>

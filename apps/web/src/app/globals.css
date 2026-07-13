@@ -174,7 +174,7 @@
   }
 
   .action-primary {
-    @apply inline-flex items-center justify-center rounded-md bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-none transition hover:bg-slate-700;
+    @apply inline-flex items-center justify-center rounded-md bg-slate-900 px-3.5 py-2 text-sm font-semibold text-white shadow-none transition hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-0)];
   }
 
   .dark .action-primary {
@@ -183,7 +183,7 @@
   }
 
   .action-secondary {
-    @apply inline-flex items-center justify-center rounded-md border border-slate-300/70 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50;
+    @apply inline-flex items-center justify-center rounded-md border border-slate-300/70 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-0)];
   }
 
   .dark .action-secondary {
@@ -191,7 +191,7 @@
   }
 
   .action-ghost {
-    @apply inline-flex items-center justify-center rounded-md border border-slate-300/70 bg-white p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900;
+    @apply inline-flex items-center justify-center rounded-md border border-slate-300/70 bg-white p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-0)];
   }
 
   .dark .action-ghost {
@@ -227,7 +227,7 @@
   }
 
   .ledger-filter {
-    @apply inline-flex min-h-9 items-center justify-center rounded-md border border-[var(--line-strong)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] outline-none transition hover:border-[var(--route-green)] hover:text-[var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[var(--route-green)];
+    @apply inline-flex min-h-10 items-center justify-center rounded-md border border-[var(--line-strong)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] outline-none transition hover:border-[var(--route-green)] hover:text-[var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[var(--route-green)];
   }
 
   .ledger-filter-active {
@@ -298,6 +298,17 @@
 }
 
 @media (max-width: 767px) {
+  .action-primary,
+  .action-secondary,
+  .action-ghost,
+  .ledger-filter {
+    min-height: 44px;
+  }
+
+  .action-ghost {
+    min-width: 44px;
+  }
+
   .route-ledger-row {
     grid-template-columns: minmax(5rem, 0.72fr) minmax(9rem, 1.6fr);
   }

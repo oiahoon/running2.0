@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -108,7 +108,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         <Run2Logo onClick={onNavigate} />
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6" aria-label={t('shell.primaryNavigation')}>
         {navGroups.map((group) => (
           <div key={group.labelKey}>
             <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{t(group.labelKey)}</div>
@@ -120,8 +120,9 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                     key={item.nameKey}
                     href={item.href}
                     onClick={onNavigate}
+                    aria-current={isActive ? 'page' : undefined}
                     className={classNames(
-                      'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+                      'group flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]',
                       isActive
                         ? 'bg-[var(--route-green)]/10 text-[var(--text-strong)] ring-1 ring-inset ring-[var(--route-green)]/35'
                         : 'text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-strong)] dark:hover:bg-white/5'
@@ -168,7 +169,7 @@ function DesktopNavigation({ pathname }: { pathname: string }) {
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 className={classNames(
-                  'relative inline-flex h-11 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-px after:scale-x-0 after:bg-[var(--route-green)] after:transition-transform',
+                  'relative inline-flex h-11 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-px after:scale-x-0 after:bg-[var(--route-green)] after:transition-transform focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)]',
                   isActive
                     ? 'text-[var(--text-strong)] after:scale-x-100'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'
@@ -186,6 +187,9 @@ function DesktopNavigation({ pathname }: { pathname: string }) {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const sidebarDialogRef = useRef<HTMLDivElement>(null)
+  const closeSidebarButtonRef = useRef<HTMLButtonElement>(null)
+  const restoreFocusRef = useRef<HTMLElement | null>(null)
   const pathname = usePathname()
   const { t } = useI18n()
 
@@ -194,14 +198,64 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return { title: t(copy.titleKey), subtitle: t(copy.subtitleKey) }
   }, [pathname, t])
 
+  useEffect(() => {
+    if (!sidebarOpen) return
+
+    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const focusFrame = window.requestAnimationFrame(() => closeSidebarButtonRef.current?.focus())
+
+    function handleDialogKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setSidebarOpen(false)
+        return
+      }
+
+      if (event.key !== 'Tab') return
+      const focusableElements = Array.from(
+        sidebarDialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]):not([tabindex="-1"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) || []
+      )
+      if (focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault()
+        lastElement.focus()
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleDialogKeyDown)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.removeEventListener('keydown', handleDialogKeyDown)
+      document.body.style.overflow = previousOverflow
+      restoreFocusRef.current?.focus()
+      restoreFocusRef.current = null
+    }
+  }, [sidebarOpen])
+
   return (
     <div className="app-shell">
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 min-[1380px]:hidden" role="dialog" aria-modal="true">
-          <button className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} aria-label={t('shell.closeSidebar')} />
+        <div
+          ref={sidebarDialogRef}
+          className="fixed inset-0 z-50 min-[1380px]:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('shell.primaryNavigation')}
+        >
+          <button className="absolute inset-0 bg-black/50" tabIndex={-1} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
           <aside className="relative h-full w-[86%] max-w-[320px] border-r border-slate-200 bg-[var(--sidebar-bg)] shadow-2xl dark:border-white/10">
             <div className="absolute right-3 top-3">
-              <button onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label={t('shell.closeSidebar')}>
+              <button ref={closeSidebarButtonRef} onClick={() => setSidebarOpen(false)} className="action-ghost" aria-label={t('shell.closeSidebar')}>
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
@@ -210,7 +264,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div
+        className="flex min-h-screen min-w-0 flex-1 flex-col"
+        inert={sidebarOpen ? true : undefined}
+        aria-hidden={sidebarOpen ? true : undefined}
+      >
         <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--header-bg)]/95 backdrop-blur-xl">
           <div className="flex h-[72px] w-full items-center gap-3 px-4 sm:px-6">
             <button
@@ -226,8 +284,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <DesktopNavigation pathname={pathname} />
 
             <div className="min-w-0 flex-1 min-[1380px]:hidden">
-              <div className="truncate text-sm font-semibold tracking-tight text-[var(--text-strong)]">{pageMeta.title}</div>
-              <div className="mt-0.5 hidden truncate text-xs text-[var(--text-muted)] sm:block">{pageMeta.subtitle}</div>
+              <div className="hidden truncate text-sm font-semibold tracking-tight text-[var(--text-strong)] md:block">{pageMeta.title}</div>
+              <div className="mt-0.5 hidden truncate text-xs text-[var(--text-muted)] md:block">{pageMeta.subtitle}</div>
             </div>
 
             <div className="hidden shrink-0 items-center gap-2 sm:flex">

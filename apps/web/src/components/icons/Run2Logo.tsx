@@ -41,7 +41,14 @@ export function Run2Logo({
   const { t } = useI18n()
 
   return (
-    <Link href="/dashboard" onClick={onClick} className={classNames('flex items-center gap-2', className)}>
+    <Link
+      href="/dashboard"
+      onClick={onClick}
+      className={classNames(
+        'flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--route-green)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-0)]',
+        className
+      )}
+    >
       <Run2Mark className="h-8 w-8" />
       {compact ? null : (
         <div>
