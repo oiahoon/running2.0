@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useI18n } from '@/lib/i18n'
+import { readSyncError } from '@/lib/syncErrors'
 
 interface DataSourceType {
   id: string
@@ -69,8 +70,7 @@ export default function DataSourcesPage() {
         body: JSON.stringify({ sources: ['strava'] }),
       })
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data?.error || t('sync.manualFailed'))
+        throw new Error(await readSyncError(response, t))
       }
       const data = await response.json().catch(() => ({}))
       setMessage(data?.message || t('sources.syncQueued'))

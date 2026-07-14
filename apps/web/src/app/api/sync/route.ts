@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDatabase } from '@/lib/database/connection'
+import type { SyncErrorCode } from '@/lib/syncErrors'
 
 type SourceSetting = {
   source: string
@@ -13,6 +14,17 @@ type SourceLog = {
   status: string
   started_at: string
   completed_at: string | null
+}
+
+class WorkflowDispatchError extends Error {
+  constructor(
+    message: string,
+    readonly code: SyncErrorCode,
+    readonly httpStatus: number
+  ) {
+    super(message)
+    this.name = 'WorkflowDispatchError'
+  }
 }
 
 function normalizeSourceId(sourceId: string): string {
@@ -32,7 +44,11 @@ function toWorkflowBoolean(value: unknown) {
 async function triggerSyncWorkflow(body: Record<string, unknown>) {
   const token = process.env.GITHUB_ACTIONS_TRIGGER_TOKEN
   if (!token) {
-    throw new Error('Manual sync trigger is not configured. Set GITHUB_ACTIONS_TRIGGER_TOKEN in Vercel.')
+    throw new WorkflowDispatchError(
+      'Manual sync is not configured.',
+      'sync_not_configured',
+      503
+    )
   }
 
   const repository = getGitHubRepo()
@@ -58,8 +74,55 @@ async function triggerSyncWorkflow(body: Record<string, unknown>) {
   })
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => '')
-    throw new Error(`GitHub workflow dispatch failed (${response.status}): ${detail || response.statusText}`)
+    const requestId = response.headers.get('x-github-request-id')
+    console.error('GitHub workflow dispatch rejected', {
+      status: response.status,
+      requestId,
+      repository,
+      workflowId,
+      ref,
+    })
+
+    if (response.status === 401) {
+      throw new WorkflowDispatchError(
+        'Manual sync authorization is invalid.',
+        'github_auth_invalid',
+        503
+      )
+    }
+    if (response.status === 403) {
+      throw new WorkflowDispatchError(
+        'Manual sync authorization cannot dispatch this workflow.',
+        'github_permission_denied',
+        503
+      )
+    }
+    if (response.status === 404) {
+      throw new WorkflowDispatchError(
+        'The configured sync workflow was not found.',
+        'workflow_not_found',
+        503
+      )
+    }
+    if (response.status === 422) {
+      throw new WorkflowDispatchError(
+        'The configured sync workflow, ref, or inputs are invalid.',
+        'workflow_config_invalid',
+        502
+      )
+    }
+    if (response.status >= 500) {
+      throw new WorkflowDispatchError(
+        'GitHub is temporarily unavailable.',
+        'github_unavailable',
+        502
+      )
+    }
+    throw new WorkflowDispatchError(
+      'The sync workflow could not be queued.',
+      'dispatch_failed',
+      502
+    )
   }
 
   return {
@@ -168,8 +231,14 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Failed to sync data sources:', error)
+    if (error instanceof WorkflowDispatchError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.httpStatus }
+      )
+    }
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to sync data sources' },
+      { error: 'Failed to sync data sources', code: 'dispatch_failed' satisfies SyncErrorCode },
       { status: 500 }
     )
   }

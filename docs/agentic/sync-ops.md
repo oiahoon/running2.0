@@ -20,6 +20,11 @@ Manual sync was verified end-to-end on 2026-04-30 after refreshing the GitHub di
 - The workflow committed data update `9c086bfbdb153cac2b2f49aad0d5a7408a1b7a86`.
 - Production `/api/sync/history` reflected the new sync log at `2026-04-30T12:21:33.379Z`.
 
+Manual sync was reverified on 2026-07-14 after rotating the expired GitHub dispatch token:
+- `POST https://run2.miaowu.org/api/sync` returned `202` with structured `queued` state.
+- GitHub Actions run `29344918816` completed successfully from `workflow_dispatch`.
+- The dispatcher now maps GitHub authorization and workflow configuration failures to stable error codes, without returning raw upstream response bodies to the browser.
+
 ## Runtime Sync
 
 - Direct Strava executor: `apps/web/src/app/api/sync/strava/route.ts`

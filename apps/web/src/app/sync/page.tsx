@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import { useI18n } from '@/lib/i18n'
+import { readSyncError } from '@/lib/syncErrors'
 
 interface SyncRecord {
   id: string
@@ -90,8 +91,7 @@ export default function SyncPage() {
         body: JSON.stringify({ sources: ['strava'] }),
       })
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data?.error || t('sync.manualFailed'))
+        throw new Error(await readSyncError(response, t))
       }
       const data = await response.json().catch(() => ({}))
       setNotice(data?.message ? t('sync.refreshAfterDeploy', { message: data.message }) : t('sync.queued'))
