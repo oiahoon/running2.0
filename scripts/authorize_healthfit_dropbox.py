@@ -2,11 +2,12 @@
 """Grant read-only Dropbox access for the HealthFit GitHub Actions workflow."""
 
 import getpass
+import json
 import shutil
 import subprocess
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-
-import requests
+from urllib.request import Request, urlopen
 
 
 REPOSITORY = "oiahoon/running2.0"
@@ -32,19 +33,19 @@ def main():
     if not code:
         raise SystemExit("Authorization code is required")
     try:
-        response = requests.post(
+        request = Request(
             "https://api.dropbox.com/oauth2/token",
-            data={
+            data=urlencode({
                 "code": code,
                 "grant_type": "authorization_code",
                 "client_id": app_key,
                 "client_secret": app_secret,
-            },
-            timeout=30,
+            }).encode(),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        response.raise_for_status()
-        token = response.json()["refresh_token"]
-    except (requests.RequestException, KeyError, ValueError) as exc:
+        with urlopen(request, timeout=30) as response:
+            token = json.load(response)["refresh_token"]
+    except (HTTPError, URLError, KeyError, ValueError) as exc:
         raise SystemExit("Dropbox authorization failed; no credentials were saved") from exc
 
     print("Dropbox read access authorized.")

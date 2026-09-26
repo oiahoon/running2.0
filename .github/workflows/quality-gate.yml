@@ -39,7 +39,7 @@ jobs:
 
       - name: API smoke test
         run: |
-          npm run start -- --port 4010 > /tmp/running2-start.log 2>&1 &
+          npm run start --workspace=apps/web -- --port 4010 > /tmp/running2-start.log 2>&1 &
           APP_PID=$!
           trap 'kill $APP_PID' EXIT
 

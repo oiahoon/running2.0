@@ -32,12 +32,12 @@ const DATA_SOURCE_TYPES = {
   strava: {
     name: 'Strava',
     type: 'api',
-    description: 'Sync activities from Strava (already configured)',
+    description: 'Historical Strava activities; API sync requires an active Strava developer app',
     authMethods: ['oauth2'],
     supportedActivities: ['Run', 'Walk', 'Ride', 'Swim', 'Hike'],
     setupInstructions: [
-      'Already configured in your environment variables',
-      'Activities sync daily and can be queued manually from Sync'
+      'Historical data remains available on the site',
+      'The Strava workflow is manual-only while the API application is inactive'
     ]
   },
   garmin: {
