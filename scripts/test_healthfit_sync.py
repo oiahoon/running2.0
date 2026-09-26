@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 from garmin_fit_sdk import Encoder, Profile
 
-from sync_healthfit import dropbox_files, import_activities, parse_fit
+from sync_healthfit import HealthFitSyncError, dropbox_files, import_activities, parse_fit
 
 
 def fit_activity(start, distance, with_gps):
@@ -63,6 +63,32 @@ def database():
 
 
 class HealthFitSyncTests(unittest.TestCase):
+    def test_identical_historical_strava_rows_are_one_logical_match(self):
+        db = database()
+        self.addCleanup(db.close)
+        start = datetime(2023, 11, 6, 10, 24, 14, tzinfo=timezone.utc)
+        for activity_id in (41, 42):
+            db.execute("""
+                INSERT INTO activities (id, external_id, source, name, type, start_date, distance, moving_time)
+                VALUES (?, ?, 'strava', 'Run', 'Run', '2023-11-06T10:24:14Z', 10094.7, 1000)
+            """, (activity_id, f"strava-{activity_id}"))
+        result = import_activities(db, [("key", "1", "run.fit", fit_activity(start, 10094.7, False))])
+        self.assertEqual((result["created"], result["matched"]), (0, 1))
+        self.assertEqual(db.execute("SELECT COUNT(*) FROM activities").fetchone()[0], 2)
+
+    def test_distinct_plausible_matches_still_fail_closed(self):
+        db = database()
+        self.addCleanup(db.close)
+        start = datetime(2023, 11, 6, 10, 24, 14, tzinfo=timezone.utc)
+        for activity_id, distance in ((41, 10094.7), (42, 10100.0)):
+            db.execute("""
+                INSERT INTO activities (id, external_id, source, name, type, start_date, distance, moving_time)
+                VALUES (?, ?, 'strava', 'Run', 'Run', '2023-11-06T10:24:14Z', ?, 1000)
+            """, (activity_id, f"strava-{activity_id}", distance))
+        with self.assertRaises(HealthFitSyncError):
+            import_activities(db, [("key", "1", "run.fit", fit_activity(start, 10094.7, False))])
+        self.assertEqual(db.execute("SELECT COUNT(*) FROM activities WHERE source = 'healthfit'").fetchone()[0], 0)
+
     def test_fit_gps_and_indoor_routes(self):
         start = datetime(2026, 9, 10, 11, 17, 54, tzinfo=timezone.utc)
         gps = parse_fit(fit_activity(start, 7000, True), "2026-09-10-191754-Outdoor Running-Apple Watch.fit")[0]

@@ -243,7 +243,7 @@ def is_duplicate(db, activity):
     earliest = (start - timedelta(seconds=120)).isoformat().replace("+00:00", "Z")
     latest = (start + timedelta(seconds=120)).isoformat().replace("+00:00", "Z")
     candidates = db.execute(
-        "SELECT id, source, type, distance, moving_time, summary_polyline FROM activities WHERE start_date BETWEEN ? AND ?",
+        "SELECT id, source, type, start_date, distance, moving_time, summary_polyline FROM activities WHERE start_date BETWEEN ? AND ?",
         (earliest, latest),
     ).fetchall()
     matches = []
@@ -256,6 +256,11 @@ def is_duplicate(db, activity):
             continue
         matches.append(row)
     if len(matches) > 1:
+        # Historical Strava imports can contain two IDs for the same workout.
+        # They are one logical match only when all identifying metrics agree.
+        identity = lambda row: (row["start_date"], row["type"], row["distance"], row["moving_time"])
+        if all(identity(row) == identity(matches[0]) for row in matches[1:]):
+            return min(matches, key=lambda row: row["id"])
         raise HealthFitSyncError(f"Ambiguous existing activity match near {activity['start_date']}")
     return matches[0] if matches else None
 
