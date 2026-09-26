@@ -264,6 +264,14 @@ def is_duplicate(db, activity):
         identity = lambda row: (row["start_date"], row["type"], row["distance"], row["moving_time"])
         if all(identity(row) == identity(matches[0]) for row in matches[1:]):
             return min(matches, key=lambda row: row["id"])
+        by_start = sorted(
+            (abs((utc_datetime(datetime.fromisoformat(row["start_date"].replace("Z", "+00:00"))) - start).total_seconds()), row["id"], row)
+            for row in matches
+        )
+        # One-second clock differences are common across exports. A nearby
+        # second recording must be substantially farther away to disambiguate.
+        if by_start[0][0] <= 5 and by_start[1][0] - by_start[0][0] >= 30:
+            return by_start[0][2]
         raise HealthFitSyncError(f"Ambiguous existing activity match near {activity['start_date']}")
     return matches[0] if matches else None
 

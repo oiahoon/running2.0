@@ -105,6 +105,22 @@ class HealthFitSyncTests(unittest.TestCase):
         self.assertEqual((result["created"], result["matched"]), (0, 1))
         self.assertEqual(db.execute("SELECT COUNT(*) FROM activities").fetchone()[0], 2)
 
+    def test_one_second_clock_difference_wins_over_nearby_workout(self):
+        db = database()
+        self.addCleanup(db.close)
+        start = datetime(2022, 11, 15, 12, 0, 24, tzinfo=timezone.utc)
+        for activity_id, start_date, distance, moving_time in (
+            (41, "2022-11-15T12:00:25Z", 10000.0, 1000),
+            (42, "2022-11-15T12:01:50Z", 10100.0, 1010),
+        ):
+            db.execute("""
+                INSERT INTO activities (id, external_id, source, name, type, start_date, distance, moving_time)
+                VALUES (?, ?, 'strava', 'Run', 'Run', ?, ?, ?)
+            """, (activity_id, f"strava-{activity_id}", start_date, distance, moving_time))
+        result = import_activities(db, [("key", "1", "run.fit", fit_activity(start, 10000.0, False))])
+        self.assertEqual((result["created"], result["matched"]), (0, 1))
+        self.assertEqual(db.execute("SELECT COUNT(*) FROM activities").fetchone()[0], 2)
+
     def test_fit_gps_and_indoor_routes(self):
         start = datetime(2026, 9, 10, 11, 17, 54, tzinfo=timezone.utc)
         gps = parse_fit(fit_activity(start, 7000, True), "2026-09-10-191754-Outdoor Running-Apple Watch.fit")[0]
