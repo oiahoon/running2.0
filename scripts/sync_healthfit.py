@@ -256,6 +256,9 @@ def is_duplicate(db, activity):
             continue
         matches.append(row)
     if len(matches) > 1:
+        exact_time = [row for row in matches if row["start_date"] == activity["start_date"]]
+        if len(exact_time) == 1:
+            return exact_time[0]
         # Historical Strava imports can contain two IDs for the same workout.
         # They are one logical match only when all identifying metrics agree.
         identity = lambda row: (row["start_date"], row["type"], row["distance"], row["moving_time"])
@@ -276,6 +279,7 @@ def import_activities(db, files):
         pending.append((file_key, revision, filename, parse_fit(content, filename)))
 
     counts = {"files": len(pending), "created": 0, "updated": 0, "matched": 0, "enriched": 0}
+    ambiguous = []
     now = datetime.now(timezone.utc).isoformat()
     with db:
         for file_key, revision, filename, activities in pending:
@@ -290,7 +294,11 @@ def import_activities(db, files):
                     counts["updated"] += 1
                     continue
                 if existing is None:
-                    existing = is_duplicate(db, activity)
+                    try:
+                        existing = is_duplicate(db, activity)
+                    except HealthFitSyncError as exc:
+                        ambiguous.append(str(exc))
+                        continue
                 if existing:
                     counts["matched"] += 1
                     if not existing["summary_polyline"] and activity["summary_polyline"]:
@@ -316,6 +324,9 @@ def import_activities(db, files):
                 activity_count = excluded.activity_count,
                 imported_at = excluded.imported_at
             """, (file_key, revision, len(activities), now))
+        if ambiguous:
+            examples = "; ".join(ambiguous[:10])
+            raise HealthFitSyncError(f"{len(ambiguous)} ambiguous activity match(es): {examples}")
         if pending:
             db.execute("""
                 INSERT INTO sync_logs (user_id, source, sync_type, status, activities_processed,
