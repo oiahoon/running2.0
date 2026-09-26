@@ -43,6 +43,10 @@ Runtime sync reads Strava tokens from `data_source_settings`. It refreshes token
 - `scripts/check-strava-permissions.py`: Strava token/scope check.
 - `scripts/generate-auth-url.py`, `scripts/get-new-token.py`: Strava OAuth helpers.
 
+The scheduled sync must exit nonzero when Strava rejects a request, returns malformed data, or returns zero activities while historical activities exist. GitHub Actions then stops before migration, map generation, and data commits. It must never replace the activity JSON with an empty list after an API failure. The workflow runs `scripts/test_sync_strava.py` before syncing.
+
+For an activities endpoint 403, inspect the safe error fields in the failed workflow log. Check that the authorized Strava token includes `activity:read` or `activity:read_all` (the latter includes private activities), and reauthorize the app if the grant lacks the required scope. A successful token refresh alone does not prove that the token can read activities. After reauthorization, update the `STRAVA_REFRESH_TOKEN` GitHub Actions secret and dispatch `sync-data.yml` again. Do not put tokens in logs or commits.
+
 ## GitHub Actions
 
 - `.github/workflows/sync-data.yml`: scheduled/manual Strava data sync.
