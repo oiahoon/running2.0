@@ -89,9 +89,9 @@ fi
 # Check if database exists
 if [ ! -f "data/running_page_2.db" ]; then
     print_warning "Database not found. You may need to run data sync first."
-    print_info "To sync data from Strava:"
-    print_info "1. Set up GitHub Actions secrets (STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)"
-    print_info "2. Run the sync workflow manually from GitHub Actions"
+    print_info "Default sync: HealthFit FIT exports through Dropbox."
+    print_info "1. Follow docs/setup-healthfit-dropbox.md from the repository root"
+    print_info "2. Run the Sync HealthFit Data workflow manually from GitHub Actions"
     print_info "3. Or place your existing database file in apps/web/data/"
 else
     print_status "Database file found"

@@ -52,7 +52,7 @@ Core tables:
 - Some API/UI transforms convert distance to km for chart data.
 - Moving/elapsed time is seconds.
 - Speed is m/s.
-- Strava source id is `strava`.
+- Strava source id is `strava`; HealthFit / Dropbox source id is `healthfit`.
 - Activity types follow source naming, e.g. `Run`, `Walk`, `Ride`, `Swim`, `Hike`, `WeightTraining`, `Rowing`.
 
 ## Known Edges
@@ -60,5 +60,4 @@ Core tables:
 - Some APIs still use raw SQL inline instead of repository methods.
 - TypeScript debt exists around `any` activity payloads.
 - `data_source_settings` is effectively single-user (`user_id = 1`) today.
-- Multi-source architecture exists, but production sync is Strava-first.
-
+- Multi-source architecture exists; manual sync defaults to HealthFit / Dropbox, with Strava still available by explicit source selection.

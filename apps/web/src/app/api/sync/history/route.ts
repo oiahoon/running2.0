@@ -35,6 +35,7 @@ export async function GET() {
     `).all() as any[]
 
     const totalResult = db.prepare('SELECT COUNT(*) as count FROM activities').get() as { count: number }
+    const sourceCounts = db.prepare('SELECT source, COUNT(*) AS count FROM activities GROUP BY source').all() as Array<{ source: string; count: number }>
 
     return NextResponse.json({
       logs: logs.map(log => ({
@@ -55,6 +56,7 @@ export async function GET() {
         lastSync: source.last_sync_at || source.updated_at || null,
       })),
       totalActivities: totalResult.count,
+      activityCounts: Object.fromEntries(sourceCounts.map(({ source, count }) => [source, count])),
     })
   } catch (error) {
     console.error('Failed to fetch sync history:', error)

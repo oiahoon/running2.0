@@ -6,6 +6,8 @@ Read this for Strava and HealthFit sync, static maps, data import scripts, and s
 
 HealthFit FIT exports in `/Apps/HealthFitExporter` are the replacement source for new Apple Watch / Apple Health workouts. `.github/workflows/sync-healthfit.yml` reads that folder daily or on manual dispatch, imports FIT data into the existing SQLite database, generates maps, copies the public DB, and commits derived data. The daily job runs only after the repository variable `HEALTHFIT_SYNC_ENABLED=true` is set; manual dispatch can be used first to verify the setup. The old Strava workflow is manual-only because the API app is inactive on the free tier.
 
+The user-facing setup guide is [Configure Dropbox as the default activity source](../setup-healthfit-dropbox.md).
+
 One-time Dropbox setup:
 
 1. Keep HealthFit's automatic FIT export targeting `/Apps/HealthFitExporter`. Dropbox login through Google works; the API uses a separate Dropbox OAuth grant.
@@ -26,7 +28,7 @@ For local checks, run `python -m unittest discover -s scripts -p 'test_healthfit
 5. Workflow commits data/map/public changes back to `master`.
 6. Vercel deploys `run2` from `master`.
 
-Manual sync from the app dispatches `sync-healthfit.yml` after the first successful HealthFit import; until then it uses the Strava workflow. It should not import data inside a Vercel function. Vercel only has a `/tmp` copy of the SQLite database, so runtime writes are not durable and will not update the committed data file.
+Manual sync from the app and an unqualified `POST /api/sync` dispatch `sync-healthfit.yml` by default, including before the first successful import. The website offers Strava as an explicit manual choice. It should not import data inside a Vercel function. Vercel only has a `/tmp` copy of the SQLite database, so runtime writes are not durable and will not update the committed data file.
 
 Manual sync was verified end-to-end on 2026-04-30 after refreshing the GitHub dispatch token:
 - `POST https://run2.miaowu.org/api/sync` returned `202` and queued `sync-data.yml`.
@@ -98,7 +100,7 @@ Vercel/runtime:
 - `STRAVA_REFRESH_TOKEN` if required by route/script context
 - `GITHUB_ACTIONS_TRIGGER_TOKEN` for `/api/sync` manual workflow dispatch
 - `GITHUB_SYNC_REPOSITORY` optional, defaults to `oiahoon/running2.0`
-- `GITHUB_SYNC_WORKFLOW_ID` optional, defaults to `sync-data.yml`
+- `GITHUB_SYNC_WORKFLOW_ID` optional Strava workflow override, defaults to `sync-data.yml`; Dropbox uses `sync-healthfit.yml`
 - `GITHUB_SYNC_REF` optional, defaults to `master`
 - `NEXT_PUBLIC_MAPBOX_TOKEN`
 - `DATABASE_PATH`

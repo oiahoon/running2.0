@@ -33,6 +33,7 @@ interface SyncHistoryResponse {
     lastSync: string | null
   }>
   totalActivities: number
+  activityCounts: Record<string, number>
 }
 
 function statusBadge(status: SyncRecord['status']) {
@@ -45,6 +46,7 @@ export default function SyncPage() {
   const { t, dateLocale } = useI18n()
   const [syncRecords, setSyncRecords] = useState<SyncRecord[]>([])
   const [dataSources, setDataSources] = useState<DataSource[]>([])
+  const [selectedSource, setSelectedSource] = useState<'healthfit' | 'strava'>('healthfit')
   const [isLoading, setIsLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,17 +61,16 @@ export default function SyncPage() {
       const data: SyncHistoryResponse = await response.json()
       setSyncRecords(data.logs || [])
 
-      const activeSource = (data.sources || []).find((s) => s.source === 'healthfit')
-        || (data.sources || []).find((s) => s.source === 'strava')
-      setDataSources([
-        {
-          id: activeSource?.source || 'strava',
-          name: activeSource?.source === 'healthfit' ? 'HealthFit' : 'Strava',
-          status: activeSource?.isActive ? 'connected' : 'disconnected',
-          lastSync: activeSource?.lastSync || undefined,
-          totalActivities: data.totalActivities || 0,
-        },
-      ])
+      setDataSources((['healthfit', 'strava'] as const).map((sourceId) => {
+        const source = (data.sources || []).find((item) => item.source === sourceId)
+        return {
+          id: sourceId,
+          name: sourceId === 'healthfit' ? t('sync.source.dropbox') : 'Strava',
+          status: source?.isActive ? 'connected' : 'disconnected',
+          lastSync: source?.lastSync || undefined,
+          totalActivities: data.activityCounts?.[sourceId] || 0,
+        }
+      }))
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.unknown'))
     } finally {
@@ -81,7 +82,10 @@ export default function SyncPage() {
     fetchSyncData()
   }, [fetchSyncData])
 
-  const latestSync = useMemo(() => syncRecords[0], [syncRecords])
+  const latestSync = useMemo(
+    () => syncRecords.find((record) => record.source === selectedSource),
+    [syncRecords, selectedSource]
+  )
 
   const handleSyncNow = async () => {
     setIsSyncing(true)
@@ -91,7 +95,7 @@ export default function SyncPage() {
       const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources: [dataSources[0]?.id || 'strava'] }),
+        body: JSON.stringify({ sources: [selectedSource] }),
       })
       if (!response.ok) {
         throw new Error(await readSyncError(response, t))
@@ -115,7 +119,17 @@ export default function SyncPage() {
               <h2 className="section-title">{t('sync.console')}</h2>
               <p className="section-subtitle">{t('sync.copy')}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <label htmlFor="sync-source" className="sr-only">{t('sync.sourceSelect')}</label>
+              <select
+                id="sync-source"
+                value={selectedSource}
+                onChange={(event) => setSelectedSource(event.target.value as 'healthfit' | 'strava')}
+                className="action-secondary max-w-full"
+              >
+                <option value="healthfit">{t('sync.source.dropbox')}</option>
+                <option value="strava">Strava</option>
+              </select>
               <button onClick={fetchSyncData} className="action-secondary">{t('sync.refresh')}</button>
               <button onClick={handleSyncNow} disabled={isSyncing} className="action-primary disabled:opacity-60">
                 <ArrowPathIcon className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -145,7 +159,7 @@ export default function SyncPage() {
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {dataSources.map((source) => (
+            {dataSources.filter((source) => source.id === selectedSource).map((source) => (
               <div key={source.name} className="panel lg:col-span-2">
                 <div className="panel-header flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-[var(--text-strong)]">{t('sync.sourceHealth', { source: source.name })}</h3>
@@ -157,6 +171,16 @@ export default function SyncPage() {
                   <MetricItem label={t('sync.totalActivities')} value={source.totalActivities.toLocaleString()} />
                   <MetricItem label={t('sync.lastSync')} value={source.lastSync ? new Date(source.lastSync).toLocaleString(dateLocale) : t('common.never')} />
                   <MetricItem label={t('sync.latestStatus')} value={latestSync ? t(`sync.status.${latestSync.status}`) : t('sync.noRecords')} />
+                  {source.id === 'healthfit' && source.status !== 'connected' ? (
+                    <a
+                      href="https://github.com/oiahoon/running2.0/blob/master/docs/setup-healthfit-dropbox.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-sky-700 underline underline-offset-4 hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200 sm:col-span-3"
+                    >
+                      {t('sync.setupDropbox')}
+                    </a>
+                  ) : null}
                 </div>
               </div>
             ))}

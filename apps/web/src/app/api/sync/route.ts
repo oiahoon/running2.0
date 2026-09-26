@@ -28,8 +28,10 @@ class WorkflowDispatchError extends Error {
 }
 
 function normalizeSourceId(sourceId: string): string {
+  if (sourceId === 'dropbox' || sourceId === 'healthfit') return 'healthfit'
   if (sourceId === 'strava') return sourceId
   const prefix = sourceId.split('_')[0]
+  if (prefix === 'dropbox') return 'healthfit'
   return prefix || sourceId
 }
 
@@ -211,7 +213,7 @@ export async function POST(request: NextRequest) {
           .map(normalizeSourceId)
       : null
 
-    const targetSources = requestedSources && requestedSources.length > 0 ? [...new Set(requestedSources)] : ['strava']
+    const targetSources = requestedSources && requestedSources.length > 0 ? [...new Set(requestedSources)] : ['healthfit']
     if (targetSources.length !== 1 || !['strava', 'healthfit'].includes(targetSources[0])) {
       return NextResponse.json(
         { error: 'Select one supported sync source: Strava or HealthFit.' },

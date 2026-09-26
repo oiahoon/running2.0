@@ -41,6 +41,7 @@ export default function DataSourcesPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'configured' | 'available'>('configured')
+  const [selectedSource, setSelectedSource] = useState<'healthfit' | 'strava'>('healthfit')
 
   useEffect(() => {
     fetchDataSources()
@@ -67,7 +68,7 @@ export default function DataSourcesPage() {
       const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources: [configuredSources.some((source) => source.id === 'healthfit') ? 'healthfit' : 'strava'] }),
+        body: JSON.stringify({ sources: [selectedSource] }),
       })
       if (!response.ok) {
         throw new Error(await readSyncError(response, t))
@@ -111,9 +112,21 @@ export default function DataSourcesPage() {
               <h2 className="section-title">{t('sources.hub')}</h2>
               <p className="section-subtitle">{t('sources.copy')}</p>
             </div>
-            <button onClick={handleSync} disabled={syncing} className="action-primary disabled:opacity-60">
-              {syncing ? t('sync.queueing') : t('sources.runSync')}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <label htmlFor="source-sync-choice" className="sr-only">{t('sync.sourceSelect')}</label>
+              <select
+                id="source-sync-choice"
+                value={selectedSource}
+                onChange={(event) => setSelectedSource(event.target.value as 'healthfit' | 'strava')}
+                className="action-secondary max-w-full"
+              >
+                <option value="healthfit">{t('sync.source.dropbox')}</option>
+                <option value="strava">Strava</option>
+              </select>
+              <button onClick={handleSync} disabled={syncing} className="action-primary disabled:opacity-60">
+                {syncing ? t('sync.queueing') : t('sources.runSync')}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -217,6 +230,16 @@ export default function DataSourcesPage() {
                     ))}
                   </ol>
                 </details>
+                {type.id === 'healthfit' ? (
+                  <a
+                    href="https://github.com/oiahoon/running2.0/blob/master/docs/setup-healthfit-dropbox.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-700 underline underline-offset-4 hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
+                  >
+                    {t('sync.setupDropbox')}
+                  </a>
+                ) : null}
               </div>
             </div>
           ))}
