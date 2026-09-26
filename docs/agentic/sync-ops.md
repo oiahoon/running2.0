@@ -47,6 +47,8 @@ The scheduled sync must exit nonzero when Strava rejects a request, returns malf
 
 For an activities endpoint 403, inspect the safe error fields in the failed workflow log. Check that the authorized Strava token includes `activity:read` or `activity:read_all` (the latter includes private activities), and reauthorize the app if the grant lacks the required scope. A successful token refresh alone does not prove that the token can read activities. After reauthorization, update the `STRAVA_REFRESH_TOKEN` GitHub Actions secret and dispatch `sync-data.yml` again. Do not put tokens in logs or commits.
 
+For reauthorization, run `python scripts/generate-auth-url.py`, approve the requested `activity:read_all` scope, and copy the full redirect URL. Then run `python scripts/get-new-token.py` locally. It checks the granted scope and activity endpoint before displaying the new refresh token for entry in the GitHub Actions secret. The helper defaults to `http://localhost/`, which Strava allows for local OAuth; the browser may show a connection error, but its address bar still contains the redirect URL. Set `STRAVA_REDIRECT_URI` for both commands if using another redirect. Update `STRAVA_CLIENT_SECRET` in GitHub Actions too when the app secret is rotated. The website callback saves tokens only to Vercel's ephemeral database, so it does not update the GitHub Actions secret.
+
 ## GitHub Actions
 
 - `.github/workflows/sync-data.yml`: scheduled/manual Strava data sync.

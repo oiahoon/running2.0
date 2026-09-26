@@ -1,71 +1,64 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Get new refresh token with the authorization code
-"""
+"""Exchange a Strava consent code and verify activity access locally."""
+
+import getpass
+import os
+from urllib.parse import parse_qs, urlparse
 
 import requests
-import json
 
-def get_new_token():
-    """Get new refresh token using authorization code"""
-    
-    # Your authorization code from the redirect URL
-    auth_code = "faa3a8a7109c532bfea6bb552217a1e3572aeb14"
-    
-    # Get credentials
-    client_id = input("Enter your Strava Client ID: ")
-    client_secret = input("Enter your Strava Client Secret: ")
-    
-    print("Exchanging authorization code for tokens...")
-    
-    # Exchange authorization code for tokens
-    token_url = 'https://www.strava.com/oauth/token'
-    token_data = {
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'code': auth_code,
-        'grant_type': 'authorization_code'
-    }
-    
+
+DEFAULT_REDIRECT_URI = "http://localhost/"
+
+
+def main():
+    client_id = os.getenv("STRAVA_CLIENT_ID") or input("Strava Client ID: ").strip()
+    client_secret = getpass.getpass("Strava Client Secret: ")
+    redirect_uri = os.getenv("STRAVA_REDIRECT_URI", DEFAULT_REDIRECT_URI)
+    redirected_url = input("Full URL after Strava approval: ").strip()
+    parsed = urlparse(redirected_url)
+    parameters = parse_qs(parsed.query)
+
+    expected = urlparse(redirect_uri)
+    if (parsed.scheme, parsed.netloc, parsed.path) != (expected.scheme, expected.netloc, expected.path):
+        raise SystemExit("The redirect URL does not match the authorization URL")
+    if "activity:read_all" not in parameters.get("scope", [""])[0].split(","):
+        raise SystemExit("Strava did not grant activity:read_all; no token was exchanged")
+    code = parameters.get("code", [None])[0]
+    if not code or not client_id or not client_secret:
+        raise SystemExit("Client ID, Client Secret, and authorization code are required")
+
     try:
-        response = requests.post(token_url, data=token_data)
+        response = requests.post(
+            "https://www.strava.com/oauth/token",
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+                "grant_type": "authorization_code",
+            },
+            timeout=30,
+        )
         response.raise_for_status()
-        token_info = response.json()
-        
-        print("Token exchange successful!")
-        print("\nToken Information:")
-        print("=" * 50)
-        print(json.dumps(token_info, indent=2))
-        print("=" * 50)
-        
-        # Extract important information
-        refresh_token = token_info.get('refresh_token')
-        scope = token_info.get('scope', 'NOT PRESENT')
-        
-        print(f"\nYour new refresh token:")
-        print(f"   {refresh_token}")
-        
-        print(f"\nScope verification:")
-        print(f"   - Scope: {scope}")
-        
-        if 'activity:read_all' in str(scope):
-            print("   Has activity:read_all permission - Perfect!")
-        else:
-            print("   Missing activity:read_all permission")
-        
-        print(f"\nNext steps:")
-        print(f"   1. Update your GitHub Secret STRAVA_REFRESH_TOKEN with:")
-        print(f"      {refresh_token}")
-        print(f"   2. Test the permissions again")
-        
-        return token_info
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Token exchange failed: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"   Response: {e.response.text}")
-        return None
+        token_data = response.json()
+        access_token = token_data["access_token"]
+        refresh_token = token_data["refresh_token"]
+        verification = requests.get(
+            "https://www.strava.com/api/v3/athlete/activities",
+            headers={"Authorization": f"Bearer {access_token}"},
+            params={"page": 1, "per_page": 1},
+            timeout=30,
+        )
+        verification.raise_for_status()
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        raise SystemExit(f"Authorization or activity access failed: HTTP {status}" if status else "Authorization or activity access failed") from exc
 
-if __name__ == '__main__':
-    get_new_token()
+    print("Activity access verified. Set these GitHub Actions secrets:")
+    print("STRAVA_CLIENT_SECRET: the current secret from Strava settings")
+    print(f"STRAVA_REFRESH_TOKEN: {refresh_token}")
+    print("Treat the displayed refresh token as private; clear the terminal when done.")
+
+
+if __name__ == "__main__":
+    main()
