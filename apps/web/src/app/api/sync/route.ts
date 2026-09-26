@@ -41,7 +41,7 @@ function toWorkflowBoolean(value: unknown) {
   return value === true || value === 'true' ? 'true' : 'false'
 }
 
-async function triggerSyncWorkflow(body: Record<string, unknown>) {
+async function triggerSyncWorkflow(body: Record<string, unknown>, source: 'strava' | 'healthfit') {
   const token = process.env.GITHUB_ACTIONS_TRIGGER_TOKEN
   if (!token) {
     throw new WorkflowDispatchError(
@@ -52,7 +52,9 @@ async function triggerSyncWorkflow(body: Record<string, unknown>) {
   }
 
   const repository = getGitHubRepo()
-  const workflowId = process.env.GITHUB_SYNC_WORKFLOW_ID || 'sync-data.yml'
+  const workflowId = source === 'healthfit'
+    ? 'sync-healthfit.yml'
+    : process.env.GITHUB_SYNC_WORKFLOW_ID || 'sync-data.yml'
   const ref = process.env.GITHUB_SYNC_REF || 'master'
   const workflowUrl = `https://github.com/${repository}/actions/workflows/${workflowId}`
 
@@ -66,7 +68,7 @@ async function triggerSyncWorkflow(body: Record<string, unknown>) {
     },
     body: JSON.stringify({
       ref,
-      inputs: {
+      inputs: source === 'healthfit' ? {} : {
         force_full_sync: toWorkflowBoolean(body.forceFullSync ?? body.force_full_sync),
         regenerate_maps: toWorkflowBoolean(body.regenerateMaps ?? body.regenerate_maps),
       },
@@ -210,20 +212,20 @@ export async function POST(request: NextRequest) {
       : null
 
     const targetSources = requestedSources && requestedSources.length > 0 ? [...new Set(requestedSources)] : ['strava']
-    const unsupportedSource = targetSources.find((source) => source !== 'strava')
-    if (unsupportedSource) {
+    if (targetSources.length !== 1 || !['strava', 'healthfit'].includes(targetSources[0])) {
       return NextResponse.json(
-        { error: `Manual workflow sync is only configured for Strava. Unsupported source: ${unsupportedSource}` },
+        { error: 'Select one supported sync source: Strava or HealthFit.' },
         { status: 400 }
       )
     }
 
-    const workflow = await triggerSyncWorkflow(body)
+    const source = targetSources[0] as 'strava' | 'healthfit'
+    const workflow = await triggerSyncWorkflow(body, source)
 
     return NextResponse.json(
       {
         message: 'Sync workflow queued',
-        source: 'strava',
+        source,
         status: 'queued',
         workflow,
       },

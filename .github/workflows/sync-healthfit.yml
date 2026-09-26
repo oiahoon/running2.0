@@ -1,0 +1,69 @@
+name: Sync HealthFit Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-data:
+    if: github.event_name == 'workflow_dispatch' || vars.HEALTHFIT_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+      DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+      DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+      HEALTHFIT_DROPBOX_FOLDER: ${{ vars.HEALTHFIT_DROPBOX_FOLDER || '/Apps/HealthFitExporter' }}
+      MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install FIT dependencies
+        run: python -m pip install 'garmin-fit-sdk==21.217.0' 'requests>=2.32,<3'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Verify FIT importer
+        run: python -m unittest discover -s scripts -p 'test_healthfit_sync.py'
+
+      - name: Import HealthFit FIT files
+        run: python scripts/sync_healthfit.py
+
+      - name: Generate static maps
+        run: python scripts/generate-static-maps.py
+
+      - name: Prepare database for Vercel
+        run: npm run prepare-db --workspace=apps/web
+
+      - name: Commit imported data and maps
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add -f apps/web/data/running_page_2.db apps/web/public/running_page_2.db
+          if [ -n "$(find apps/web/public/maps -maxdepth 1 -name '*.png' -print -quit)" ]; then
+            git add -f apps/web/public/maps/
+          fi
+          if git diff --cached --quiet; then
+            echo "No new HealthFit activities or maps"
+            exit 0
+          fi
+          git commit -m "Sync HealthFit activity data"
+          git push

@@ -5,9 +5,9 @@ This script runs as part of GitHub Actions to pre-generate all activity maps
 """
 
 import os
-import json
 import requests
 import time
+import sqlite3
 from pathlib import Path
 from urllib.parse import quote
 
@@ -15,12 +15,12 @@ class StaticMapGenerator:
     def __init__(self):
         self.mapbox_token = os.getenv('MAPBOX_TOKEN')
         if not self.mapbox_token:
-            print("Warning  No MAPBOX_TOKEN found, skipping map generation")
-            return
+            raise RuntimeError("MAPBOX_TOKEN is required for static map generation")
             
-        self.data_dir = Path('../apps/web/data')
-        self.maps_dir = Path('../apps/web/public/maps')
-        self.maps_dir.mkdir(exist_ok=True)
+        repo_dir = Path(__file__).resolve().parents[1]
+        self.database_file = repo_dir / 'apps/web/data/running_page_2.db'
+        self.maps_dir = repo_dir / 'apps/web/public/maps'
+        self.maps_dir.mkdir(parents=True, exist_ok=True)
         
         # Rate limiting
         self.request_delay = 0.1  # 100ms between requests
@@ -29,15 +29,24 @@ class StaticMapGenerator:
         self.error_count = 0
         
     def load_activities(self):
-        """Load activities from JSON file"""
-        activities_file = self.data_dir / 'strava_activities.json'
-        if not activities_file.exists():
-            print("Error No activities file found")
-            return []
-            
-        with open(activities_file, 'r') as f:
-            activities = json.load(f)
-            
+        """Read all saved routes so one source cannot delete another source's maps."""
+        if not self.database_file.exists():
+            raise RuntimeError("Activity database does not exist")
+        with sqlite3.connect(f'{self.database_file.as_uri()}?mode=ro', uri=True) as database:
+            rows = database.execute('''
+                SELECT id, start_latitude, start_longitude, end_latitude,
+                       end_longitude, summary_polyline
+                FROM activities
+            ''').fetchall()
+        activities = [
+            {
+                'id': row[0],
+                'start_latlng': [row[1], row[2]] if row[1] is not None and row[2] is not None else None,
+                'end_latlng': [row[3], row[4]] if row[3] is not None and row[4] is not None else None,
+                'map': {'summary_polyline': row[5]},
+            }
+            for row in rows
+        ]
         print(f"Stats Loaded {len(activities)} activities")
         return activities
     
@@ -197,9 +206,6 @@ class StaticMapGenerator:
     
     def generate_maps(self):
         """Generate static maps for all GPS activities"""
-        if not self.mapbox_token:
-            return
-            
         activities = self.load_activities()
         gps_activities = [a for a in activities if self.has_gps_data(a)]
         

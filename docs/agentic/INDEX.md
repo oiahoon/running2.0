@@ -8,7 +8,7 @@ Read this file first. It is the routing layer, not the full context.
 - Main workspace: `apps/web`.
 - Runtime baseline: Node 22 LTS preferred; root engines allow Node `>=20 <25`.
 - Persistence: SQLite via `better-sqlite3`.
-- Primary data source: Strava.
+- Activity sources: historical Strava data; HealthFit FIT exports are the new sync path after Dropbox authorization.
 - Deployment: Vercel project `run2`, root directory `apps/web`, production branch `master`.
 - Build is intentionally webpack-backed: `apps/web/vercel.json` uses `npm run build`, and `apps/web/package.json` runs `next build --webpack`.
 

@@ -26,6 +26,7 @@ export type SportType =
 
 export type DataSource = 
   | 'strava'
+  | 'healthfit'
   | 'garmin'
   | 'nike'
   | 'keep'

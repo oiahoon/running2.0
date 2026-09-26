@@ -17,6 +17,7 @@ interface SyncRecord {
 }
 
 interface DataSource {
+  id: string
   name: string
   status: 'connected' | 'disconnected' | 'error'
   lastSync?: string
@@ -58,12 +59,14 @@ export default function SyncPage() {
       const data: SyncHistoryResponse = await response.json()
       setSyncRecords(data.logs || [])
 
-      const stravaSource = (data.sources || []).find((s) => s.source === 'strava')
+      const activeSource = (data.sources || []).find((s) => s.source === 'healthfit')
+        || (data.sources || []).find((s) => s.source === 'strava')
       setDataSources([
         {
-          name: 'Strava',
-          status: stravaSource?.isActive ? 'connected' : 'disconnected',
-          lastSync: stravaSource?.lastSync || undefined,
+          id: activeSource?.source || 'strava',
+          name: activeSource?.source === 'healthfit' ? 'HealthFit' : 'Strava',
+          status: activeSource?.isActive ? 'connected' : 'disconnected',
+          lastSync: activeSource?.lastSync || undefined,
           totalActivities: data.totalActivities || 0,
         },
       ])
@@ -88,7 +91,7 @@ export default function SyncPage() {
       const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources: ['strava'] }),
+        body: JSON.stringify({ sources: [dataSources[0]?.id || 'strava'] }),
       })
       if (!response.ok) {
         throw new Error(await readSyncError(response, t))

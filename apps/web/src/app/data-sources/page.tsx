@@ -67,7 +67,7 @@ export default function DataSourcesPage() {
       const response = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources: ['strava'] }),
+        body: JSON.stringify({ sources: [configuredSources.some((source) => source.id === 'healthfit') ? 'healthfit' : 'strava'] }),
       })
       if (!response.ok) {
         throw new Error(await readSyncError(response, t))

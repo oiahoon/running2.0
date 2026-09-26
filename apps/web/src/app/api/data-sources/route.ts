@@ -3,6 +3,18 @@ import { getDatabase } from '@/lib/database/connection'
 import { NikeDataSource } from '@/lib/integrations/nike'
 
 const DATA_SOURCE_TYPES = {
+  healthfit: {
+    name: 'HealthFit + Dropbox',
+    type: 'file',
+    description: 'Import Apple Health FIT exports from Dropbox through GitHub Actions',
+    authMethods: ['dropbox_oauth2'],
+    supportedActivities: ['Run', 'Walk', 'Ride', 'Swim', 'Hike', 'Strength'],
+    setupInstructions: [
+      'Enable automatic FIT export from HealthFit to Dropbox',
+      'Authorize Dropbox through scripts/authorize_healthfit_dropbox.py',
+      'Run the Sync HealthFit Data GitHub Action once to verify the connection',
+    ],
+  },
   nike: {
     name: 'Nike Run Club',
     type: 'api',
