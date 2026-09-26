@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -159,18 +159,6 @@ function TotalMetric({ label, value, icon: Icon }: { label: string; value: strin
 }
 
 function DesktopRunnerMuse() {
-  const [shouldRender, setShouldRender] = useState(false)
-
-  useEffect(() => {
-    const desktopQuery = window.matchMedia('(min-width: 1280px)')
-    const updateVisibility = () => setShouldRender(desktopQuery.matches)
-    updateVisibility()
-    desktopQuery.addEventListener('change', updateVisibility)
-    return () => desktopQuery.removeEventListener('change', updateVisibility)
-  }, [])
-
-  if (!shouldRender) return null
-
   return (
     <Image
       src={runnerMuseCameos.dashboardHero.src}
@@ -178,9 +166,8 @@ function DesktopRunnerMuse() {
       width={410}
       height={615}
       sizes="205px"
-      loading="eager"
-      fetchPriority="high"
-      className="hero-runner-float pointer-events-none absolute z-20 hidden object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.34)] xl:-bottom-[230px] xl:left-0 xl:block xl:h-[290px] xl:w-[205px]"
+      loading="lazy"
+      className="hero-runner-float pointer-events-none absolute z-20 hidden object-contain drop-shadow-[0_22px_32px_rgba(0,0,0,0.22)] xl:-bottom-[230px] xl:left-0 xl:block xl:h-[290px] xl:w-[205px]"
     />
   )
 }
@@ -247,9 +234,9 @@ export function CyberDashboard() {
 
   return (
     <section className="dashboard-ledger-shell xl:-mx-8 xl:-mb-8 xl:-mt-5">
-      <div className="grid min-h-[calc(100vh-4.5rem)] xl:grid-cols-[minmax(0,1.63fr)_minmax(500px,1fr)]">
+      <div className="grid min-h-[calc(100vh-4.5rem)] xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="relative min-w-0 px-1 pb-10 pt-3 sm:px-2 lg:px-5 lg:pt-7 xl:px-8">
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(450px,1.15fr)_minmax(330px,0.85fr)]">
+          <div className="grid items-start gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
             <div>
               <h1 className="dashboard-display-title max-w-[620px] text-[var(--text-strong)]">
                 {t('dashboard.headline')}
@@ -373,7 +360,7 @@ export function CyberDashboard() {
             </select>
           </div>
 
-          <div className="mt-8 hidden grid-cols-[88px_minmax(144px,1fr)_62px_62px_68px] gap-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] md:grid 2xl:grid-cols-[88px_minmax(180px,1fr)_78px_76px_70px] 2xl:gap-3">
+          <div className="mt-8 hidden grid-cols-[88px_minmax(0,1fr)_62px_62px_68px] gap-1.5 px-3 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] 2xl:grid 2xl:grid-cols-[88px_minmax(0,1fr)_70px_70px_68px]">
             <span>{t('common.date')}</span>
             <span>{t('dashboard.routeColumn')}</span>
             <span className="text-right">{t('common.distance')}</span>

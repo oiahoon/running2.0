@@ -141,8 +141,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
       <div className="border-t border-slate-200 px-5 py-4 dark:border-white/10">
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
           <span>{t('shell.system')}</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-emerald-300 ring-1 ring-emerald-400/30">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--route-green)]/10 px-2 py-0.5 text-[var(--route-green)] ring-1 ring-[var(--route-green)]/30">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--route-green)]" />
             {t('shell.online')}
           </span>
         </div>

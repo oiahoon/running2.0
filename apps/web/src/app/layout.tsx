@@ -1,39 +1,13 @@
 import { type Metadata } from 'next'
-import { JetBrains_Mono, Manrope, Noto_Sans_JP, Noto_Sans_SC } from 'next/font/google'
-import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
 import { AppLayout } from '@/components/AppLayout'
 
+import '@fontsource-variable/manrope/wght.css'
+import '@fontsource-variable/jetbrains-mono/wght.css'
+import '@fontsource-variable/noto-sans-sc/wght.css'
+import '@fontsource-variable/noto-sans-jp/wght.css'
 import '@/app/globals.css'
-
-const manrope = Manrope({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-manrope',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-mono',
-})
-
-const notoSansSc = Noto_Sans_SC({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '900'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-cjk-sc',
-})
-
-const notoSansJp = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '900'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-cjk-jp',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://run2.miaowu.org'),
@@ -81,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={clsx('h-full antialiased', manrope.variable, jetbrainsMono.variable, notoSansSc.variable, notoSansJp.variable)}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
       <body className="min-h-full">

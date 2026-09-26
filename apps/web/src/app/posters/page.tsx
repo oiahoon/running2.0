@@ -94,14 +94,18 @@ export default function PostersPage() {
   const { t, dateLocale } = useI18n()
   const [mode, setMode] = useState<PosterMode>('month')
   const { data, isLoading, error } = useActivities({}, 1, 240)
-  const activities = (data?.activities || []) as ActivityLike[]
-  const routeActivities = activities.filter((activity) => routePolyline(activity))
+  const routeActivities = useMemo(
+    () => ((data?.activities || []) as ActivityLike[]).filter((activity) => routePolyline(activity)),
+    [data?.activities]
+  )
 
   const periods = useMemo(() => {
     const buckets = new Map<string, ActivityLike[]>()
     routeActivities.forEach((activity) => {
       const key = periodKey(activity, mode)
-      buckets.set(key, [...(buckets.get(key) || []), activity])
+      const bucket = buckets.get(key)
+      if (bucket) bucket.push(activity)
+      else buckets.set(key, [activity])
     })
     return Array.from(buckets.entries())
       .map(([key, items]) => ({ key, items }))
@@ -126,6 +130,7 @@ export default function PostersPage() {
               alt=""
               width={768}
               height={768}
+              sizes="(min-width: 1024px) 208px, 176px"
               loading="eager"
               className="pointer-events-none absolute -top-5 right-28 z-20 hidden h-56 w-44 -rotate-2 object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)] md:block lg:-top-8 lg:right-40 lg:h-64 lg:w-52"
             />
@@ -141,7 +146,7 @@ export default function PostersPage() {
         <section className="panel"><div className="panel-body text-sm text-[var(--text-muted)]">{t('posters.composing')}</div></section>
       ) : null}
       {error ? (
-        <section className="panel"><div className="panel-body text-sm text-red-300">{t('posters.failed')}</div></section>
+        <section className="panel"><div className="panel-body text-sm text-red-700 dark:text-red-300">{t('posters.failed')}</div></section>
       ) : null}
 
       {!isLoading && !error ? (
@@ -170,6 +175,7 @@ export default function PostersPage() {
                     alt=""
                     width={768}
                     height={768}
+                    sizes="(min-width: 1280px) 320px, (min-width: 640px) 42vw, 36vw"
                     loading="lazy"
                     className="pointer-events-none absolute bottom-2 right-1 z-20 h-[48%] w-[44%] rotate-2 object-contain opacity-[0.11] dark:opacity-[0.16]"
                   />

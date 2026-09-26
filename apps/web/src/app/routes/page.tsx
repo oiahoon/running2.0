@@ -143,7 +143,7 @@ export default function RouteWallGalleryPage() {
 
       {error ? (
         <section className="panel">
-          <div className="panel-body text-sm text-red-300">{t('routes.failed')}</div>
+          <div className="panel-body text-sm text-red-700 dark:text-red-300">{t('routes.failed')}</div>
         </section>
       ) : null}
 

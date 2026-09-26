@@ -172,7 +172,7 @@ export default function DataSourcesPage() {
                       ))}
                     </div>
                   </div>
-                  {source.errorMessage ? <p className="sm:col-span-3 text-sm text-red-300">{source.errorMessage}</p> : null}
+                  {source.errorMessage ? <p className="sm:col-span-3 text-sm text-red-700 dark:text-red-300">{source.errorMessage}</p> : null}
                 </div>
               </div>
             ))

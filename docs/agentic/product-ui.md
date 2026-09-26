@@ -41,7 +41,7 @@ Read this for UI, UX, layout, theme, and page workflow tasks.
 
 - Theme provider uses `next-themes` with class strategy.
 - Use `resolvedTheme` for toggles, not raw `theme`, because `theme` can be `system`.
-- Typography uses Manrope for Latin/numerics, JetBrains Mono for monospace, Noto Sans SC for Simplified Chinese, and Noto Sans JP for Japanese. Keep CJK fonts neutral and data-friendly; avoid decorative handwritten or rounded display fonts for operational UI.
+- Typography uses self-hosted Fontsource variable fonts: Manrope for Latin/numerics, JetBrains Mono for monospace, Noto Sans SC for Simplified Chinese, and Noto Sans JP for Japanese. Keep CJK fonts neutral and data-friendly; avoid decorative handwritten or rounded display fonts for operational UI.
 - Light/dark core tokens live in `globals.css`:
   - `--bg-0`, `--bg-1`, `--bg-2`
   - `--surface`, `--surface-2`
@@ -96,6 +96,7 @@ Legacy cyber/template/Catalyst component islands were removed in the 2026-04-30 
 - Dashboard hero runner animation should preserve the existing high-quality PNG cameo. Use only subtle container motion such as floating/breathing unless a dedicated art pipeline provides matching frame art; do not replace it with Codex-drawn SVG frame loops that clash with the current illustration quality.
 - Stats consistency heatmaps should use a GitHub-style calendar: continuous week columns, weekday labels, month markers, fixed small cells, horizontal scrolling for the selected year, and a compact Less/More intensity legend.
 - Favorite-runner visuals are generated low-poly character cutouts under `apps/web/public/assets/runners/`. They should appear as unlabeled lively cameos woven into dashboard/poster surfaces, not as an explicit "runner muse" module. Use floating layout/layering rather than motion effects; slight overlap with descriptive copy is allowed when it feels intentional and editorial. Keep route glyphs, metric rows, hero headlines, and primary controls readable, and keep silhouettes complete.
-- Runner asset set: four original runner-inspired characters now have run/stretch/lifestyle/pose coverage in `apps/web/src/lib/runnerMuses.ts`. Treat the PNGs as fictional low-poly UI assets, not portraits or real-athlete photos.
+- Runner asset set: the existing four characters plus two new fictional atlas runners cover run/stretch/lifestyle/pose uses in `apps/web/src/lib/runnerMuses.ts`. Treat the PNGs as fictional low-poly UI assets, not portraits or real-athlete photos.
 - Transparent runner PNG QA: verify full-body framing, no text/logo/bib/flag/watermark, no realistic likeness, and alpha extrema including `0` before adding a file to the registry.
 - Poster cards can use low-opacity runner cutouts as deterministic-random background texture. Choose run/stride poses for faster running periods and walk/stretch/lifestyle/pose variants for walk-like or slow periods; keep the background figure subtle in the lower-right third so route data remains primary.
+- Keep the dashboard's left and right columns fluid at intermediate desktop widths. Ledger rows switch to the compact two-column view until the full five-column layout fits at 2xl. Check English, Simplified Chinese, and Japanese in both themes at narrow and wide widths after typography changes.

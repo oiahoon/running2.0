@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 :root {
+  --font-manrope: 'Manrope Variable';
+  --font-mono: 'JetBrains Mono Variable';
+  --font-cjk-sc: 'Noto Sans SC Variable';
+  --font-cjk-jp: 'Noto Sans JP Variable';
   --bg-0: #f4f7fb;
   --bg-1: #f9fbff;
   --bg-2: #edf2f8;
@@ -20,7 +24,7 @@
   --text-muted: #64748b;
   --accent: #5b8dff;
   --accent-2: #8cb0ff;
-  --route-green: #1fa968;
+  --route-green: #147d50;
   --route-lime: #7cae1e;
   --route-orange: #d96f2b;
   --route-cyan: #1389ad;
@@ -153,7 +157,7 @@
   }
 
   .skip-link {
-    @apply fixed left-4 top-3 z-[70] -translate-y-20 rounded-md bg-[var(--route-green)] px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[var(--text-strong)] focus:ring-offset-2 focus:ring-offset-[var(--bg-0)];
+    @apply fixed left-4 top-3 z-[70] -translate-y-20 rounded-md bg-[var(--route-green)] px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-[var(--text-strong)] focus:ring-offset-2 focus:ring-offset-[var(--bg-0)] dark:text-slate-950;
   }
 
   .panel {
@@ -177,7 +181,7 @@
 
   .metric-label {
     color: var(--text-muted);
-    @apply text-[11px] font-semibold uppercase tracking-[0.12em];
+    @apply text-xs font-semibold uppercase tracking-[0.1em];
   }
 
   .metric-value {
@@ -221,7 +225,7 @@
   }
 
   .dashboard-display-title {
-    @apply text-[2.35rem] font-black leading-[1.02] tracking-[-0.055em] sm:text-[clamp(2.6rem,3vw,2.85rem)];
+    @apply text-[clamp(2rem,5vw,2.8rem)] font-extrabold leading-[1.08] tracking-[-0.045em];
   }
 
   .data-scroll-region {
@@ -241,7 +245,7 @@
 
   .route-atlas-label {
     color: var(--text-muted);
-    @apply text-[11px] font-semibold uppercase tracking-[0.14em];
+    @apply text-xs font-semibold uppercase tracking-[0.1em];
   }
 
   .route-atlas-surface {
@@ -262,12 +266,12 @@
   }
 
   .ledger-filter-active {
-    @apply border-[var(--route-green)] bg-[var(--route-green)] text-slate-950;
+    @apply border-[var(--route-green)] bg-[var(--route-green)] text-white dark:text-slate-950;
   }
 
   .route-ledger-row {
     display: grid;
-    grid-template-columns: 5.5rem minmax(9rem, 1fr) 3.875rem 3.875rem 4.25rem;
+    grid-template-columns: 5.5rem minmax(0, 1fr) 4.375rem 4.375rem 4.25rem;
     align-items: center;
     width: 100%;
     min-height: 82px;
@@ -311,12 +315,10 @@
 
   .route-glyph-path-loop {
     animation: draw-route-loop 9.6s linear infinite;
-    will-change: stroke-dashoffset, opacity;
   }
 
   .route-glyph-glow-loop {
     animation: draw-route-glow-loop 9.6s linear infinite;
-    will-change: stroke-dashoffset, opacity;
   }
 
   .route-constellation-runner,
@@ -356,8 +358,25 @@ html:lang(zh) .dashboard-display-title,
 html:lang(zh-CN) .dashboard-display-title,
 html:lang(ja) .dashboard-display-title {
   font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+html:lang(zh) .route-atlas-label,
+html:lang(zh-CN) .route-atlas-label,
+html:lang(ja) .route-atlas-label {
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 768px) and (max-width: 1535px) {
+  .route-ledger-row {
+    grid-template-columns: minmax(5rem, 0.7fr) minmax(0, 1.7fr);
+  }
+
+  .route-ledger-row > :nth-child(n + 3) {
+    display: none;
+  }
 }
 
 @media (min-width: 1380px) and (max-width: 1599px) {
@@ -502,11 +521,11 @@ html:lang(ja) .dashboard-display-title {
   }
 
   34% {
-    transform: translate3d(0, -5px, 0);
+    transform: translate3d(0, -3px, 0) scale(1.006);
   }
 
   68% {
-    transform: translate3d(2px, -2px, 0);
+    transform: translate3d(1px, -1px, 0) scale(1.003);
   }
 }
 

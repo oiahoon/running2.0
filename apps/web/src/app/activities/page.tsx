@@ -112,7 +112,7 @@ export default function ActivitiesPage() {
 
         <div className="panel-body">
           {isLoading ? <p className="text-sm text-[var(--text-muted)]">{t('activities.loading')}</p> : null}
-          {error ? <p className="text-sm text-red-300">{error.message}</p> : null}
+          {error ? <p className="text-sm text-red-700 dark:text-red-300">{error.message}</p> : null}
 
           {!isLoading && !error && activities.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">{t('activities.empty')}</p>

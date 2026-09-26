@@ -1,4 +1,22 @@
 export const runnerMuses = {
+  atlasSprinter: {
+    variants: {
+      run: {
+        id: 'atlas-sprinter-run',
+        src: '/assets/runners/atlas-sprinter-run.png',
+        role: 'running-cameo',
+      },
+    },
+  },
+  atlasRecovery: {
+    variants: {
+      stretch: {
+        id: 'atlas-recovery-stretch',
+        src: '/assets/runners/atlas-recovery-stretch.png',
+        role: 'recovery-cameo',
+      },
+    },
+  },
   seiraFuwa: {
     name: 'Seira Fuwa',
     sourceName: '不破聖衣来',
@@ -117,9 +135,11 @@ export const runnerMuses = {
 export const runnerMuseCameos = {
   dashboardHero: runnerMuses.seiraFuwa.variants.stride,
   dashboardShortcutLead: runnerMuses.shieriDrury.variants.lifestyle,
-  posterLab: runnerMuses.sayakaSato.variants.pose,
+  posterLab: runnerMuses.atlasRecovery.variants.stretch,
   posterSignature: runnerMuses.nozomiTanaka.variants.wave,
   shortcutStrip: [
+    runnerMuses.atlasSprinter.variants.run,
+    runnerMuses.atlasRecovery.variants.stretch,
     runnerMuses.shieriDrury.variants.pose,
     runnerMuses.sayakaSato.variants.watch,
     runnerMuses.nozomiTanaka.variants.lifestyle,
@@ -129,6 +149,7 @@ export const runnerMuseCameos = {
 
 export const runnerPosterBackgrounds = {
   run: [
+    runnerMuses.atlasSprinter.variants.run,
     runnerMuses.seiraFuwa.variants.stride,
     runnerMuses.seiraFuwa.variants.run,
     runnerMuses.shieriDrury.variants.run,
@@ -136,6 +157,7 @@ export const runnerPosterBackgrounds = {
     runnerMuses.nozomiTanaka.variants.run,
   ],
   walk: [
+    runnerMuses.atlasRecovery.variants.stretch,
     runnerMuses.seiraFuwa.variants.stretch,
     runnerMuses.seiraFuwa.variants.lifestyle,
     runnerMuses.seiraFuwa.variants.pose,
